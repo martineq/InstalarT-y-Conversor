@@ -1,0 +1,25 @@
+Obtener ID y Nombre ordenado alfabéticamente del archivo password blabalbalbalblablablablblabalbalbalbalbalblablablablablablalbalbablabal
+
+cut -f 5,3 -d: nombrearchivo | sort
+
+
+
+---------------------------
+
+mart@mart-Inspiron-1420:~$ echo `echo 2 + 67858 | bc`
+67860
+
+---------------------------------------
+Ya sabemos todo lo que tenemos que saber del shell...
+
+Ejercicio: conversor de temperaturas
+Cree un programa de shell usando las siguientes fórmulas que efectuen la conversión de temperaturas. Dados grados celsius, los convierte a Fahrenheit y viceversa. Emitir un mensaje tipo: " xx grados C son YY grados F"
+
+C=5*(f-32)/9
+
+F=9*C/5 + 32
+
+Ejemlplo de invocación (tiene 2 parámetros)
+conversor.sh c 80
+o
+conversor.sh f 151
