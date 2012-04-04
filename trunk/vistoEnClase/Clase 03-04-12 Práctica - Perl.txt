@@ -1,0 +1,27 @@
+
+# Ejemplo perl
+
+$dir=$ARGV[0];
+if (opendir(DIRH,$dir)){
+@flist=readdir(DIRH); closedir(DIRH);}
+foreach(@flist){
+if(-x $dir/$_){
+	print $dir/$_
+}
+}
+
+
+
+# Otra forma para no usar el "@flist=readdir..."
+
+while($file=readir(DIRH)){
+print $file;}
+
+
+# Otro ej. donde se usa el operador "<>" para lecturas
+
+While(<*>){
+if(-r $_){
+  print $_;
+}
+}
