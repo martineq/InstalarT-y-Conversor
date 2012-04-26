@@ -2,14 +2,14 @@
 
 # Grupo: 13
 # Name: logT.sh
-# Usage: ... 
+# Usage: ...
 #
 #
 #
 
 #Ayuda
 USAGE="USAGE: logT command [message_type] message\
-		"
+                "
 
 #chequea y trunca si es necesario el archivo en caso de que llegue al tamaño maximo.
 truncate() {
@@ -21,16 +21,16 @@ truncate() {
           SIZE=`du -sk "$LOGDIR/$COMMAND.$LOGEXT"`
           SIZE=`echo $SIZE | cut -f 1 -d ' '`
     fi
-        
+
         AUXMAX=`expr $LOGSIZE \* 1024`
     #Si es mas grande que el tamaño maximo permitido, entonces lo trunco.
     if [ $SIZE -gt $AUXMAX ]
     then
-		  TOTAL_LINES=`wc -l $LOGDIR/$COMMAND.$LOGEXT | cut -f 1 -d ' '`
+                  TOTAL_LINES=`wc -l $LOGDIR/$COMMAND.$LOGEXT | cut -f 1 -d ' '`
           CUTLINES=`expr $TOTAL_LINES \/ 2`
-		  echo -e "`tail -n $CUTLINES "$LOGDIR/$COMMAND.$LOGEXT"`" > "$LOGDIR/$COMMAND.$LOGEXT"
-		  echo "$DATE-$USER-I-LOG EXCEEDED." >> "$LOGDIR/$COMMAND.$LOGEXT"
-		  
+                  echo -e "`tail -n $CUTLINES "$LOGDIR/$COMMAND.$LOGEXT"`" > "$LOGDIR/$COMMAND.$LOGEXT"
+                  echo "$DATE-$USER-I-LOG EXCEEDED." >> "$LOGDIR/$COMMAND.$LOGEXT"
+
     fi
 
     return 0
@@ -46,11 +46,11 @@ main() {
     COMMAND=$1
     MSGTYPE=$2
     DATE=`date "+%Y%m%d_%H:%M:%S"`
-	USER = echo `whoami`
+        USER = echo `whoami`
 
-	#Si MSG tiene mas de 140 caracteres lo trunco
+        #Si MSG tiene mas de 140 caracteres lo trunco
     MSG=`echo $3 | sed 's/\(^.\{140\}\).*/\1/'`
-	
+
     case $COMMAND in
 
     'instalar')
@@ -78,3 +78,4 @@ fi
 
 main $1 $2 $3
 exit 0
+
