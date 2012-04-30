@@ -1,3 +1,4 @@
+#!/BIN/BASH
 # conversor.sh
 # script conversor de temperaturas - Sistemas Operativos 75.08
 #
