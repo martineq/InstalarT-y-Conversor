@@ -13,6 +13,7 @@ USAGE="USAGE: logT command [message_type] message\
 
 #chequea y trunca si es necesario el archivo en caso de que llegue al tamaño maximo.
 truncate() {
+	#test_ariel_m
 
     SIZE=0
     #Obtengo el tamani del archivo, si es que este existe.
@@ -48,6 +49,9 @@ main() {
     DATE=`date "+%Y%m%d_%H:%M:%S"`
     USER=`whoami`
     
+	#LOGDIR="logdir" #update by arielM
+	#LOGEXT="log_ext" #update by arielM
+     
     #Si MSG tiene mas de 140 caracteres lo trunco
     MSG=`echo $3 | sed 's/\(^.\{140\}\).*/\1/'`
 
@@ -61,6 +65,7 @@ main() {
                 truncate
                 #Escribo en el log.
                 echo "$DATE-$USER-$COMMAND-$MSGTYPE-$MSG." >> "$LOGDIR/$COMMAND.$LOGEXT";;
+                #echo "$LOGDIR/$COMMAND.$LOGEXT"
     esac
 }
 
@@ -78,4 +83,3 @@ fi
 
 main "$1" "$2" "$3"
 exit 0
-
