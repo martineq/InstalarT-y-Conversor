@@ -8,12 +8,18 @@
 #					#
 #########################################
 
+# NOTAS:
+# + En el achivo instalarT.conf las primeras 10 líneas SIEMPRE son:
+#   1-GRUPO 2-ARRIDIR 3-RECHDIR 4-BINDIR 5-MAEDIR 6-REPODIR 7-LOGDIR 8-LOGEXT 9-LOGSIZE 10-DATASIZE
+# + Por ahora no se verifica la ruta de directorios dada por el usuario
+
 #######################
 ## Variables creadas ##
 #######################
 PATHACTUAL=$(pwd)			# ../grupo13/bin
 GRUPO=${PATHACTUAL%/*}			# Le saco el "/bin"
 CONFDIR="$GRUPO/confdir"		# Le agergo el "/confdir"
+ARCHCONF="$CONFDIR/instalarT.conf"	# Le agergo el "/instalarT.conf"
 LOGINST="$CONFDIR/instalarT.log"	# Le agergo el "/instalarT.log"
 PAQINST="$CONFDIR/PaqInst.dat"		# Le agergo el "/PaqInst.dat"
 
@@ -53,8 +59,8 @@ function cargarEstado   # Acá empezaría a leer el archivo y según lo que enco
     ESTADO="P00"
   fi
 
-  CODSALIDA=$(echo $ESTADO | sed 's/^P[0-1][0-9]$/OK/')  # Valida que sea de "P00" hasta "P19"
-  CODSALIDA=$(echo $CODSALIDA | sed 's/ /X/')  # Cambio los espacios por X
+  CODSALIDA=$(echo $ESTADO | sed 's/^P[0-1][0-9]$/OK/g')  # Valida que sea de "P00" hasta "P19"
+  CODSALIDA=$(echo $CODSALIDA | sed 's/ /X/g')  # Cambio los espacios por X
 
   if [ ! $CODSALIDA == "OK" ] ; then
     log "Error leyendo el estado de instalación. Se interrumpe el script."
@@ -258,7 +264,7 @@ function elegirInstalar
     instalar15
     ;;
   *)
-    echo "" > /dev/null
+    instalarFin		# Este caso no se va a dar a menos que el archivo sea corrompido. en ese caso lo llevo al fin de la instalación
     ;;
   esac 
 
@@ -281,9 +287,12 @@ function instalar02
   echo instalar02
 
 #COMPLETAR
-  log "Directorio de Trabajo para la instalacion: ... mostrar el path completo de GRUPO y listar sus archivos y subdirectorios"
-  log "Librería del Sistema: mostrar el path completo de CONFDIR y listar sus archivos"
-
+  log "Directorio de Trabajo para la instalacion: $GRUPO"
+  log "Sus archivos y subdirectorios son:"
+  listarArchivos $GRUPO
+  log "Librería del Sistema: $CONFDIR"
+  log "Sus archivos y subdirectorios son:"
+  listarArchivos $CONFDIR
   log "Estado de la instalacion: PENDIENTE"
   log "Para completar la instalación Ud. Deberá:"
   log "Definir el directorio de arribo de archivos externos"
@@ -518,6 +527,62 @@ function instalarFin
   exit 0 #Terminar el proceso
 }
 
+
+# Define el directorio que se quiere usar en el archivo de config. Se elige la variable a través de $1. Supongo una entrada de directorio válida
+function definirDirectorio 
+{
+  log "Defina el nombre de Sub-directorio de arribo de archivos externos. (Para definir el Sub-directorio por defecto <$1> presione enter):"
+  read VAL
+  VAL=$(echo $VAL | sed 's/ /_/g')  # Cambio los espacios por "_"
+  if [ ! -z $VAL ] ; then
+    crearDirectorio "$GRUPO/$VAL"
+    if [ $? -eq 1 ] ; then
+      definirDirectorio $1  # Si puso algo inválido y por eso no se creó el directorio, lo hago definir de vuelta  
+    fi
+    guardarEntrada "$1" "$VAL"
+  else
+    crearDirectorio "$GRUPO/$1"
+    guardarEntrada "$1" "$1"  # Acá el directorio y su valor coinciden (el caso por default)
+  fi
+}
+
+function guardarEntrada  # $1 es el dir a cambiar y $2 es el valor del dir que se cambiará. Con él se decide que línea se sobreescribe
+{
+
+  case $1 in
+  arribos)
+    LINEA=2
+    DIR=ARRIDIR
+    ;;
+#COMPLETAR con todos los casos
+  esac 
+
+  NUEVAENTRADA="$DIR=$GRUPO/$2=$(whoami)=$(date)"
+  NUEVAENTRADA=$(echo $NUEVAENTRADA | sed 's/ /_/g')  # Cambio los espacios por "_"
+
+  echo "linea |$LINEA| nuevaentrada |$NUEVAENTRADA|"
+  sed -e "${LINEA}s#.*#${NUEVAENTRADA}#" $ARCHCONF > "${ARCHCONF}_tmp"  # El delimitador del sed es el "#" porque en la ruta se usan barras invertidas
+  mv "${ARCHCONF}_tmp" "$ARCHCONF"
+}
+
+
+function crearDirectorio	# Crea el directorio de la ruta $1
+{
+  if [ ! -d "$1" ]; then
+    mkdir $1
+    if [ ! -d "$1" ]; then
+      log "Error al crear el directorio <$1>"
+      return 1
+    else
+      log "Directorio <$1> creado."
+      return 0
+    fi
+  else
+    log "Directorio <$1> creado."
+    return 0
+  fi
+}
+
 function mostrarDirectorios  # Muestra los directorios con datos
 {
 echo directorios
@@ -533,6 +598,17 @@ echo directorios
 # $grupo/inst_rechazadas
 # $grupo/inst_procesadas
 # $grupo/parque_instalado
+}
+
+function listarArchivos # Lista todos los archivos y subdirectorios de un directorio especificado en $1
+{
+# Sin el log:
+# find ./ -maxdepth 1 -printf "%A@ %f\0" | sort -z -n | while read -d '' date line; do echo "$line" | grep -v '\./' ; done
+
+P=$1
+D=${P##*/}
+find $P -maxdepth 1 -printf "%A@ %f\0" | sort -z -n | while read -d '' date line; do TXT=$(echo "$line" | grep -v "$D") ; if [ ! -z $TXT ] ; then echo "$TXT" ; fi ; done
+
 }
 
 function confirmarInstalación # Pregunta si se inicia la instalación. Si=0 No=1
@@ -580,7 +656,7 @@ function perlNoInstalado
   log "Para instalar el TP es necesario contar con Perl 5 o superior instalado. Efectúe su instalación e inténtelo nuevamente."
   log ""
   log "Proceso de Instalación Cancelado"
-  exit 1
+  instalarFin
 }
 
 # Muestra algunas variables usadas en el script
@@ -600,12 +676,14 @@ echo ----------------------------------------------
 ## Inicio del programa ##
 #########################
 clear
-mostrarVariables
-log "Comando InstalarT Inicio de Ejecución"
-chequeoArchivo $LOGINST		# Verifico que se encuentre el archivo de log para el instalarT
-cargarEstado $PAQINST	# Ejecuta los pasos del punto (2).
-ESTADO=$?
-instalarEstado $ESTADO
+#mostrarVariables
+#log "Comando InstalarT Inicio de Ejecución"
+#chequeoArchivo $LOGINST	# Verifico que se encuentre el archivo de log para el instalarT
+#cargarEstado $PAQINST	# Ejecuta los pasos del punto (2).
+#ESTADO=$?
+#instalarEstado $ESTADO
+
+definirDirectorio "arribos"
 
 echo "Chau! =D"
 exit 0
@@ -615,34 +693,7 @@ exit 0
 ######################
 
 ###Cosas por hacer###
-#1. Este comando debe grabar un archivo de log. El nombre del archivo de log correspondiente a este comando es: instalarT.log en el directorio $CONFDIR
-#2. Detectar si el paquete o alguno de sus componentes ya está instalado
-#2.1.Si todo el paquete ya está instalado: mostrar y grabar en el log. Ir a FIN.
-#2.2.Si falta instalar algún componente, mostrar y grabar en el log los siguientes mensajes: mostrar msj y preguntar Si-No
-#2.3.Si el usuario indica "Si"
-#2.3.1.Chequear que Perl esté instalado
-#2.3.2.Brindar las indicaciones para completar el proceso de Instalación explicando en qué lugar se llevará a cabo...
-#2.3.3.Continuar en el paso: “Confirmar Inicio de Instalación”
-#2.4. Si el usuario indica No, ir a FIN
-#2.5. Si el paquete no fue instalado, continuar en el punto 3
-#3. Chequear que Perl esté instalado
-#4. Brindar la información de la Instalación
-#5. Definir el directorio de arribo de archivos externos
-#6. Definir el espacio mínimo libre para el arribo de archivos externos
-#7. Verificar espacio en disco
-#8. Definir el directorio de grabación de los archivos rechazados
-#9. Definir el directorio de instalación de los ejecutables
-#10. Definir el directorio de instalación de los archivos maestros
-#11. Definir el directorio de grabación de los logs de auditoria
-#12. Definir la extensión y tamaño máximo para los archivos de log
-#13. Definir el directorio de grabación de los reportes de salida
-#14. Mostrar estructura de directorios resultante y valores de parámetros configurados
-#15. Confirmar Inicio de Instalación
-#16. Instalación
-#17. Borrar archivos temporarios, si se hubiesen generado
-#18. Mostrar mensaje de fin de instalación
-#19. FIN
-
+# Reservar los nombre de los paths
 
 #########################################################
 # <<Machete>>
