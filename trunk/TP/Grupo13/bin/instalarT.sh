@@ -76,44 +76,109 @@ function instalarEstado
     if [ "$1" -ge "1" ]; then
       log "Instalado P01"
     fi
+    if [ "$1" -eq "1" ]; then
+      log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
+    fi
     if [ "$1" -ge "2" ]; then
       log "Instalado P02"
+    else
+      log "Falta P02"
+    fi
+    if [ "$1" -eq "2" ]; then
+      log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "3" ]; then
       log "Instalado P03"
+    else
+      log "Falta P03"
+    fi
+    if [ "$1" -eq "3" ]; then
+      log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "4" ]; then
       log "Instalado P04"
+    else
+      log "Falta P04"
+    fi
+    if [ "$1" -eq "4" ]; then
+      log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "5" ]; then
       log "Instalado P05"
+    else
+      log "Falta P05"
+    fi
+    if [ "$1" -eq "5" ]; then
+      log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "6" ]; then
       log "Instalado P06"
+    else
+      log "Falta P06"
+    fi
+    if [ "$1" -eq "6" ]; then
+      log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "7" ]; then
       log "Instalado P07"
+    else
+      log "Falta P07"
+    fi
+    if [ "$1" -eq "7" ]; then
+      log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "8" ]; then
       log "Instalado P08"
+    else
+      log "Falta P08"
+    fi
+    if [ "$1" -eq "8" ]; then
+      log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "9" ]; then
       log "Instalado P09"
+    else
+      log "Falta P09"
+    fi
+    if [ "$1" -eq "9" ]; then
+      log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "10" ]; then
       log "Instalado P10"
+    else
+      log "Falta P10"
+    fi
+    if [ "$1" -eq "10" ]; then
+      log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "11" ]; then
       log "Instalado P11"
+    else
+      log "Falta P11"
+    fi
+    if [ "$1" -eq "11" ]; then
+      log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "12" ]; then
       log "Instalado P12"
+    else
+      log "Falta P12"
+    fi
+    if [ "$1" -eq "12" ]; then
+      log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "13" ]; then
       log "Instalado P13"
+    else
+      log "Falta P13"
+    fi
+    if [ "$1" -eq "13" ]; then
+      log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "14" ]; then
       log "Instalado P14"
+    else
+      log "Falta P14"
     fi
 
     if [ "$1" -ge "15" ] ; then # "15" sería el estado de instalación al 100%. Como está implementado, tambien se aceptan: 16,17,18,19
@@ -122,6 +187,7 @@ function instalarEstado
       log "Proceso de Instalación Cancelado"
       instalarFin
     else
+      log "Falta P15" #COMPLETAR
       log "Estado de la instalacion: INCOMPLETA"
       log "¿Desea completar la instalacion? (Si-No)"
       OPC=$(($1+1))	# Le sumo 1 a "$1" para instalar el paquete siguiente al que ya está instalado
@@ -133,7 +199,6 @@ function instalarEstado
       done
     fi
 
-
   fi
 }
 
@@ -141,53 +206,14 @@ function instalarEstado
 function elegirInstalar
 {
   chequeoPerl
-  # Muestro los resultados de los pasos ya instalados...
-   if [ "$1" -gt "1" ]; then
-      # Acá me parece no tengo resultados
-      log "Resultados de P01..."
-   fi
-   if [ "$1" -gt "2" ]; then
-      log "Resultados de P02..."
-   fi
-   if [ "$1" -gt "3" ]; then
-      log "Resultados de P03..."
-   fi
-   if [ "$1" -gt "4" ]; then
-      log "Resultados de P04..."
-   fi
-   if [ "$1" -gt "5" ]; then
-      log "Resultados de P05..."
-   fi
-   if [ "$1" -gt "6" ]; then
-      log "Resultados de P06..."
-   fi
-   if [ "$1" -gt "7" ]; then
-      log "Resultados de P07..."
-   fi
-   if [ "$1" -gt "8" ]; then
-      log "Resultados de P08..."
-   fi
-   if [ "$1" -gt "9" ]; then
-      log "Resultados de P09..."
-   fi
-   if [ "$1" -gt "10" ]; then
-      log "Resultados de P10..."
-   fi
-   if [ "$1" -gt "11" ]; then
-      log "Resultados de P11..."
-   fi
-   if [ "$1" -gt "12" ]; then
-      log "Resultados de P12..."
-   fi
-   if [ "$1" -gt "13" ]; then
-      log "Resultados de P13..."
-   fi
-   if [ "$1" -gt "14" ]; then
-      log "Resultados de P14..."
-   fi
+  mostrarDirectorios  
+  confirmarInstalación
+  CONFIRMA=$?  # Si=0, No=1
+  if [ "$CONFIRMA" == "1" ]; then
+    instalarFin    
+  fi  
 
   # Instalo los paquetes faltantes, empezando desde "$1"
-  #echo "elijo instalar desde $1"  
   case $1 in
   2)
     instalar02
@@ -238,10 +264,11 @@ function elegirInstalar
 
 }
 
-#3 Ejecuta los pasos del punto (3): chequeo de perl
+#3. Ejecuta los pasos del punto (3): chequeo de perl
 function instalar01
 {
   echo instalar01
+
   chequeoPerl
   :>$PAQINST
   echo "P01" > $PAQINST
@@ -252,6 +279,22 @@ function instalar01
 function instalar02
 {
   echo instalar02
+
+#COMPLETAR
+  log "Directorio de Trabajo para la instalacion: ... mostrar el path completo de GRUPO y listar sus archivos y subdirectorios"
+  log "Librería del Sistema: mostrar el path completo de CONFDIR y listar sus archivos"
+
+  log "Estado de la instalacion: PENDIENTE"
+  log "Para completar la instalación Ud. Deberá:"
+  log "Definir el directorio de arribo de archivos externos"
+  log "Definir el espacio mínimo libre para el arribo de archivos externos"
+  log "Definir el directorio de grabación de los archivos externos rechazados"
+  log "Definir el directorio de instalación de los ejecutables"
+  log "Definir el directorio de instalación de los archivos maestros"
+  log "Definir el directorio de grabación de los logs de auditoria"
+  log "Definir la extensión y tamaño máximo para los archivos de log"
+  log "Definir el directorio de grabación de los reportes de salida"
+
   :>$PAQINST
   echo "P02" > $PAQINST
   instalar03
@@ -261,6 +304,13 @@ function instalar02
 function instalar03
 {
   echo instalar03
+
+  log "Defina el directorio (PESOSgrupo/arribos):"
+
+# Proponer /arribos y si el usuario lo desea cambiar, permitírselo.
+# El usuario puede ingresar un nombre simple como “/arribos” o un subdirectorio como /archivos/externos/arribos
+# Reservar este path en la variable ARRIDIR
+
   :>$PAQINST
   echo "P03" > $PAQINST
   instalar04
@@ -269,6 +319,11 @@ function instalar03
 function instalar04
 {
   echo instalar04
+
+  log "Defina el espacio mínimo libre para el arribo de archivos externos en Mbytes (100):"
+
+# Proponer 100 Mb, Si el usuario lo desea cambiar, debe ingresar una cantidad que se interpreta como Mb. Reservar este valor en la variable DATASIZE.
+
   :>$PAQINST
   echo "P04" > $PAQINST
   instalar05
@@ -277,6 +332,15 @@ function instalar04
 function instalar05
 {
   echo instalar05
+
+#  Chequear si en ARRIDIR hay disponibles por lo menos DATASIZE Mb. Si esto da error mostrar y grabar en el log el siguiente mensaje:
+# SI HAY ERROR DE ESPACIO:
+  log "Insuficiente espacio en disco."
+  log "Espacio disponible: xx Mb."
+  log "Espacio requerido DATASIZE Mb"
+  log "Cancele la instalación e inténtelo mas tarde o vuelva a intentarlo con otro valor."
+# Volver al punto anterior.
+
   :>$PAQINST
   echo "P05" > $PAQINST
   instalar06
@@ -285,6 +349,10 @@ function instalar05
 function instalar06
 {
   echo instalar06
+
+  log "Defina el directorio de grabación de los archivos externos rechazados (PESOSgrupo/rechazados):"
+#Proponer /rechazados y si el usuario lo desea cambiar, permitírselo. El usuario puede ingresar un nombre simple como “/rechazados” o un subdirectorio como /archivos/externos/rechazados Reservar este path en la variable RECHDIR
+
   :>$PAQINST
   echo "P06" > $PAQINST
   instalar07
@@ -293,70 +361,150 @@ function instalar06
 function instalar07
 {
   echo instalar07
+
+  log "Defina el directorio de instalación de los ejecutables (PESOSgrupo/bin):"
+# Proponer /bin y si el usuario lo desea cambiar, permitírselo. El usuario puede ingresar un nombre simple como “bin” o un subdirectorio como /tp/sistemas/bin Reservar este path en la variable BINDIR
+
   :>$PAQINST
   echo "P07" > $PAQINST
   instalar08
 }
+
 #10. Definir el directorio de instalación de los archivos maestros
 function instalar08
 {
   echo instalar08
+
+  log "Defina el directorio de instalación de los archivos maestros (PESOSgrupo/mae):"
+# Proponer /mae y si el usuario lo desea cambiar, permitírselo. El usuario puede ingresar un nombre simple como “mae” o un subdirectorio como /data/mae Reservar este path en la variable MAEDIR
+
   :>$PAQINST
   echo "P08" > $PAQINST
   instalar09
 }
+
 #11. Definir el directorio de grabación de los logs de auditoria
 function instalar09
 {
   echo instalar09
+
+  log "Defina el directorio de grabación de los logs de auditoria (PESOSgrupo/log):"
+# Proponer /log y si el usuario lo desea cambiar, permitírselo. El usuario puede ingresar un nombre simple como “log” o un subdirectorio: /data/log Reservar este path en la variable LOGDIR.
+
   :>$PAQINST
   echo "P09" > $PAQINST
   instalar10
 }
+
 #12. Definir la extensión y tamaño máximo para los archivos de log
 function instalar10
 {
   echo instalar10
+
+  log "Defina la extensión para los archivos de log (.log):"
+# Proponer .log, y si el usuario lo desea cambiar, permitírselo. Reservar este valor en la variable LOGEXT.
+
+  log "Defina el tamaño máximo para los archivos $LOGEXT en Kbytes (400):"
+# Proponer 400 KB, Si el usuario lo desea cambiar, debe ingresar una cantidad que se interpreta como Kb. Reservar este valor en la variable LOGSIZE.
+
   :>$PAQINST
   echo "P10" > $PAQINST
   instalar11
 }
+
 #13. Definir el directorio de grabación de los reportes de salida
 function instalar11
 {
   echo instalar11
+
+  log "Defina el directorio de grabación de los reportes de salida (PESOSgrupo/reportes):"
+# Proponer /reportes y si el usuario lo desea cambiar, permitírselo. El usuario puede ingresar un nombre simple como “reportes” o un subdirectorio como archivos/salida/reportes Reservar este path en la variable REPODIR.
+
   :>$PAQINST
   echo "P11" > $PAQINST
   instalar12
 }
+
 #14. Mostrar estructura de directorios resultante y valores de parámetros configurados
 function instalar12
 {
   echo instalar12
+
+  clear
+  log "TP SO7508 1er cuatrimestre 2012. Tema T Copyright © Grupo 13"
+  log "Directorio de Trabajo: GRUPO"
+  log "Librería del Sistema: CONFDIR"
+  log "Directorio de arribo de archivos externos: ARRIDIR"
+  log "Espacio mínimo libre para el arribo de archivos externos: DATASIZE Mb"
+  log "Directorio de grabación de los archivos externos rechazados: RECHDIR"
+  log "Directorio de instalación de los ejecutables: BINDIR"
+  log "Directorio de instalación de los archivos maestros: MAEDIR"
+  log "Directorio de grabación de los logs de auditoria: LOGDIR"
+  log "Extensión para los archivos de log: LOGEXT"
+  log "Tamaño máximo para los archivos de log: LOGSIZE Kb"
+  log "Directorio de grabación de los reportes de salida: REPODIR"
+  log "Estado de la instalacion: LISTA"
+  log "Los datos ingresados son correctos? (Si-No)"
+
+# Si el usuario indica Si, Continuar en el paso: “Confirmar Inicio de Instalación”
+# 14.4. Si el usuario indica No
+# 14.4.1. Limpiar la pantalla
+# 14.4.2. Continuar en el paso: “Definir el directorio de arribo de archivos externos”
+# En este caso, los valores default propuestos deben ser los contenidos en las variables:
+# BINDIR, ARRIDIR, DATASIZE, LOGDIR, LOGEXT, LOGSIZE, etc
+
   :>$PAQINST
   echo "P12" > $PAQINST
   instalar13
 }
+
 #15. Confirmar Inicio de Instalación
 function instalar13
 {
   echo instalar13
+  confirmarInstalación
+  CONFIRMA=$?
+# Si el usuario indica Si=0, Continuar en el paso siguiente (16. Instalación). Si el usuario indica No=1, ir a FIN
+
   :>$PAQINST
   echo "P13" > $PAQINST
   instalar14
 }
+
 #16. Instalación
 function instalar14
 {
   echo instalar14
+
+  log "Creando Estructuras de directorio..."
+# Las creo y desoues las muestro en pantalla con mostrarDirectorios
+  mostrarDirectorios
+
+# Mover los archivos maestros al directorio MAEDIR mostrando el siguiente mensaje
+  log "Instalando Archivos Maestros"
+# Mover los ejecutables y funciones al directorio BINDIR mostrando el siguiente mensaje
+  log "Instalando Programas y Funciones"
+# Actualizar el archivo de configuración mostrando el siguiente mensaje
+  log "Actualizando la configuración del sistema"
+
+# Se debe almacenar la información de configuración del sistema en el archivo InstalarT.conf en CONFDIR
+# Si el archivo de configuración no existe, crearlo, si existe actualizar los valores que correspondan.
+# Se debe grabar un registro para cada una de las siguientes variables:
+# GRUPO, ARRIDIR, RECHDIR, BINDIR, MAEDIR, REPODIR, LOGDIR LOGEXT, LOGSIZE, DATASIZE.
+# Se debe grabar 10 líneas en blanco (de la 11 a la 20) son líneas reservadas para futuras actualizaciones del paquete. Solo pueden ser usadas por un programa instalador o de actualización Líneas 21 y siguientes son de libre disponibilidad.
+
   :>$PAQINST
   echo "P14" > $PAQINST
   instalar15
 }
+
 #17. Borrar archivos temporarios, si se hubiesen generado
 function instalar15
 {
   echo instalar15
+
+#17. Borrar archivos temporarios, si se hubiesen generado
+
   :>$PAQINST
   echo "P15" > $PAQINST
   instalarFin
@@ -365,8 +513,37 @@ function instalar15
 #18. Mostrar mensaje de fin de instalación
 function instalarFin
 {
-  log "instalarT Finalizado."
-  exit 0
+  log "Instalación concluida."
+#Cerrar el archivo InstalarT.log
+  exit 0 #Terminar el proceso
+}
+
+function mostrarDirectorios  # Muestra los directorios con datos
+{
+echo directorios
+#Muestro los DIR con "log"
+# $ARRIDIR
+# $RECHDIR
+# $BINDIR
+# $MAEDIR
+# $LOGDIR
+# $REPODIR
+# $grupo/inst_recibidas
+# $grupo/inst_ordenadas
+# $grupo/inst_rechazadas
+# $grupo/inst_procesadas
+# $grupo/parque_instalado
+}
+
+function confirmarInstalación # Pregunta si se inicia la instalación. Si=0 No=1
+{
+  log "Iniciando Instalacion. Esta Ud, seguro? (Si-No)"
+  select SN in "Si" "No"; do
+      case $SN in
+          Si ) return 0; break;;
+          No ) return 1; break;;
+      esac
+  done
 }
 
 # Verifica si se encuentra instalado Perl. Si no está instalado detiene el script.
@@ -426,7 +603,7 @@ clear
 mostrarVariables
 log "Comando InstalarT Inicio de Ejecución"
 chequeoArchivo $LOGINST		# Verifico que se encuentre el archivo de log para el instalarT
-cargarEstado $PAQINST	# Ejecuta los pasos del punto (2). Si hubo instalación parcial se deriva
+cargarEstado $PAQINST	# Ejecuta los pasos del punto (2).
 ESTADO=$?
 instalarEstado $ESTADO
 
