@@ -1,4 +1,5 @@
 #!/bin/bash
+
 #########################################
 #					#
 #	Sistemas Operativos 75.08	#
@@ -8,10 +9,12 @@
 #					#
 #########################################
 
+##########################################################################################################################################
 # NOTAS:
 # + En el achivo instalarT.conf las primeras 10 líneas SIEMPRE son:
 #   1-GRUPO 2-ARRIDIR 3-RECHDIR 4-BINDIR 5-MAEDIR 6-REPODIR 7-LOGDIR 8-LOGEXT 9-LOGSIZE 10-DATASIZE
-# + Por ahora no se verifica la ruta de directorios dada por el usuario
+# + Se permite cualquier ruta de directorio dada por el usuario. si el nombre tiene espacios, se cambian por guión bajo "_"
+##########################################################################################################################################
 
 #######################
 ## Variables creadas ##
@@ -21,7 +24,7 @@ GRUPO=${PATHACTUAL%/*}			# Le saco el "/bin"
 CONFDIR="$GRUPO/confdir"		# Le agergo el "/confdir"
 ARCHCONF="$CONFDIR/instalarT.conf"	# Le agergo el "/instalarT.conf"
 LOGINST="$CONFDIR/instalarT.log"	# Le agergo el "/instalarT.log"
-PAQINST="$CONFDIR/PaqInst.dat"		# Le agergo el "/PaqInst.dat"
+LINEAESTADOINSTALACION=21		# La línea que uso para leer el estado de instalación es la N° 21 del arch de configuración
 
 ######################
 ## Funciones usadas ##
@@ -33,34 +36,53 @@ function log
 	echo "[LOG]: $1"
 }
 
-# Verifica si $1 es un archivo existente con permisos +rw para el usuario y sino lo crea
+# Verifica si $1 es un archivo existente con permisos +rw para el usuario y sino lo crea. Devuelve 0 si estaba creado y 1 si no lo estaba
 function chequeoArchivo	
 {
 if [ -f $1 ]; then
    #echo "El archivo $1 existe."
    chmod a+rw $1	# Le doy permiso a todos de hacer cualquier cosa con el archivo
+   return 0
 else
    #echo "El archivo $1 No existe."
    touch $1		# Como el archivo no existe, lo creo (vacío)
    chmod a+rw $1	# Le doy permiso a todos de hacer cualquier cosa con el archivo
+   return 1
    #echo "Archivo $1 creado."
 fi
 }
 
-
-# Ejecuta los pasos del punto (2) y llama a los del (3): A partir del archivo "$1" chequea que paquetes se instalaron
-# Ejecuta los comandos de instalar
-function cargarEstado   # Acá empezaría a leer el archivo y según lo que encontró se deriva a 2.1; 2.2; 2.3; 2.4 o 2.5
+# Verifico que se encuentre el archivo de log para el instalarT
+function inicioArchivoLog
 {
   chequeoArchivo $1
-  ESTADO=$(cat $1)
+  log "Comando InstalarT Inicio de Ejecución"
+}
+
+# Verifico que se encuentre el archivo de configuración
+function chequeoArchivoConfig
+{
+  chequeoArchivo $1
+  if [ $? -eq 1 ]; then	# Si la variable es 1, el archivo se creó de cero, entonces escribo unas lineas en blanco para que luego se puedan leer
+    for i in {1..21}	# Voy a escribir 21 lineas en blanco
+    do
+      echo "" >> $1
+    done
+  fi
+}
+
+# Carga el estado de la instalación a partir del archivo de configuración pasado en $1
+function cargarEstado   
+{
+  chequeoArchivo $1
+  ESTADO=$(sed "${LINEAESTADOINSTALACION}!d" $1)	# El delimitador del sed es el "#" porque en la ruta se usan barras invertidas
 
   if [ "$ESTADO" == "" ]; then	# Si la variable está vacia lo tomo como que no se hizo nada
     ESTADO="P00"
   fi
 
   CODSALIDA=$(echo $ESTADO | sed 's/^P[0-1][0-9]$/OK/g')  # Valida que sea de "P00" hasta "P19"
-  CODSALIDA=$(echo $CODSALIDA | sed 's/ /X/g')  # Cambio los espacios por X
+  CODSALIDA=$(echo $CODSALIDA | sed 's/ /_/g')  # Cambio los espacios por "_"
 
   if [ ! $CODSALIDA == "OK" ] ; then
     log "Error leyendo el estado de instalación. Se interrumpe el script."
@@ -274,10 +296,9 @@ function elegirInstalar
 function instalar01
 {
   echo instalar01
-
   chequeoPerl
-  :>$PAQINST
-  echo "P01" > $PAQINST
+
+  guardarEstadoInstalacion "P01"
   instalar02
 }
 
@@ -285,8 +306,6 @@ function instalar01
 function instalar02
 {
   echo instalar02
-
-#COMPLETAR
   log "Directorio de Trabajo para la instalacion: $GRUPO"
   log "Sus archivos y subdirectorios son:"
   listarArchivos $GRUPO
@@ -304,8 +323,7 @@ function instalar02
   log "Definir la extensión y tamaño máximo para los archivos de log"
   log "Definir el directorio de grabación de los reportes de salida"
 
-  :>$PAQINST
-  echo "P02" > $PAQINST
+  guardarEstadoInstalacion "P02"
   instalar03
 }
 
@@ -314,29 +332,31 @@ function instalar03
 {
   echo instalar03
 
-  log "Defina el directorio (PESOSgrupo/arribos):"
+  TIPO="DIR"
+  NOMBRE="arribos"
+  DEFECTO="arribos"
+  MSG="Defina el nombre de Sub-directorio de arribo de archivos externos. (Para definir el Sub-directorio por defecto <$DEFECTO> presione enter):"
+  definirValor "$TIPO" "$NOMBRE" "$MSG" "$DEFECTO"
 
-# Proponer /arribos y si el usuario lo desea cambiar, permitírselo.
-# El usuario puede ingresar un nombre simple como “/arribos” o un subdirectorio como /archivos/externos/arribos
-# Reservar este path en la variable ARRIDIR
-
-  :>$PAQINST
-  echo "P03" > $PAQINST
+  guardarEstadoInstalacion "P03"
   instalar04
 }
+
 #6. Definir el espacio mínimo libre para el arribo de archivos externos
 function instalar04
 {
   echo instalar04
 
-  log "Defina el espacio mínimo libre para el arribo de archivos externos en Mbytes (100):"
+  TIPO="NUM"
+  NOMBRE="espacioExternos"
+  DEFECTO="100"
+  MSG="Defina el espacio mínimo libre para el arribo de archivos externos en Mbytes. (Para usar $DEFECTO Mb presione enter):"
+  definirValor "$TIPO" "$NOMBRE" "$MSG" "$DEFECTO"
 
-# Proponer 100 Mb, Si el usuario lo desea cambiar, debe ingresar una cantidad que se interpreta como Mb. Reservar este valor en la variable DATASIZE.
-
-  :>$PAQINST
-  echo "P04" > $PAQINST
+  guardarEstadoInstalacion "P04"
   instalar05
 }
+
 #7. Verificar espacio en disco
 function instalar05
 {
@@ -350,8 +370,7 @@ function instalar05
   log "Cancele la instalación e inténtelo mas tarde o vuelva a intentarlo con otro valor."
 # Volver al punto anterior.
 
-  :>$PAQINST
-  echo "P05" > $PAQINST
+  guardarEstadoInstalacion "P05"
   instalar06
 }
 #8. Definir el directorio de grabación de los archivos rechazados
@@ -359,11 +378,13 @@ function instalar06
 {
   echo instalar06
 
-  log "Defina el directorio de grabación de los archivos externos rechazados (PESOSgrupo/rechazados):"
-#Proponer /rechazados y si el usuario lo desea cambiar, permitírselo. El usuario puede ingresar un nombre simple como “/rechazados” o un subdirectorio como /archivos/externos/rechazados Reservar este path en la variable RECHDIR
+  TIPO="DIR"
+  NOMBRE="rechazados"
+  DEFECTO="rechazados"
+  MSG="Defina el nombre de Sub-directorio de grabación de los archivos externos rechazados. (Para definir el Sub-directorio por defecto <$DEFECTO> presione enter):"
+  definirValor "$TIPO" "$NOMBRE" "$MSG" "$DEFECTO"
 
-  :>$PAQINST
-  echo "P06" > $PAQINST
+  guardarEstadoInstalacion "P06"
   instalar07
 }
 #9. Definir el directorio de instalación de los ejecutables
@@ -371,11 +392,13 @@ function instalar07
 {
   echo instalar07
 
-  log "Defina el directorio de instalación de los ejecutables (PESOSgrupo/bin):"
-# Proponer /bin y si el usuario lo desea cambiar, permitírselo. El usuario puede ingresar un nombre simple como “bin” o un subdirectorio como /tp/sistemas/bin Reservar este path en la variable BINDIR
+  TIPO="DIR"
+  NOMBRE="bin"
+  DEFECTO="bin"
+  MSG="Defina el nombre de Sub-directorio de grabación de instalación de los ejecutables. (Para definir el Sub-directorio por defecto <$DEFECTO> presione enter):"
+  definirValor "$TIPO" "$NOMBRE" "$MSG" "$DEFECTO"
 
-  :>$PAQINST
-  echo "P07" > $PAQINST
+  guardarEstadoInstalacion "P07"
   instalar08
 }
 
@@ -384,11 +407,13 @@ function instalar08
 {
   echo instalar08
 
-  log "Defina el directorio de instalación de los archivos maestros (PESOSgrupo/mae):"
-# Proponer /mae y si el usuario lo desea cambiar, permitírselo. El usuario puede ingresar un nombre simple como “mae” o un subdirectorio como /data/mae Reservar este path en la variable MAEDIR
+  TIPO="DIR"
+  NOMBRE="archivosMaestros"
+  DEFECTO="mae"
+  MSG="Defina el nombre de Sub-directorio de grabación de instalación de los archivos maestros. (Para definir el Sub-directorio por defecto <$DEFECTO> presione enter):"
+  definirValor "$TIPO" "$NOMBRE" "$MSG" "$DEFECTO"
 
-  :>$PAQINST
-  echo "P08" > $PAQINST
+  guardarEstadoInstalacion "P08"
   instalar09
 }
 
@@ -397,11 +422,15 @@ function instalar09
 {
   echo instalar09
 
-  log "Defina el directorio de grabación de los logs de auditoria (PESOSgrupo/log):"
+  TIPO="DIR"
+  NOMBRE="log"
+  DEFECTO="log"
+  MSG="Defina el nombre de Sub-directorio de grabación de instalación de los logs de auditoria. (Para definir el Sub-directorio por defecto <$DEFECTO> presione enter):"
+  definirValor "$TIPO" "$NOMBRE" "$MSG" "$DEFECTO"
+
 # Proponer /log y si el usuario lo desea cambiar, permitírselo. El usuario puede ingresar un nombre simple como “log” o un subdirectorio: /data/log Reservar este path en la variable LOGDIR.
 
-  :>$PAQINST
-  echo "P09" > $PAQINST
+  guardarEstadoInstalacion "P09"
   instalar10
 }
 
@@ -410,14 +439,21 @@ function instalar10
 {
   echo instalar10
 
-  log "Defina la extensión para los archivos de log (.log):"
-# Proponer .log, y si el usuario lo desea cambiar, permitírselo. Reservar este valor en la variable LOGEXT.
+  TIPO="EXT"
+  NOMBRE="extensionLog"
+  DEFECTO="log"
+  MSG="Defina la extensión para los archivos de log (Para usar <$DEFECTO> presione enter):"
+  definirValor "$TIPO" "$NOMBRE" "$MSG" "$DEFECTO"
 
-  log "Defina el tamaño máximo para los archivos $LOGEXT en Kbytes (400):"
-# Proponer 400 KB, Si el usuario lo desea cambiar, debe ingresar una cantidad que se interpreta como Kb. Reservar este valor en la variable LOGSIZE.
+  LOGEXT="log"
+  obtenerEstado "LOGEXT"
+  TIPO="NUM"
+  NOMBRE="tamanioLog"
+  DEFECTO="400"
+  MSG="Defina el tamaño máximo para los archivos <$LOGEXT> en Kbytes. (Para usar $DEFECTO Kb presione enter):"
+  definirValor "$TIPO" "$NOMBRE" "$MSG" "$DEFECTO"
 
-  :>$PAQINST
-  echo "P10" > $PAQINST
+  guardarEstadoInstalacion "P10"
   instalar11
 }
 
@@ -426,11 +462,13 @@ function instalar11
 {
   echo instalar11
 
-  log "Defina el directorio de grabación de los reportes de salida (PESOSgrupo/reportes):"
-# Proponer /reportes y si el usuario lo desea cambiar, permitírselo. El usuario puede ingresar un nombre simple como “reportes” o un subdirectorio como archivos/salida/reportes Reservar este path en la variable REPODIR.
+  TIPO="DIR"
+  NOMBRE="reportes"
+  DEFECTO="reportes"
+  MSG="Defina el nombre de Sub-directorio de grabación de instalación de los reportes de salida. (Para definir el Sub-directorio por defecto <$DEFECTO> presione enter):"
+  definirValor "$TIPO" "$NOMBRE" "$MSG" "$DEFECTO"
 
-  :>$PAQINST
-  echo "P11" > $PAQINST
+  guardarEstadoInstalacion "P11"
   instalar12
 }
 
@@ -462,8 +500,7 @@ function instalar12
 # En este caso, los valores default propuestos deben ser los contenidos en las variables:
 # BINDIR, ARRIDIR, DATASIZE, LOGDIR, LOGEXT, LOGSIZE, etc
 
-  :>$PAQINST
-  echo "P12" > $PAQINST
+  guardarEstadoInstalacion "P12"
   instalar13
 }
 
@@ -475,8 +512,7 @@ function instalar13
   CONFIRMA=$?
 # Si el usuario indica Si=0, Continuar en el paso siguiente (16. Instalación). Si el usuario indica No=1, ir a FIN
 
-  :>$PAQINST
-  echo "P13" > $PAQINST
+  guardarEstadoInstalacion "P13"
   instalar14
 }
 
@@ -502,8 +538,7 @@ function instalar14
 # GRUPO, ARRIDIR, RECHDIR, BINDIR, MAEDIR, REPODIR, LOGDIR LOGEXT, LOGSIZE, DATASIZE.
 # Se debe grabar 10 líneas en blanco (de la 11 a la 20) son líneas reservadas para futuras actualizaciones del paquete. Solo pueden ser usadas por un programa instalador o de actualización Líneas 21 y siguientes son de libre disponibilidad.
 
-  :>$PAQINST
-  echo "P14" > $PAQINST
+  guardarEstadoInstalacion "P14"
   instalar15
 }
 
@@ -514,8 +549,7 @@ function instalar15
 
 #17. Borrar archivos temporarios, si se hubiesen generado
 
-  :>$PAQINST
-  echo "P15" > $PAQINST
+  guardarEstadoInstalacion "P15"
   instalarFin
 }
 
@@ -527,44 +561,122 @@ function instalarFin
   exit 0 #Terminar el proceso
 }
 
-
-# Define el directorio que se quiere usar en el archivo de config. Se elige la variable a través de $1. Supongo una entrada de directorio válida
-function definirDirectorio 
+# Define el valor que se quiere usar en el archivo de config. Se elige el 'tipo' de VAR a través de $1 y el 'nombre' de la variable través de $2
+# Valores posibles de $1: "DIR" , "NUM" o "EXT"
+# Muestra el mensaje y loguea enviado en $3
+# El valor por defecto es pasado en $4
+function definirValor
 {
-  log "Defina el nombre de Sub-directorio de arribo de archivos externos. (Para definir el Sub-directorio por defecto <$1> presione enter):"
+  log "$3"
   read VAL
   VAL=$(echo $VAL | sed 's/ /_/g')  # Cambio los espacios por "_"
-  if [ ! -z $VAL ] ; then
-    crearDirectorio "$GRUPO/$VAL"
-    if [ $? -eq 1 ] ; then
-      definirDirectorio $1  # Si puso algo inválido y por eso no se creó el directorio, lo hago definir de vuelta  
-    fi
-    guardarEntrada "$1" "$VAL"
-  else
-    crearDirectorio "$GRUPO/$1"
-    guardarEntrada "$1" "$1"  # Acá el directorio y su valor coinciden (el caso por default)
-  fi
-}
-
-function guardarEntrada  # $1 es el dir a cambiar y $2 es el valor del dir que se cambiará. Con él se decide que línea se sobreescribe
-{
 
   case $1 in
+    DIR)
+    if [ ! -z $VAL ] ; then
+      crearDirectorio "$GRUPO/$VAL"
+      if [ $? -eq 1 ] ; then
+        definirValor "$1" "$2" "$3" "$4"  # Si puso algo inválido y por eso no se creó el directorio, lo hago definir de vuelta  
+      fi
+      guardarEntrada "$1" "$2" "$VAL"
+    else
+      crearDirectorio "$GRUPO/$4"
+      guardarEntrada "$1" "$2" "$4"  # Acá el directorio y su valor coinciden (el caso por default)
+    fi
+    ;;
+
+    NUM)
+    if [ ! -z $VAL ] ; then
+      if [ $VAL -eq $VAL 2> /dev/null ]; then  # Verifica que sea un valor numérico
+        guardarEntrada "$1" "$2" "$VAL"
+      else
+        definirValor "$1" "$2" "$3" "$4"	# Si puso un valor inválido, lo hago definir de vuelta  
+      fi
+    else
+      guardarEntrada "$1" "$2" "$4"  # Caso por default
+    fi
+    ;;
+
+    EXT)
+    if [ ! -z $VAL ] ; then
+      guardarEntrada "$1" "$2" "$VAL"
+    else
+      guardarEntrada "$1" "$2" "$4"  # Caso por default
+    fi
+    ;;
+
+  esac
+}
+
+function guardarEntrada  # $1 es el tipo de valor, $2 es el nombre de la variable a cambiar y $3 es el valor que se cambiará.
+{
+  case $2 in	# Posibles valores: grupo, arribos, rechazados, bin, archivosMaestros, 6-REPODIR 8-LOGEXT, tamanioLog, espacioExternos
+  grupo)
+    LINEA=1
+    DIR=GRUPO
+    ;;
   arribos)
     LINEA=2
     DIR=ARRIDIR
     ;;
-#COMPLETAR con todos los casos
+  rechazados)
+    LINEA=3
+    DIR=RECHDIR
+    ;;
+  bin)
+    LINEA=4
+    DIR=BINDIR
+    ;;
+  archivosMaestros)
+    LINEA=5
+    DIR=MAEDIR
+    ;;
+  reportes)
+    LINEA=6
+    DIR=REPODIR
+    ;;
+  log)
+    LINEA=7
+    DIR=LOGDIR
+    ;;
+  extensionLog)
+    LINEA=8
+    DIR=LOGEXT
+    ;;
+  tamanioLog)
+    LINEA=9
+    DIR=LOGSIZE
+    ;;
+  espacioExternos)
+    LINEA=10
+    DIR=DATASIZE
+    ;;
   esac 
 
-  NUEVAENTRADA="$DIR=$GRUPO/$2=$(whoami)=$(date)"
-  NUEVAENTRADA=$(echo $NUEVAENTRADA | sed 's/ /_/g')  # Cambio los espacios por "_"
+  VALOR=$3
+  if [ "$1" == "DIR" ]; then
+    VALOR="$GRUPO/$3"
+  fi
+  NUEVAENTRADA="$DIR=$VALOR=$(whoami)=$(date)"
 
-  echo "linea |$LINEA| nuevaentrada |$NUEVAENTRADA|"
   sed -e "${LINEA}s#.*#${NUEVAENTRADA}#" $ARCHCONF > "${ARCHCONF}_tmp"  # El delimitador del sed es el "#" porque en la ruta se usan barras invertidas
   mv "${ARCHCONF}_tmp" "$ARCHCONF"
+  log "El valor $VALOR fue guardado"
 }
 
+function obtenerEntrada	# Obtengo el estado de instalación pasado en $1
+{
+#COMPLETAR
+  echo COMPLETAR obtenerEntrada
+  LOGEXT=log
+}
+
+
+function guardarEstadoInstalacion	# Guardo el estado de instalación pasado en $1
+{
+  sed -e "${LINEAESTADOINSTALACION}s#.*#${1}#" $ARCHCONF > "${ARCHCONF}_tmp"  # El delimitador del sed es el "#" 
+  mv "${ARCHCONF}_tmp" "$ARCHCONF"
+}
 
 function crearDirectorio	# Crea el directorio de la ruta $1
 {
@@ -605,13 +717,12 @@ function listarArchivos # Lista todos los archivos y subdirectorios de un direct
 # Sin el log:
 # find ./ -maxdepth 1 -printf "%A@ %f\0" | sort -z -n | while read -d '' date line; do echo "$line" | grep -v '\./' ; done
 
-P=$1
-D=${P##*/}
-find $P -maxdepth 1 -printf "%A@ %f\0" | sort -z -n | while read -d '' date line; do TXT=$(echo "$line" | grep -v "$D") ; if [ ! -z $TXT ] ; then echo "$TXT" ; fi ; done
-
+P=$1		# Ruta donde se hace el find
+D=${P##*/}	# Se saca el nombre del directorio que se usa para buscar, ya que buscamos sub-directorios y archivos
+find $P -maxdepth 1 -printf "%A@ %f\0" | sort -z -n | while read -d '' date line; do TXT=$(echo "$line" | grep -v "$D") ; if [ ! -z $TXT ] ; then log "$TXT" ; fi ; done
 }
 
-function confirmarInstalación # Pregunta si se inicia la instalación. Si=0 No=1
+function confirmarInstalación # Pregunta si se inicia la instalación. Devuelve Si=0 No=1
 {
   log "Iniciando Instalacion. Esta Ud, seguro? (Si-No)"
   select SN in "Si" "No"; do
@@ -664,26 +775,22 @@ function mostrarVariables
 {
 echo ----------------------------------------------
 echo "Variables usadas:"
-echo PATHACTUAL\: $PATHACTUAL
-echo GRUPO\: $GRUPO
-echo CONFDIR\: $CONFDIR
+echo "PATHACTUAL: $PATHACTUAL"
+echo "GRUPO: $GRUPO"
+echo "CONFDIR: $CONFDIR"
 echo "LOGINST: $LOGINST"
 echo ----------------------------------------------
 }
-
 
 #########################
 ## Inicio del programa ##
 #########################
 clear
-#mostrarVariables
-#log "Comando InstalarT Inicio de Ejecución"
-#chequeoArchivo $LOGINST	# Verifico que se encuentre el archivo de log para el instalarT
-#cargarEstado $PAQINST	# Ejecuta los pasos del punto (2).
-#ESTADO=$?
-#instalarEstado $ESTADO
-
-definirDirectorio "arribos"
+mostrarVariables
+inicioArchivoLog $LOGINST	# Verifico que se encuentre el archivo de log para el instalarT
+chequeoArchivoConfig $ARCHCONF	# Verifico que se encuentre el archivo de configuración
+#cargarEstado $ARCHCONF		# Cargo el estado a partir del archivo de configuración
+#instalarEstado $?		# Instalo a partir del estado que devolvió el CargarEstado en "$?"
 
 echo "Chau! =D"
 exit 0
@@ -727,8 +834,8 @@ exit 0
 #########################################################
 # Chequear si está Perl
 #if perl < /dev/null > /dev/null 2>&1  ; then
-#      echo yes we have perl on  PATH
+#      echo hay perl!
 #else
-#      echo dang... no perl
+#      echo no hay perl )=
 #fi
 #########################################################
