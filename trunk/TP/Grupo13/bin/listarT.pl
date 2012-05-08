@@ -74,7 +74,7 @@ sub generateOutputData{
 }
 
 
-printData{
+sub printData{
 
 # Imprimo mi buffer por stdout
 
@@ -92,6 +92,17 @@ printData{
 printHelp{
 
 # Imprime informacion de uso de la herramienta
+# Usage:	listarT.pl -<c|e|h|s|k|p|t>
+#	
+#
+#
+#
+#
+#
+#
+#
+#
+
 
 }
 
