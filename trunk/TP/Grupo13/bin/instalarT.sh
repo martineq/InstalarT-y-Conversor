@@ -6,6 +6,7 @@
 #	Grupo: 	13			#
 #	Nombre:	instalarT.sh		#
 #	Estado: <<INCOMPLETO>>		#
+#	Porcentaje completo: 95%	#
 #					#
 #########################################
 
@@ -13,7 +14,7 @@
 # NOTAS:
 # + En el achivo instalarT.conf las primeras 10 líneas SIEMPRE son:
 #   1-GRUPO 2-ARRIDIR 3-RECHDIR 4-BINDIR 5-MAEDIR 6-REPODIR 7-LOGDIR 8-LOGEXT 9-LOGSIZE 10-DATASIZE
-# + Se permite cualquier ruta de directorio dada por el usuario. si el nombre tiene espacios, se cambian por guión bajo "_"
+# + Se permite cualquier nombre de SubDirectorio dado por el usuario. Si el nombre tiene espacios, se cambian por guión bajo "_"
 ##########################################################################################################################################
 
 #######################
@@ -30,10 +31,22 @@ LINEAESTADOINSTALACION=21		# La línea que uso para leer el estado de instalaci�
 ## Funciones usadas ##
 ######################
 
-# Usará el loguearT. Mientras, hago un "echo" de "$1"
+# Usará el loguearT. Mientras, hago un "echo" de "$1". "$2" es opcional y representa el tipo de mensaje, por defecto será informativo
 function log	
 {
-	echo "[LOG]: $1"
+  if [ -z $2 ] ; then  
+	echo "[LOG - Info]: $1"
+  else
+    if [ "$2" == "SE" ] ; then 
+       	echo "[LOG - Error Severo]: $1"
+    fi
+    if [ "$2" == "E" ] ; then 
+       	echo "[LOG - Error]: $1"
+    fi
+    if [ "$2" == "A" ] ; then 
+       	echo "[LOG - Alerta]: $1"
+    fi
+  fi
 }
 
 # Verifica si $1 es un archivo existente con permisos +rw para el usuario y sino lo crea. Devuelve 0 si estaba creado y 1 si no lo estaba
@@ -69,14 +82,17 @@ function chequeoArchivoConfig
       echo "" >> $1
     done
   fi
+  PATHACTUAL=$(pwd)			# ../grupo13/<DirectorioDeInstalación>
+  GRUPO=${PATHACTUAL%/*}		# Le saco el "/<DirectorioDeInstalación>"
+  guardarEntrada "DIR" "grupo" "$GRUPO"
 }
 
 # Carga el estado de la instalación a partir del archivo de configuración pasado en $1
 function cargarEstado   
 {
   chequeoArchivo $1
-  ESTADO=$(sed "${LINEAESTADOINSTALACION}!d" $1)	# El delimitador del sed es el "#" porque en la ruta se usan barras invertidas
-
+  ESTADO=$(sed "${LINEAESTADOINSTALACION}!d" $1)	# El delimitador del sed es el "#". Borra todas las líneas, menos la que necesito
+echo $ESTADO
   if [ "$ESTADO" == "" ]; then	# Si la variable está vacia lo tomo como que no se hizo nada
     ESTADO="P00"
   fi
@@ -99,123 +115,137 @@ function instalarEstado
     instalar01
   else
     log "TP SO7508 1er cuatrimestre 2012. Tema T Copyright © Grupo 13"
-    log "Componentes Existentes:"
+    log "Librería del Sistema: $CONFDIR"
+    log "Sus archivos y subdirectorios son:"
+    listarArchivos $CONFDIR
 
     if [ "$1" -ge "1" ]; then
-      log "Instalado P01"
+      echo "" > /dev/null
     fi
     if [ "$1" -eq "1" ]; then
-      log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
+      echo "" > /dev/null
     fi
     if [ "$1" -ge "2" ]; then
-      log "Instalado P02"
+      echo "" > /dev/null
     else
-      log "Falta P02"
+      echo "" > /dev/null
     fi
     if [ "$1" -eq "2" ]; then
-      log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
+      echo "" > /dev/null
     fi
     if [ "$1" -ge "3" ]; then
-      log "Instalado P03"
+      log "Componentes Existentes:" # Acá Arrancan los componentes y el primero tiene que estar siempre así que imprimo el msj a partir de acá
+      obtenerEntrada "ARRIDIR"
+      log "Directorio de arribo de archivos externos: $ARRIDIR"
     else
-      log "Falta P03"
+      log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
+      log "Directorio de arribo de archivos externos: No Definido"
     fi
     if [ "$1" -eq "3" ]; then
       log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "4" ]; then
-      log "Instalado P04"
+      echo "" > /dev/null
     else
-      log "Falta P04"
+      echo "" > /dev/null
     fi
     if [ "$1" -eq "4" ]; then
       log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "5" ]; then
-      log "Instalado P05"
+      echo "" > /dev/null
     else
-      log "Falta P05"
+      echo "" > /dev/null
     fi
     if [ "$1" -eq "5" ]; then
       log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "6" ]; then
-      log "Instalado P06"
+      obtenerEntrada "RECHDIR"
+      log "Directorio de grabación de los archivos externos rechazados: $RECHDIR"
     else
-      log "Falta P06"
+      log "Directorio de grabación de los archivos externos rechazados: No Definido"
     fi
     if [ "$1" -eq "6" ]; then
       log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "7" ]; then
-      log "Instalado P07"
+      obtenerEntrada "BINDIR"
+      log "Directorio de instalación de los ejecutables: $BINDIR"
+      listarArchivos $BINDIR
     else
-      log "Falta P07"
+      log "Directorio de instalación de los ejecutables: No Definido"
     fi
     if [ "$1" -eq "7" ]; then
       log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "8" ]; then
-      log "Instalado P08"
+      obtenerEntrada "MAEDIR"
+      log "Directorio de instalación de los archivos maestros: $MAEDIR"
+      listarArchivos $MAEDIR
     else
-      log "Falta P08"
+      log "Directorio de instalación de los archivos maestros: No Definido"
     fi
     if [ "$1" -eq "8" ]; then
       log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "9" ]; then
-      log "Instalado P09"
+      obtenerEntrada "LOGDIR"
+      log "Directorio de grabación de los logs de auditoria: $LOGDIR"
     else
-      log "Falta P09"
+      log "Directorio de grabación de los logs de auditoria: No Definido"
     fi
     if [ "$1" -eq "9" ]; then
       log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "10" ]; then
-      log "Instalado P10"
+      echo "" > /dev/null
     else
-      log "Falta P10"
+      echo "" > /dev/null
     fi
     if [ "$1" -eq "10" ]; then
       log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "11" ]; then
-      log "Instalado P11"
+      obtenerEntrada "REPODIR"
+      log "Directorio de grabación de los reportes de salida: $REPODIR"
     else
-      log "Falta P11"
+      log "Directorio de grabación de los reportes de salida: No Definido"
     fi
     if [ "$1" -eq "11" ]; then
       log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "12" ]; then
-      log "Instalado P12"
+      echo "" > /dev/null
     else
-      log "Falta P12"
+      echo "" > /dev/null
     fi
     if [ "$1" -eq "12" ]; then
       log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "13" ]; then
-      log "Instalado P13"
+      echo "" > /dev/null
     else
-      log "Falta P13"
+      echo "" > /dev/null
     fi
     if [ "$1" -eq "13" ]; then
       log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
     if [ "$1" -ge "14" ]; then
-      log "Instalado P14"
+      log "Estructuras de directorio y archivos: Creados"
     else
-      log "Falta P14"
+      log "Estructuras de directorio y archivos: No Creados"
+    fi
+    if [ "$1" -eq "14" ]; then
+      log "Componentes faltantes:"  # Como ya reportó lo instalado y este era el último, Reporto los faltantes
     fi
 
     if [ "$1" -ge "15" ] ; then # "15" sería el estado de instalación al 100%. Como está implementado, tambien se aceptan: 16,17,18,19
-      log "Instalado P15"
       log "Estado de la instalacion: COMPLETA"
       log "Proceso de Instalación Cancelado"
       instalarFin
     else
-      log "Falta P15" #COMPLETAR
+      log "Archivos temporarios no borrados"
       log "Estado de la instalacion: INCOMPLETA"
       log "¿Desea completar la instalacion? (Si-No)"
       OPC=$(($1+1))	# Le sumo 1 a "$1" para instalar el paquete siguiente al que ya está instalado
@@ -233,8 +263,7 @@ function instalarEstado
 # Chequeo perl y me meto en un case donde muestra lo que se hizo antes y despues arranco con lo que se va a hacer
 function elegirInstalar
 {
-  chequeoPerl
-  mostrarDirectorios  
+  chequeoPerl  
   confirmarInstalación
   CONFIRMA=$?  # Si=0, No=1
   if [ "$CONFIRMA" == "1" ]; then
@@ -286,7 +315,7 @@ function elegirInstalar
     instalar15
     ;;
   *)
-    instalarFin		# Este caso no se va a dar a menos que el archivo sea corrompido. en ese caso lo llevo al fin de la instalación
+    instalarFin		# Este caso no se va a dar a menos que el archivo se corrompa. en ese caso lo llevo al fin de la instalación
     ;;
   esac 
 
@@ -332,10 +361,16 @@ function instalar03
 {
   echo instalar03
 
+  obtenerEntrada "ARRIDIR"
+  if [ -z $ARRIDIR ] ; then
+    DEFECTO="${GRUPO}/arribos"
+  else
+    DEFECTO=$ARRIDIR
+  fi
+  SUBDIRDEFECTO=${DEFECTO##*/}
   TIPO="DIR"
   NOMBRE="arribos"
-  DEFECTO="arribos"
-  MSG="Defina el nombre de Sub-directorio de arribo de archivos externos. (Para definir el Sub-directorio por defecto <$DEFECTO> presione enter):"
+  MSG="Defina el nombre de Sub-directorio de arribo de archivos externos. (Para definir el Sub-directorio por defecto <$SUBDIRDEFECTO> presione enter):"
   definirValor "$TIPO" "$NOMBRE" "$MSG" "$DEFECTO"
 
   guardarEstadoInstalacion "P03"
@@ -346,10 +381,15 @@ function instalar03
 function instalar04
 {
   echo instalar04
-
+  
+  obtenerEntrada "DATASIZE"
+  if [ -z $DATASIZE ] ; then
+    DEFECTO="100"
+  else
+    DEFECTO=$DATASIZE
+  fi
   TIPO="NUM"
   NOMBRE="espacioExternos"
-  DEFECTO="100"
   MSG="Defina el espacio mínimo libre para el arribo de archivos externos en Mbytes. (Para usar $DEFECTO Mb presione enter):"
   definirValor "$TIPO" "$NOMBRE" "$MSG" "$DEFECTO"
 
@@ -362,13 +402,21 @@ function instalar05
 {
   echo instalar05
 
-#  Chequear si en ARRIDIR hay disponibles por lo menos DATASIZE Mb. Si esto da error mostrar y grabar en el log el siguiente mensaje:
-# SI HAY ERROR DE ESPACIO:
-  log "Insuficiente espacio en disco."
-  log "Espacio disponible: xx Mb."
-  log "Espacio requerido DATASIZE Mb"
-  log "Cancele la instalación e inténtelo mas tarde o vuelva a intentarlo con otro valor."
-# Volver al punto anterior.
+  obtenerEntrada "DATASIZE"
+  obtenerEntrada "ARRIDIR"
+  crearDirectorio "$ARRIDIR"
+  if [ $? -eq 1 ] ; then
+    log "El directorio ${ARRIDIR} no pudo ser creado" "E"
+  fi
+
+  DISPONIBLE=$(df "$ARRIDIR" --block-size=1M | sed '2!d' | awk '{ print $4 }')
+  if [ $DISPONIBLE -lt $DATASIZE ] ; then
+    log "Insuficiente espacio en disco." "SE"
+    log "Espacio disponible: $DISPONIBLE Mb"
+    log "Espacio requerido $DATASIZE Mb"
+    log "Cancele la instalación e inténtelo mas tarde o vuelva a intentarlo con otro valor."
+    instalar04
+  fi
 
   guardarEstadoInstalacion "P05"
   instalar06
@@ -378,10 +426,16 @@ function instalar06
 {
   echo instalar06
 
+  obtenerEntrada "RECHDIR"
+  if [ -z $RECHDIR ] ; then
+    DEFECTO="${GRUPO}/rechazados"
+  else
+    DEFECTO=$RECHDIR
+  fi
+  SUBDIRDEFECTO=${DEFECTO##*/}
   TIPO="DIR"
   NOMBRE="rechazados"
-  DEFECTO="rechazados"
-  MSG="Defina el nombre de Sub-directorio de grabación de los archivos externos rechazados. (Para definir el Sub-directorio por defecto <$DEFECTO> presione enter):"
+  MSG="Defina el nombre de Sub-directorio de grabación de los archivos externos rechazados. (Para definir el Sub-directorio por defecto <$SUBDIRDEFECTO> presione enter):"
   definirValor "$TIPO" "$NOMBRE" "$MSG" "$DEFECTO"
 
   guardarEstadoInstalacion "P06"
@@ -392,10 +446,16 @@ function instalar07
 {
   echo instalar07
 
+  obtenerEntrada "BINDIR"
+  if [ -z $BINDIR ] ; then
+    DEFECTO="${GRUPO}/bin"
+  else
+    DEFECTO=$BINDIR
+  fi
+  SUBDIRDEFECTO=${DEFECTO##*/}
   TIPO="DIR"
   NOMBRE="bin"
-  DEFECTO="bin"
-  MSG="Defina el nombre de Sub-directorio de grabación de instalación de los ejecutables. (Para definir el Sub-directorio por defecto <$DEFECTO> presione enter):"
+  MSG="Defina el nombre de Sub-directorio de grabación de instalación de los ejecutables. (Para definir el Sub-directorio por defecto <$SUBDIRDEFECTO> presione enter):"
   definirValor "$TIPO" "$NOMBRE" "$MSG" "$DEFECTO"
 
   guardarEstadoInstalacion "P07"
@@ -407,10 +467,16 @@ function instalar08
 {
   echo instalar08
 
+  obtenerEntrada "MAEDIR"
+  if [ -z $MAEDIR ] ; then
+    DEFECTO="${GRUPO}/mae"
+  else
+    DEFECTO=$MAEDIR
+  fi
+  SUBDIRDEFECTO=${DEFECTO##*/}
   TIPO="DIR"
   NOMBRE="archivosMaestros"
-  DEFECTO="mae"
-  MSG="Defina el nombre de Sub-directorio de grabación de instalación de los archivos maestros. (Para definir el Sub-directorio por defecto <$DEFECTO> presione enter):"
+  MSG="Defina el nombre de Sub-directorio de grabación de instalación de los archivos maestros. (Para definir el Sub-directorio por defecto <$SUBDIRDEFECTO> presione enter):"
   definirValor "$TIPO" "$NOMBRE" "$MSG" "$DEFECTO"
 
   guardarEstadoInstalacion "P08"
@@ -422,13 +488,17 @@ function instalar09
 {
   echo instalar09
 
+  obtenerEntrada "LOGDIR"
+  if [ -z $LOGDIR ] ; then
+    DEFECTO="${GRUPO}/log"
+  else
+    DEFECTO=$LOGDIR
+  fi
+  SUBDIRDEFECTO=${DEFECTO##*/}
   TIPO="DIR"
   NOMBRE="log"
-  DEFECTO="log"
-  MSG="Defina el nombre de Sub-directorio de grabación de instalación de los logs de auditoria. (Para definir el Sub-directorio por defecto <$DEFECTO> presione enter):"
+  MSG="Defina el nombre de Sub-directorio de grabación de instalación de los logs de auditoria. (Para definir el Sub-directorio por defecto <$SUBDIRDEFECTO> presione enter):"
   definirValor "$TIPO" "$NOMBRE" "$MSG" "$DEFECTO"
-
-# Proponer /log y si el usuario lo desea cambiar, permitírselo. El usuario puede ingresar un nombre simple como “log” o un subdirectorio: /data/log Reservar este path en la variable LOGDIR.
 
   guardarEstadoInstalacion "P09"
   instalar10
@@ -439,17 +509,26 @@ function instalar10
 {
   echo instalar10
 
+  obtenerEntrada "LOGEXT"
+  if [ -z $LOGEXT ] ; then
+    DEFECTO="log"
+  else
+    DEFECTO=$LOGEXT
+  fi
   TIPO="EXT"
   NOMBRE="extensionLog"
-  DEFECTO="log"
   MSG="Defina la extensión para los archivos de log (Para usar <$DEFECTO> presione enter):"
   definirValor "$TIPO" "$NOMBRE" "$MSG" "$DEFECTO"
 
-  LOGEXT="log"
-  obtenerEstado "LOGEXT"
+  obtenerEntrada "LOGSIZE"
+  if [ -z $LOGSIZE ] ; then
+    DEFECTO="400"
+  else
+    DEFECTO=$LOGSIZE
+  fi
+  obtenerEntrada "LOGEXT"
   TIPO="NUM"
   NOMBRE="tamanioLog"
-  DEFECTO="400"
   MSG="Defina el tamaño máximo para los archivos <$LOGEXT> en Kbytes. (Para usar $DEFECTO Kb presione enter):"
   definirValor "$TIPO" "$NOMBRE" "$MSG" "$DEFECTO"
 
@@ -462,10 +541,16 @@ function instalar11
 {
   echo instalar11
 
+  obtenerEntrada "REPODIR"
+  if [ -z $REPODIR ] ; then
+    DEFECTO="${GRUPO}/reportes"
+  else
+    DEFECTO=$REPODIR
+  fi
+  SUBDIRDEFECTO=${DEFECTO##*/}
   TIPO="DIR"
   NOMBRE="reportes"
-  DEFECTO="reportes"
-  MSG="Defina el nombre de Sub-directorio de grabación de instalación de los reportes de salida. (Para definir el Sub-directorio por defecto <$DEFECTO> presione enter):"
+  MSG="Defina el nombre de Sub-directorio de grabación de instalación de los reportes de salida. (Para definir el Sub-directorio por defecto <$SUBDIRDEFECTO> presione enter):"
   definirValor "$TIPO" "$NOMBRE" "$MSG" "$DEFECTO"
 
   guardarEstadoInstalacion "P11"
@@ -479,29 +564,36 @@ function instalar12
 
   clear
   log "TP SO7508 1er cuatrimestre 2012. Tema T Copyright © Grupo 13"
-  log "Directorio de Trabajo: GRUPO"
-  log "Librería del Sistema: CONFDIR"
-  log "Directorio de arribo de archivos externos: ARRIDIR"
-  log "Espacio mínimo libre para el arribo de archivos externos: DATASIZE Mb"
-  log "Directorio de grabación de los archivos externos rechazados: RECHDIR"
-  log "Directorio de instalación de los ejecutables: BINDIR"
-  log "Directorio de instalación de los archivos maestros: MAEDIR"
-  log "Directorio de grabación de los logs de auditoria: LOGDIR"
-  log "Extensión para los archivos de log: LOGEXT"
-  log "Tamaño máximo para los archivos de log: LOGSIZE Kb"
-  log "Directorio de grabación de los reportes de salida: REPODIR"
+  obtenerEntrada "GRUPO"
+  log "Directorio de Trabajo: $GRUPO"
+  obtenerEntrada "CONFDIR"
+  log "Librería del Sistema: $CONFDIR"
+  obtenerEntrada "ARRIDIR"
+  log "Directorio de arribo de archivos externos: $ARRIDIR"
+  obtenerEntrada "DATASIZE"
+  log "Espacio mínimo libre para el arribo de archivos externos: $DATASIZE Mb"
+  obtenerEntrada "RECHDIR"
+  log "Directorio de grabación de los archivos externos rechazados: $RECHDIR"
+  obtenerEntrada "BINDIR"
+  log "Directorio de instalación de los ejecutables: $BINDIR"
+  obtenerEntrada "MAEDIR"
+  log "Directorio de instalación de los archivos maestros: $MAEDIR"
+  obtenerEntrada "LOGDIR"
+  log "Directorio de grabación de los logs de auditoria: $LOGDIR"
+  obtenerEntrada "LOGEXT"
+  log "Extensión para los archivos de log: $LOGEXT"
+  obtenerEntrada "LOGSIZE"
+  log "Tamaño máximo para los archivos de log: $LOGSIZE Kb"
+  obtenerEntrada "REPODIR"
+  log "Directorio de grabación de los reportes de salida: $REPODIR"
   log "Estado de la instalacion: LISTA"
   log "Los datos ingresados son correctos? (Si-No)"
-
-# Si el usuario indica Si, Continuar en el paso: “Confirmar Inicio de Instalación”
-# 14.4. Si el usuario indica No
-# 14.4.1. Limpiar la pantalla
-# 14.4.2. Continuar en el paso: “Definir el directorio de arribo de archivos externos”
-# En este caso, los valores default propuestos deben ser los contenidos en las variables:
-# BINDIR, ARRIDIR, DATASIZE, LOGDIR, LOGEXT, LOGSIZE, etc
-
-  guardarEstadoInstalacion "P12"
-  instalar13
+  select SN in "Si" "No"; do
+      case $SN in
+          Si ) guardarEstadoInstalacion "P12" ; instalar13 ; break;;
+          No ) clear ; guardarEstadoInstalacion "P02" ; instalar03 ; break;;
+      esac
+  done
 }
 
 #15. Confirmar Inicio de Instalación
@@ -510,10 +602,13 @@ function instalar13
   echo instalar13
   confirmarInstalación
   CONFIRMA=$?
-# Si el usuario indica Si=0, Continuar en el paso siguiente (16. Instalación). Si el usuario indica No=1, ir a FIN
+  if [ $CONFIRMA -eq 0 ] ; then
+    guardarEstadoInstalacion "P13"
+    instalar14 
+  else
+    instalarFin
+  fi
 
-  guardarEstadoInstalacion "P13"
-  instalar14
 }
 
 #16. Instalación
@@ -522,8 +617,27 @@ function instalar14
   echo instalar14
 
   log "Creando Estructuras de directorio..."
-# Las creo y desoues las muestro en pantalla con mostrarDirectorios
-  mostrarDirectorios
+#ACÁ USO: 
+#  obtenerEntrada "XX"
+#  crearDirectorio "$XX"
+#  if [ $? -eq 1 ] ; then
+#    log "El directorio $XX no pudo ser creado" "E"
+#  fi
+# .
+# .
+# .
+# Las creo y despues notifico su creación
+# $ARRIDIR
+# $RECHDIR
+# $BINDIR
+# $MAEDIR
+# $LOGDIR
+# $REPODIR
+#$GRUPO/inst_recibidas
+#$GRUPO/inst_ordenadas
+#$GRUPO/inst_rechazadas
+#$GRUPO/inst_procesadas
+#$GRUPO/parque_instalado
 
 # Mover los archivos maestros al directorio MAEDIR mostrando el siguiente mensaje
   log "Instalando Archivos Maestros"
@@ -531,12 +645,6 @@ function instalar14
   log "Instalando Programas y Funciones"
 # Actualizar el archivo de configuración mostrando el siguiente mensaje
   log "Actualizando la configuración del sistema"
-
-# Se debe almacenar la información de configuración del sistema en el archivo InstalarT.conf en CONFDIR
-# Si el archivo de configuración no existe, crearlo, si existe actualizar los valores que correspondan.
-# Se debe grabar un registro para cada una de las siguientes variables:
-# GRUPO, ARRIDIR, RECHDIR, BINDIR, MAEDIR, REPODIR, LOGDIR LOGEXT, LOGSIZE, DATASIZE.
-# Se debe grabar 10 líneas en blanco (de la 11 a la 20) son líneas reservadas para futuras actualizaciones del paquete. Solo pueden ser usadas por un programa instalador o de actualización Líneas 21 y siguientes son de libre disponibilidad.
 
   guardarEstadoInstalacion "P14"
   instalar15
@@ -546,9 +654,7 @@ function instalar14
 function instalar15
 {
   echo instalar15
-
-#17. Borrar archivos temporarios, si se hubiesen generado
-
+  #COMPLETAR ¿Se crearon archivos temporarios? --> Borrarlos
   guardarEstadoInstalacion "P15"
   instalarFin
 }
@@ -557,7 +663,7 @@ function instalar15
 function instalarFin
 {
   log "Instalación concluida."
-#Cerrar el archivo InstalarT.log
+  # Cerrar el archivo InstalarT.log
   exit 0 #Terminar el proceso
 }
 
@@ -574,13 +680,12 @@ function definirValor
   case $1 in
     DIR)
     if [ ! -z $VAL ] ; then
-      crearDirectorio "$GRUPO/$VAL"
-      if [ $? -eq 1 ] ; then
-        definirValor "$1" "$2" "$3" "$4"  # Si puso algo inválido y por eso no se creó el directorio, lo hago definir de vuelta  
+      if [ "$2" == "grupo" ]; then  # Hago la excepción porque "grupo" tiene la ruta completa
+        guardarEntrada "$1" "$2" "$VAL"
+      else
+        guardarEntrada "$1" "$2" "$GRUPO/$VAL"
       fi
-      guardarEntrada "$1" "$2" "$VAL"
     else
-      crearDirectorio "$GRUPO/$4"
       guardarEntrada "$1" "$2" "$4"  # Acá el directorio y su valor coinciden (el caso por default)
     fi
     ;;
@@ -610,7 +715,7 @@ function definirValor
 
 function guardarEntrada  # $1 es el tipo de valor, $2 es el nombre de la variable a cambiar y $3 es el valor que se cambiará.
 {
-  case $2 in	# Posibles valores: grupo, arribos, rechazados, bin, archivosMaestros, 6-REPODIR 8-LOGEXT, tamanioLog, espacioExternos
+  case $2 in	# Posibles valores: grupo, arribos, rechazados, bin, archivosMaestros, reportes, log, extensionLog, tamanioLog, espacioExternos
   grupo)
     LINEA=1
     DIR=GRUPO
@@ -653,22 +758,46 @@ function guardarEntrada  # $1 es el tipo de valor, $2 es el nombre de la variabl
     ;;
   esac 
 
-  VALOR=$3
-  if [ "$1" == "DIR" ]; then
-    VALOR="$GRUPO/$3"
-  fi
-  NUEVAENTRADA="$DIR=$VALOR=$(whoami)=$(date)"
-
+  NUEVAENTRADA="$DIR=$3=$(whoami)=$(date)"
   sed -e "${LINEA}s#.*#${NUEVAENTRADA}#" $ARCHCONF > "${ARCHCONF}_tmp"  # El delimitador del sed es el "#" porque en la ruta se usan barras invertidas
   mv "${ARCHCONF}_tmp" "$ARCHCONF"
   log "El valor $VALOR fue guardado"
 }
 
-function obtenerEntrada	# Obtengo el estado de instalación pasado en $1
+function obtenerEntrada	# Obtengo el valor de la entrada especificada en $1
 {
-#COMPLETAR
-  echo COMPLETAR obtenerEntrada
-  LOGEXT=log
+  case $1 in
+  GRUPO)
+    GRUPO=$(sed "1!d" $ARCHCONF | sed 's/^[^=]*=\([^=]*\)=.*$/\1/')
+    ;;
+  ARRIDIR)
+    ARRIDIR=$(sed "2!d" $ARCHCONF | sed 's/^[^=]*=\([^=]*\)=.*$/\1/')
+    ;;
+  RECHDIR)
+    RECHDIR=$(sed "3!d" $ARCHCONF | sed 's/^[^=]*=\([^=]*\)=.*$/\1/')
+    ;;
+  BINDIR)
+    BINDIR=$(sed "4!d" $ARCHCONF | sed 's/^[^=]*=\([^=]*\)=.*$/\1/')
+    ;;
+  MAEDIR)
+    MAEDIR=$(sed "5!d" $ARCHCONF | sed 's/^[^=]*=\([^=]*\)=.*$/\1/')
+    ;;
+  REPODIR)
+    REPODIR=$(sed "6!d" $ARCHCONF | sed 's/^[^=]*=\([^=]*\)=.*$/\1/')
+    ;;
+  LOGDIR)
+    LOGDIR=$(sed "7!d" $ARCHCONF | sed 's/^[^=]*=\([^=]*\)=.*$/\1/')
+    ;;
+  LOGEXT)
+    LOGEXT=$(sed "8!d" $ARCHCONF | sed 's/^[^=]*=\([^=]*\)=.*$/\1/')
+    ;;
+  LOGSIZE)
+    LOGSIZE=$(sed "9!d" $ARCHCONF | sed 's/^[^=]*=\([^=]*\)=.*$/\1/')
+    ;;
+  DATASIZE)
+    DATASIZE=$(sed "10!d" $ARCHCONF | sed 's/^[^=]*=\([^=]*\)=.*$/\1/')
+    ;;
+  esac 
 }
 
 
@@ -695,31 +824,15 @@ function crearDirectorio	# Crea el directorio de la ruta $1
   fi
 }
 
-function mostrarDirectorios  # Muestra los directorios con datos
-{
-echo directorios
-#Muestro los DIR con "log"
-# $ARRIDIR
-# $RECHDIR
-# $BINDIR
-# $MAEDIR
-# $LOGDIR
-# $REPODIR
-# $grupo/inst_recibidas
-# $grupo/inst_ordenadas
-# $grupo/inst_rechazadas
-# $grupo/inst_procesadas
-# $grupo/parque_instalado
-}
 
 function listarArchivos # Lista todos los archivos y subdirectorios de un directorio especificado en $1
 {
-# Sin el log:
-# find ./ -maxdepth 1 -printf "%A@ %f\0" | sort -z -n | while read -d '' date line; do echo "$line" | grep -v '\./' ; done
+  # Sin el log:
+  # find ./ -maxdepth 1 -printf "%A@ %f\0" | sort -z -n | while read -d '' date line; do echo "$line" | grep -v '\./' ; done
 
-P=$1		# Ruta donde se hace el find
-D=${P##*/}	# Se saca el nombre del directorio que se usa para buscar, ya que buscamos sub-directorios y archivos
-find $P -maxdepth 1 -printf "%A@ %f\0" | sort -z -n | while read -d '' date line; do TXT=$(echo "$line" | grep -v "$D") ; if [ ! -z $TXT ] ; then log "$TXT" ; fi ; done
+  P=$1		# Ruta donde se hace el find
+  D=${P##*/}	# Se saca el nombre del directorio que se usa para buscar, ya que buscamos sub-directorios y archivos
+  find $P -maxdepth 1 -printf "%A@ %f\0" | sort -z -n | while read -d '' date line; do TXT=$(echo "$line" | grep -v "$D") ; if [ ! -z $TXT ] ; then log "$TXT" ; fi ; done
 }
 
 function confirmarInstalación # Pregunta si se inicia la instalación. Devuelve Si=0 No=1
@@ -786,11 +899,12 @@ echo ----------------------------------------------
 ## Inicio del programa ##
 #########################
 clear
-mostrarVariables
 inicioArchivoLog $LOGINST	# Verifico que se encuentre el archivo de log para el instalarT
 chequeoArchivoConfig $ARCHCONF	# Verifico que se encuentre el archivo de configuración
-#cargarEstado $ARCHCONF		# Cargo el estado a partir del archivo de configuración
-#instalarEstado $?		# Instalo a partir del estado que devolvió el CargarEstado en "$?"
+cargarEstado $ARCHCONF		# Cargo el estado a partir del archivo de configuración
+ESTADO=$?
+mostrarVariables
+instalarEstado $ESTADO		# Instalo a partir del estado que devolvió el CargarEstado en "$?"
 
 echo "Chau! =D"
 exit 0
