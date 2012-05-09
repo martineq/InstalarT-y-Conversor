@@ -8,9 +8,10 @@
 #     Parametro 1 (obligatorio): origen
 #     Parametro 2 (obligatorio): destino
 #     Parametro 3 (obligatorio): comando que la invoca
-#
+#	  Estado: <<INCOMPLETO>>		
+#	  Porcentaje completo: 90%
 # ------------------------------------------------------------------------------------------------
-#nota: incompleto
+#nota: incompleto en el 30% en complejidad
 
 # FUNCION PARA SEPARAR EL PATH PASADO POR PARAMETRO EN DIRECTORIO Y EN ARCHIVO
 # parametro 0: directorio+archivo
@@ -79,16 +80,90 @@ sub exite_archivo_En{
 		return ($exite_archivo_origen_);
 }
 
-# FUNCION PARA RENOMBRAR EL NOMBRE DE UN ARCHIVO, SEGUN EL NUMERO DE SECUENCIA
-# parametro1: path del archivo a renombrar
-# parametro2: numero de secuencia del archivo movido
-sub renombrar(){
-	$arch_renombrar = @_[0];
-	$numero_secuncia = @_[1];
+########################################################################
+#FUNCION PARA DEVOLVER EL ULTIMO NUMERO DE SECUENCIA DEL ARCHIVO PASADO POR PARAMETRO, ESTO
+#SE REALIZA EN EL DIRECTORIO PASADO POR PARAMETRO
+# parametro 1: archivo mediante el cual cacular su numero de secuencia
+# parametro 2: directorio en donde calcular el numero de secuencia
+# 
+# RETURN
+#         -1: para que se pueda realizar solo el "MOVER DUPLICADO" segun nombrado en el enunciado
+#         -2: para que se pueda realizar solo el "MOVER ESTANDAR" segun nombrado en el enunciado
+#
+# readme:para administrar el numero de secuencia en la operacion de "MOVER ESTANDAR" se guardo en un arreglo
+# todos los nombres de los archivos del directorio a considerar para el calculo del numero de secuencia, luego
+# se fue comparando mediante un patron definido por el archivo mediante el cual se calcula tal numero, y a continuacion
+# mediante ese patron se toma el maximo numero de secuencia encontrado, para finalmente devolverlo.
+sub getNroSecuencia_ultimo{
+	#readme: el formato de la extension del archivo origen tiene que ser asi: [nombreFile].[ExtensionFile], y por eso
+	#ese valor 2 hard-codeado
+	$nombreArh_patron = @_[0]; 	
+	$dir = @_[1]; 				
 	
-	$comando_renombrar = `rename -v 's/\.*$/\.\$numero_secuncia/' \$arch_renombrar`;
+	if (opendir(DIRH, "$dir")){
+		@flist = readdir(DIRH);
+		closedir(DIRH);
+	}
+	
+	@nombresArch_patron_split = split("[.]", $nombreArh_patron);
+	
+	$existe_nombreArh_patron = "no";
+	$nroMax_secuencia = -1; 
+	@flist_ordenado = sort(@flist);
+	
+	foreach(@flist_ordenado){
+		#ignoro . y ..
+		next if ($_ eq "." || $_ eq "..");
+		@nombresArch_split = split("[.]", $_);
+		
+		$long_nombresArch_split = @nombresArch_split;
+		
+		if ($long_nombresArch_split >= 2){
+			if (@nombresArch_patron_split[0] eq @nombresArch_split[0]){
+				if (@nombresArch_patron_split[1] eq @nombresArch_split[1]){
+					if ($existe_nombreArh_patron eq "no"){
+						$existe_nombreArh_patron = "si";
+					}
+					if ($long_nombresArch_split >= 3){
+						if (@nombresArch_split[2] > $nroMax_secuencia){
+							$nroMax_secuencia = @nombresArch_split[2];
+						}
+					}
+				}
+			}
+		}
+	} #fin foreach
 
+	if ($existe_nombreArh_patron eq "no"){
+		$nroMax_secuencia = -2;
+	}
+	
+	return ($nroMax_secuencia);
 }
+
+# FUNCION PARA MOVER UN ARCHIVO DESDE ORIGEN HASTA DESTINO
+# parametro1: path del archivo a mover. Parametro esta validado
+# parametro2: directorio destino hasta donde se movera. Parametro esta validado
+sub mover_estandar{
+	$origen_ = @_[0];
+	$destino_ = @_[1];
+	
+	$copiar = `cp $origen_ $destino_`;
+	$eliminar = `rm $origen_`;
+}
+
+# FUNCION PARA RENOMBRAR UN ARCHIVO
+# parametro1: path completo del archivo a renombra por parametro 1. Por ejemplo dir/arch.txt
+# parametro2: directorio destino hasta donde se movera. Parametro esta validado
+sub renombrar{
+	$path_original_ = @_[0];
+	$nombre_nuevo_ = @_[1];
+
+	#esto no me funciona!!!
+	$comando_renombrar = `rename 's/$path_original_/$nombre_nuevo_/' *`;
+}
+
+########################################################################
 
 #segun criterio, falta definir la cantidad maxima de parametros
 $cant_max_parametros = 4;
@@ -97,14 +172,11 @@ $cant_max_parametros = 4;
 @argumentos = @ARGV;
 $cant_parametros = $#argumentos + 1;
 
-
 #valido la cantidad de parametros
 if ( ($cant_parametros >= 2) && ($cant_parametros <= $cant_max_parametros) ){
 	
-		#tomo los valores de los dos primeros parametros
 		$origen = @argumentos[0];  #directorio origen
 		$destino = @argumentos[1]; #directorio destino
-
 		#verifico que origen y destino existen
 		$existe_origen = "no";
 		if (-e $origen) {
@@ -119,10 +191,7 @@ if ( ($cant_parametros >= 2) && ($cant_parametros <= $cant_max_parametros) ){
 		}else{
 				print "ERROR_SEVERO: No existe destino\n";
 			}
-				
-		#verifico que tiene permiso de lectura
-		#...
-
+		
 		if ($existe_origen eq "si" && $existe_destino eq "si"){
 			($dir_origen, $arch_origen) = separar_enDir_yArchivo($origen);
 			($dir_destino, $arch_destino) = separar_enDir_yArchivo($destino);
@@ -131,35 +200,29 @@ if ( ($cant_parametros >= 2) && ($cant_parametros <= $cant_max_parametros) ){
 			if ( $dir_origen eq $dir_destino ){
 				$dir_distintos = "no";
 			}
+
+			if ($dir_distintos eq "si") {
 				
-			$existe_arch_origenEn = exite_archivo_En($arch_origen, $dir_destino);
-
-			#situacion_1: MOVER ESTANDARD
-			if ($dir_distintos eq "si" && $existe_arch_origenEn eq "no") {
-				print "INFORMATIVO: Inicio de ejecucion MOVER ESTANDARD\n";
-				print "origen: ".$origen."\n";
-				print "destino: ".$destino."\n";
-				$copiar = `cp $origen $destino`;
-				$eliminar = `rm $origen`;
-				#...llamar a logT
-
-				#en principio es una valor vacio, entonces lo defino 
-				$arch_destino = $destino.$arch_origen;
-				#print $arch_destino."\n";
-
-				#TODO: seguir revisando por que no funciona esta linea!!!...
-				#$comando_renombrar = `rename 's/\.*$/\.0/' $arch_destino`;
-				#renombrar("../inst_rechazadas/test.txt", "10");
-				
+				$nroSecuencia_ultimo = getNroSecuencia_ultimo($arch_origen, $destino);
+				if( $nroSecuencia_ultimo == -2 ){
+					print "origen: ".$origen."\n";
+					print "destino: ".$destino."\n";
+					#mover_estandar($origen, $destino);
+				}else{
+						$nroSecuencia_archMover = $nroSecuencia_ultimo + 1;
+						$nombre_nuevo = $arch_origen.".".$nroSecuencia_archMover;
+						
+						#renombrar($dir_origen.$arch_origen, $nombre_nuevo);
+						$origen_nuevo = $dir_origen.$nombre_nuevo;
+						print "origen: ".$origen_nuevo."\n";
+						print "destino: ".$destino."\n";
+						#mover_estandar($origen_nuevo, $destino);
+					}
 			}else{
-				if ($dir_distintos eq "no"){
-					print "ERROR: Los directorios origen y destino son iguales\n";
-					#...llamar a logT
-				}
-				if ($existe_arch_origenEn eq "si"){
-					print "ERROR: El archivo origen existe en el directorio destino\n";
-					#...llamar a logT
-				}				
+					if ($dir_distintos eq "no"){
+						print "ERROR: Los directorios origen y destino son iguales\n";
+						#...llamar a logT
+					}			
 				}
 		}
 		
