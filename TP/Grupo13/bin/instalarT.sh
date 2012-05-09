@@ -6,7 +6,7 @@
 #	Grupo: 	13			#
 #	Nombre:	instalarT.sh		#
 #	Estado: <<INCOMPLETO>>		#
-#	Porcentaje completo: 95%	#
+#	Porcentaje completo: 99%	#
 #					#
 #########################################
 
@@ -14,7 +14,8 @@
 # NOTAS:
 # + En el achivo instalarT.conf las primeras 10 líneas SIEMPRE son:
 #   1-GRUPO 2-ARRIDIR 3-RECHDIR 4-BINDIR 5-MAEDIR 6-REPODIR 7-LOGDIR 8-LOGEXT 9-LOGSIZE 10-DATASIZE
-# + Se permite cualquier nombre de SubDirectorio dado por el usuario. Si el nombre tiene espacios, se cambian por guión bajo "_"
+# + Se permite cualquier nombre de SubDirectorio dado por el usuario. Los caracteres no alfanuméricos se borran y los espacios se 
+#   cambian por guión bajo "_"
 ##########################################################################################################################################
 
 #######################
@@ -406,8 +407,13 @@ function instalar05
   obtenerEntrada "ARRIDIR"
   crearDirectorio "$ARRIDIR"
   if [ $? -eq 1 ] ; then
-    log "El directorio ${ARRIDIR} no pudo ser creado" "E"
+    log "El directorio <${ARRIDIR}> no pudo ser creado" "SE"
+    exit 1
+  else
+    log "Directorio <${ARRIDIR}> creado"
   fi
+
+
 
   DISPONIBLE=$(df "$ARRIDIR" --block-size=1M | sed '2!d' | awk '{ print $4 }')
   if [ $DISPONIBLE -lt $DATASIZE ] ; then
@@ -416,6 +422,8 @@ function instalar05
     log "Espacio requerido $DATASIZE Mb"
     log "Cancele la instalación e inténtelo mas tarde o vuelva a intentarlo con otro valor."
     instalar04
+  else
+    log "El directorio <${ARRIDIR}> tiene el espacio mínimo requerido"
   fi
 
   guardarEstadoInstalacion "P05"
@@ -617,36 +625,110 @@ function instalar14
   echo instalar14
 
   log "Creando Estructuras de directorio..."
+# $ARRIDIR (Ya estaba creado)
+
 #ACÁ USO: 
-#  obtenerEntrada "XX"
-#  crearDirectorio "$XX"
-#  if [ $? -eq 1 ] ; then
-#    log "El directorio $XX no pudo ser creado" "E"
-#  fi
-# .
-# .
-# .
 # Las creo y despues notifico su creación
-# $ARRIDIR
-# $RECHDIR
-# $BINDIR
-# $MAEDIR
-# $LOGDIR
-# $REPODIR
-#$GRUPO/inst_recibidas
-#$GRUPO/inst_ordenadas
-#$GRUPO/inst_rechazadas
-#$GRUPO/inst_procesadas
-#$GRUPO/parque_instalado
+
+  obtenerEntrada "RECHDIR"
+  crearDirectorio "$RECHDIR"
+  if [ $? -eq 1 ] ; then
+    log "El directorio <$RECHDIR> no pudo ser creado" "SE"
+    exit 1
+  else
+    log "$RECHDIR"
+  fi
+
+  obtenerEntrada "BINDIR"
+  crearDirectorio "$BINDIR"
+  if [ $? -eq 1 ] ; then
+    log "El directorio <$BINDIR> no pudo ser creado" "SE"
+    exit 1
+  else
+    log "$BINDIR"
+  fi
+
+  obtenerEntrada "MAEDIR"
+  crearDirectorio "$MAEDIR"
+  if [ $? -eq 1 ] ; then
+    log "El directorio <$MAEDIR> no pudo ser creado" "SE"
+    exit 1
+  else
+    log "$MAEDIR"
+  fi
+
+  obtenerEntrada "LOGDIR"
+  crearDirectorio "$LOGDIR"
+  if [ $? -eq 1 ] ; then
+    log "El directorio <$LOGDIR> no pudo ser creado" "SE"
+    exit 1
+  else
+    log "$LOGDIR"
+  fi
+
+  obtenerEntrada "REPODIR"
+  crearDirectorio "$REPODIR"
+  if [ $? -eq 1 ] ; then
+    log "El directorio <$REPODIR> no pudo ser creado" "SE"
+    exit 1
+  else
+    log "$REPODIR"
+  fi
+
+  obtenerEntrada "GRUPO"
+  crearDirectorio "${GRUPO}/inst_recibidas"
+  if [ $? -eq 1 ] ; then
+    log "El directorio <${GRUPO}/inst_recibidas> no pudo ser creado" "SE"
+    exit 1
+  else
+    log "${GRUPO}/inst_recibidas"
+  fi
+
+  crearDirectorio "${GRUPO}/inst_ordenadas"
+  if [ $? -eq 1 ] ; then
+    log "El directorio <${GRUPO}/inst_ordenadas> no pudo ser creado" "SE"
+    exit 1
+  else
+    log "${GRUPO}/inst_ordenadas"
+  fi
+
+  crearDirectorio "${GRUPO}/inst_rechazadas"
+  if [ $? -eq 1 ] ; then
+    log "El directorio <${GRUPO}/inst_rechazadas> no pudo ser creado" "SE"
+    exit 1
+  else
+    log "${GRUPO}/inst_rechazadas"
+  fi
+
+  crearDirectorio "${GRUPO}/inst_procesadas"
+  if [ $? -eq 1 ] ; then
+    log "El directorio <${GRUPO}/inst_procesadas> no pudo ser creado" "SE"
+    exit 1
+  else
+    log "${GRUPO}/inst_procesadas"
+  fi
+
+  crearDirectorio "${GRUPO}/parque_instalado"
+  if [ $? -eq 1 ] ; then
+    log "El directorio <${GRUPO}/parque_instalado> no pudo ser creado" "SE"
+  else
+    log "${GRUPO}/parque_instalado"
+  fi
+
+  chmod -R 777 $PATHACTUAL  # Versión octal de chmod
 
 # Mover los archivos maestros al directorio MAEDIR mostrando el siguiente mensaje
-  log "Instalando Archivos Maestros"
-# Mover los ejecutables y funciones al directorio BINDIR mostrando el siguiente mensaje
-  log "Instalando Programas y Funciones"
-# Actualizar el archivo de configuración mostrando el siguiente mensaje
-  log "Actualizando la configuración del sistema"
+  log "Instalando Archivos Maestros..."
+  cp ${PATHACTUAL}/*.mae "$MAEDIR"
 
+# Mover los ejecutables y funciones al directorio BINDIR mostrando el siguiente mensaje
+  log "Instalando Programas y Funciones..."
+  cp ${PATHACTUAL}/*.sh $BINDIR
+  cp ${PATHACTUAL}/*.pl $BINDIR
+
+# Actualizar el archivo de configuración mostrando el siguiente mensaje
   guardarEstadoInstalacion "P14"
+  log "Actualizando la configuración del sistema..."
   instalar15
 }
 
@@ -655,6 +737,7 @@ function instalar15
 {
   echo instalar15
   #COMPLETAR ¿Se crearon archivos temporarios? --> Borrarlos
+  #Borrar TODo lo que haya en al carpeta "instaladora"
   guardarEstadoInstalacion "P15"
   instalarFin
 }
@@ -675,7 +758,7 @@ function definirValor
 {
   log "$3"
   read VAL
-  VAL=$(echo $VAL | sed 's/ /_/g')  # Cambio los espacios por "_"
+  VAL=$(echo $VAL | sed 's/ /_/g' | sed -e 's/[^0-9A-Za-z_]//g')  # Cambio los caracteres no alfanumericos espacios por "_"
 
   case $1 in
     DIR)
@@ -761,7 +844,7 @@ function guardarEntrada  # $1 es el tipo de valor, $2 es el nombre de la variabl
   NUEVAENTRADA="$DIR=$3=$(whoami)=$(date)"
   sed -e "${LINEA}s#.*#${NUEVAENTRADA}#" $ARCHCONF > "${ARCHCONF}_tmp"  # El delimitador del sed es el "#" porque en la ruta se usan barras invertidas
   mv "${ARCHCONF}_tmp" "$ARCHCONF"
-  log "El valor $VALOR fue guardado"
+  log "El valor $3 fue guardado"
 }
 
 function obtenerEntrada	# Obtengo el valor de la entrada especificada en $1
@@ -812,14 +895,16 @@ function crearDirectorio	# Crea el directorio de la ruta $1
   if [ ! -d "$1" ]; then
     mkdir $1
     if [ ! -d "$1" ]; then
-      log "Error al crear el directorio <$1>"
+#      log "Error al crear el directorio <$1>"
       return 1
     else
-      log "Directorio <$1> creado."
+#      log "Directorio <$1> creado."
+      chmod -R 777 $1
       return 0
     fi
   else
-    log "Directorio <$1> creado."
+#    log "Directorio <$1> creado."
+    chmod -R 777 $1
     return 0
   fi
 }
@@ -913,8 +998,7 @@ exit 0
 ## Fin del programa ##
 ######################
 
-###Cosas por hacer###
-# Reservar los nombre de los paths
+
 
 #########################################################
 # <<Machete>>
