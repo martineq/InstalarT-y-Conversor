@@ -5,14 +5,13 @@
 #fecha: 30/04/2012
 #comando: MoverT
 #Parametros
-#     Parametro 1 (obligatorio): origen
-#     Parametro 2 (obligatorio): destino
+#     Parametro 1 (obligatorio): origen  --> el path de este archivo no tiene que tener asignado un numero de secuencia
+#     Parametro 2 (obligatorio): destino --> este directorio tiene que finalizar con la barra
 #     Parametro 3 (obligatorio): comando que la invoca
 #	  Estado: <<INCOMPLETO>>		
-#	  Porcentaje completo: 90%
+#	  Porcentaje completo: 98%
 # ------------------------------------------------------------------------------------------------
-#nota: incompleto en el 30% en complejidad
-
+#
 # FUNCION PARA SEPARAR EL PATH PASADO POR PARAMETRO EN DIRECTORIO Y EN ARCHIVO
 # parametro 0: directorio+archivo
 # return: array con el directorio y el archivo 
@@ -156,15 +155,14 @@ sub mover_estandar{
 # parametro1: path completo del archivo a renombra por parametro 1. Por ejemplo dir/arch.txt
 # parametro2: directorio destino hasta donde se movera. Parametro esta validado
 sub renombrar{
-	$path_original_ = @_[0];
-	$nombre_nuevo_ = @_[1];
+	$name_old_ = @_[0];
+	$name_new_ = @_[1];
 
-	#esto no me funciona!!!
-	$comando_renombrar = `rename 's/$path_original_/$nombre_nuevo_/' *`;
+	rename($name_old, $name_new) or die "ERROR: imposible renombrar $name_old a $name_new/n";
 }
 
 ########################################################################
-
+	
 #segun criterio, falta definir la cantidad maxima de parametros
 $cant_max_parametros = 4;
 
@@ -173,6 +171,7 @@ $cant_max_parametros = 4;
 $cant_parametros = $#argumentos + 1;
 
 #valido la cantidad de parametros
+#readme: poner a la carpeta destino la barra que indique que es archivo tipo directorio, sino no se va a poder renombrar
 if ( ($cant_parametros >= 2) && ($cant_parametros <= $cant_max_parametros) ){
 	
 		$origen = @argumentos[0];  #directorio origen
@@ -182,7 +181,8 @@ if ( ($cant_parametros >= 2) && ($cant_parametros <= $cant_max_parametros) ){
 		if (-e $origen) {
 		   $existe_origen = "si";
 		}else{
-				print "ERROR_SEVERO: No existe origen\n";
+				print "ERROR_SEVERO: No existe origen\n";	
+				exit 1;
 			}
 
 		$existe_destino = "no";
@@ -190,6 +190,7 @@ if ( ($cant_parametros >= 2) && ($cant_parametros <= $cant_max_parametros) ){
 		   $existe_destino = "si";
 		}else{
 				print "ERROR_SEVERO: No existe destino\n";
+				exit 1;
 			}
 		
 		if ($existe_origen eq "si" && $existe_destino eq "si"){
@@ -205,22 +206,39 @@ if ( ($cant_parametros >= 2) && ($cant_parametros <= $cant_max_parametros) ){
 				
 				$nroSecuencia_ultimo = getNroSecuencia_ultimo($arch_origen, $destino);
 				if( $nroSecuencia_ultimo == -2 ){
-					print "origen: ".$origen."\n";
-					print "destino: ".$destino."\n";
-					#mover_estandar($origen, $destino);
+					print "INFORMATIVO: se ejecuto el \"mover estandar\":\n";
+					#print "origen: ".$origen."\n";
+					#print "destino: ".$destino."\n";
+					mover_estandar($origen, $destino);
 				}else{
-						$nroSecuencia_archMover = $nroSecuencia_ultimo + 1;
-						$nombre_nuevo = $arch_origen.".".$nroSecuencia_archMover;
-						
-						#renombrar($dir_origen.$arch_origen, $nombre_nuevo);
-						$origen_nuevo = $dir_origen.$nombre_nuevo;
-						print "origen: ".$origen_nuevo."\n";
-						print "destino: ".$destino."\n";
-						#mover_estandar($origen_nuevo, $destino);
+					print "INFORMATIVO: se ejecuto el \"mover duplicado\":\n";
+					$nroSecuencia_archMover = $nroSecuencia_ultimo + 1;
+					$nombre_nuevo = $arch_origen.".".$nroSecuencia_archMover;
+					$name_old = $origen;
+					$name_new = $dir_origen.$nombre_nuevo;		
+					#print "name_old: $origen\n";
+					#print "name_new: $name_new\n";
+
+					#para no borrar en directorio origen un archivo con numero de secuencia ya creado
+					$name_new_2 = $name_new;	
+					$extension_fantasma = ".movertmp";
+					$name_new = $name_new.$extension_fantasma;
+					renombrar($name_old, $name_new);
+					$origen_nuevo = $name_new;
+					#print "\tdestino: ".$destino."\n";
+					mover_estandar($origen_nuevo, $destino);
+
+					#para compenzar el agregado de la extension fantasma
+					$name_old = $dir_destino.$nombre_nuevo.$extension_fantasma;	
+					$name_new = $dir_destino.$nombre_nuevo;						
+					#print "name_old: $name_old\n";
+					#print "name_new: $name_new\n";
+					renombrar($name_old, $name_new);
 					}
 			}else{
 					if ($dir_distintos eq "no"){
 						print "ERROR: Los directorios origen y destino son iguales\n";
+						exit 1;
 						#...llamar a logT
 					}			
 				}
@@ -245,5 +263,8 @@ if ( ($cant_parametros >= 2) && ($cant_parametros <= $cant_max_parametros) ){
 }else{
 	
 	print "ERROR: la cantidad de parametros debe ser como minimo 2 y como maximo 4\n";
+	exit 1;
 	
 }
+
+exit 0;
