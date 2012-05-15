@@ -81,7 +81,7 @@ if [ -z $LOGEXT ] ; then
 fi
 
 # El tam max del log debe ser definido
-if [ -z $LOGSIZE ] ; then
+if [ -z $LOGSIZE ] && [ ! $COMMAND == "instalar" ] ; then
    echo "No esta definido el tamanio de log [$LOGSIZE]"
    exit 1
 fi 
