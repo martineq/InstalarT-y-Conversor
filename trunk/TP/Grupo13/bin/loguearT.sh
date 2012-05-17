@@ -16,7 +16,7 @@ truncate() {
     #Obtengo el tamani del archivo, si es que este existe.
     if [ -e "$LOGDIR/$COMMAND.$LOGEXT" ]
     then
-          SIZE=`du -sk "$LOGDIR/$COMMAND.$LOGEXT"`
+          SIZE=`du -sb "$LOGDIR/$COMMAND.$LOGEXT"`
           SIZE=`echo $SIZE | cut -f 1 -d ' '`
     fi
 
