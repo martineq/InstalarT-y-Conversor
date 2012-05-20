@@ -1,5 +1,5 @@
-export LOGDIR="/var/tmp/TP/Grupo13/log/"
-export GRUPO="/var/tmp/TP/Grupo13/"
+export LOGDIR="/home/arielik/workspace/SO_TP/TP/Grupo13/logdir"
+export GRUPO="/home/arielik/workspace/SO_TP/TP/Grupo13"
 export LOGEXT="log"
 export LOGSIZE=5
 
