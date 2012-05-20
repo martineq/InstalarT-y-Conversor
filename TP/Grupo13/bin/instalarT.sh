@@ -14,6 +14,7 @@
 # NOTAS:
 # + En el achivo instalarT.conf las primeras 10 líneas SIEMPRE son:
 #   1-GRUPO 2-ARRIDIR 3-RECHDIR 4-BINDIR 5-MAEDIR 6-REPODIR 7-LOGDIR 8-LOGEXT 9-LOGSIZE 10-DATASIZE
+# + La línea que uso para leer el estado de instalación es la N° 21 del arch de configuración
 # + Se permite cualquier nombre de SubDirectorio dado por el usuario. Los caracteres no alfanuméricos se borran y los espacios se 
 #   cambian por guión bajo "_"
 ##########################################################################################################################################
@@ -21,8 +22,8 @@
 #######################
 ## Variables creadas ##
 #######################
-PATHACTUAL=$(pwd)			# ../grupo13/bin
-GRUPO=${PATHACTUAL%/*}			# Le saco el "/bin"
+PATHACTUAL=$(pwd)			# ../grupo13/instalador
+GRUPO=${PATHACTUAL%/*}			# Le saco el "/instalador"
 CONFDIR="$GRUPO/confdir"		# Le agergo el "/confdir"
 ARCHCONF="$CONFDIR/instalarT.conf"	# Le agergo el "/instalarT.conf"
 LOGINST="$CONFDIR/instalarT.log"	# Le agergo el "/instalarT.log"
@@ -35,17 +36,21 @@ LINEAESTADOINSTALACION=21		# La línea que uso para leer el estado de instalaci�
 # Usará el loguearT. Mientras, hago un "echo" de "$1". "$2" es opcional y representa el tipo de mensaje, por defecto será informativo
 function log	
 {
-  if [ -z $2 ] ; then  
-	echo "[LOG - Info]: $1"
+  if [ -z $2 ] ; then  # ./loguearT.sh "instalar" "I" "Soy una prueba" "/home/mart/ssoo1c-2012/TP/Grupo13/confdir/instalarT.log"
+	. loguearT.sh "instalar" "I" "$1" "$LOGINST" &
+	echo "$1"
   else
     if [ "$2" == "SE" ] ; then 
-       	echo "[LOG - Error Severo]: $1"
+        . loguearT.sh "instalar" "SE" "$1" "$LOGINST" &
+       	echo "[Error Severo]: $1"
     fi
     if [ "$2" == "E" ] ; then 
-       	echo "[LOG - Error]: $1"
+        . loguearT.sh "instalar" "E" "$1" "$LOGINST" &
+       	echo "[Error]: $1"
     fi
     if [ "$2" == "A" ] ; then 
-       	echo "[LOG - Alerta]: $1"
+        . loguearT.sh "instalar" "A" "$1" "$LOGINST" &
+       	echo "[Alerta]: $1"
     fi
   fi
 }
@@ -65,6 +70,13 @@ else
    #echo "Archivo $1 creado."
 fi
 }
+
+# Creo el directorio de configuración, donde se guarda el archivo de configuración y el log de instalación
+function crearDirectorioConfig
+{
+  crearDirectorio "$CONFDIR"
+}
+
 
 # Verifico que se encuentre el archivo de log para el instalarT
 function inicioArchivoLog
@@ -93,7 +105,6 @@ function cargarEstado
 {
   chequeoArchivo $1
   ESTADO=$(sed "${LINEAESTADOINSTALACION}!d" $1)	# El delimitador del sed es el "#". Borra todas las líneas, menos la que necesito
-echo $ESTADO
   if [ "$ESTADO" == "" ]; then	# Si la variable está vacia lo tomo como que no se hizo nada
     ESTADO="P00"
   fi
@@ -325,7 +336,7 @@ function elegirInstalar
 #3. Ejecuta los pasos del punto (3): chequeo de perl
 function instalar01
 {
-  echo instalar01
+#  echo instalar01
   chequeoPerl
 
   guardarEstadoInstalacion "P01"
@@ -335,7 +346,7 @@ function instalar01
 #4. Brindar la información de la Instalación
 function instalar02
 {
-  echo instalar02
+#  echo instalar02
   log "Directorio de Trabajo para la instalacion: $GRUPO"
   log "Sus archivos y subdirectorios son:"
   listarArchivos $GRUPO
@@ -360,7 +371,7 @@ function instalar02
 #5. Definir el directorio de arribo de archivos externos
 function instalar03
 {
-  echo instalar03
+#  echo instalar03
 
   obtenerEntrada "ARRIDIR"
   if [ -z $ARRIDIR ] ; then
@@ -381,7 +392,7 @@ function instalar03
 #6. Definir el espacio mínimo libre para el arribo de archivos externos
 function instalar04
 {
-  echo instalar04
+#  echo instalar04
   
   obtenerEntrada "DATASIZE"
   if [ -z $DATASIZE ] ; then
@@ -401,7 +412,7 @@ function instalar04
 #7. Verificar espacio en disco
 function instalar05
 {
-  echo instalar05
+#  echo instalar05
 
   obtenerEntrada "DATASIZE"
   obtenerEntrada "ARRIDIR"
@@ -432,7 +443,7 @@ function instalar05
 #8. Definir el directorio de grabación de los archivos rechazados
 function instalar06
 {
-  echo instalar06
+#  echo instalar06
 
   obtenerEntrada "RECHDIR"
   if [ -z $RECHDIR ] ; then
@@ -452,7 +463,7 @@ function instalar06
 #9. Definir el directorio de instalación de los ejecutables
 function instalar07
 {
-  echo instalar07
+#  echo instalar07
 
   obtenerEntrada "BINDIR"
   if [ -z $BINDIR ] ; then
@@ -473,7 +484,7 @@ function instalar07
 #10. Definir el directorio de instalación de los archivos maestros
 function instalar08
 {
-  echo instalar08
+#  echo instalar08
 
   obtenerEntrada "MAEDIR"
   if [ -z $MAEDIR ] ; then
@@ -494,7 +505,7 @@ function instalar08
 #11. Definir el directorio de grabación de los logs de auditoria
 function instalar09
 {
-  echo instalar09
+#  echo instalar09
 
   obtenerEntrada "LOGDIR"
   if [ -z $LOGDIR ] ; then
@@ -515,7 +526,7 @@ function instalar09
 #12. Definir la extensión y tamaño máximo para los archivos de log
 function instalar10
 {
-  echo instalar10
+#  echo instalar10
 
   obtenerEntrada "LOGEXT"
   if [ -z $LOGEXT ] ; then
@@ -547,7 +558,7 @@ function instalar10
 #13. Definir el directorio de grabación de los reportes de salida
 function instalar11
 {
-  echo instalar11
+#  echo instalar11
 
   obtenerEntrada "REPODIR"
   if [ -z $REPODIR ] ; then
@@ -568,7 +579,7 @@ function instalar11
 #14. Mostrar estructura de directorios resultante y valores de parámetros configurados
 function instalar12
 {
-  echo instalar12
+#  echo instalar12
 
   clear
   log "TP SO7508 1er cuatrimestre 2012. Tema T Copyright © Grupo 13"
@@ -607,7 +618,7 @@ function instalar12
 #15. Confirmar Inicio de Instalación
 function instalar13
 {
-  echo instalar13
+#  echo instalar13
   confirmarInstalación
   CONFIRMA=$?
   if [ $CONFIRMA -eq 0 ] ; then
@@ -622,13 +633,10 @@ function instalar13
 #16. Instalación
 function instalar14
 {
-  echo instalar14
+#  echo instalar14
 
   log "Creando Estructuras de directorio..."
-# $ARRIDIR (Ya estaba creado)
-
-#ACÁ USO: 
-# Las creo y despues notifico su creación
+  log "$ARRIDIR"
 
   obtenerEntrada "RECHDIR"
   crearDirectorio "$RECHDIR"
@@ -719,23 +727,33 @@ function instalar14
 
 # Mover los archivos maestros al directorio MAEDIR mostrando el siguiente mensaje
   log "Instalando Archivos Maestros..."
-  cp ${PATHACTUAL}/*.mae "$MAEDIR"
+  cantidadArchivos=`ls -1 *.mae 2>/dev/null | wc -l`
+  if [ $cantidadArchivos != 0 ]; then 
+    cp ${PATHACTUAL}/*.mae "$MAEDIR"
+  fi 
 
 # Mover los ejecutables y funciones al directorio BINDIR mostrando el siguiente mensaje
   log "Instalando Programas y Funciones..."
-  cp ${PATHACTUAL}/*.sh $BINDIR
-  cp ${PATHACTUAL}/*.pl $BINDIR
+  cantidadArchivos=`ls -1 *.sh 2>/dev/null | wc -l`
+  if [ $cantidadArchivos != 0 ]; then 
+    cp ${PATHACTUAL}/*.sh $BINDIR
+  fi
+
+  cantidadArchivos=`ls -1 *.pl 2>/dev/null | wc -l`
+  if [ $cantidadArchivos != 0 ]; then 
+    cp ${PATHACTUAL}/*.pl $BINDIR
+  fi
 
 # Actualizar el archivo de configuración mostrando el siguiente mensaje
-  guardarEstadoInstalacion "P14"
   log "Actualizando la configuración del sistema..."
+  guardarEstadoInstalacion "P14"
   instalar15
 }
 
 #17. Borrar archivos temporarios, si se hubiesen generado
 function instalar15
 {
-  echo instalar15
+#  echo instalar15
   #COMPLETAR ¿Se crearon archivos temporarios? --> Borrarlos
   #Borrar TODo lo que haya en al carpeta "instaladora"
   guardarEstadoInstalacion "P15"
@@ -844,7 +862,7 @@ function guardarEntrada  # $1 es el tipo de valor, $2 es el nombre de la variabl
   NUEVAENTRADA="$DIR=$3=$(whoami)=$(date)"
   sed -e "${LINEA}s#.*#${NUEVAENTRADA}#" $ARCHCONF > "${ARCHCONF}_tmp"  # El delimitador del sed es el "#" porque en la ruta se usan barras invertidas
   mv "${ARCHCONF}_tmp" "$ARCHCONF"
-  log "El valor $3 fue guardado"
+  #log "El valor $3 fue guardado"
 }
 
 function obtenerEntrada	# Obtengo el valor de la entrada especificada en $1
@@ -895,7 +913,7 @@ function crearDirectorio	# Crea el directorio de la ruta $1
   if [ ! -d "$1" ]; then
     mkdir $1
     if [ ! -d "$1" ]; then
-#      log "Error al crear el directorio <$1>"
+      log "Error al crear el directorio <$1>"
       return 1
     else
 #      log "Directorio <$1> creado."
@@ -984,14 +1002,15 @@ echo ----------------------------------------------
 ## Inicio del programa ##
 #########################
 clear
+crearDirectorioConfig		# Creo el directorio de configuración, donde se guarda el archivo de configuración y el log de instalación
 inicioArchivoLog $LOGINST	# Verifico que se encuentre el archivo de log para el instalarT
 chequeoArchivoConfig $ARCHCONF	# Verifico que se encuentre el archivo de configuración
 cargarEstado $ARCHCONF		# Cargo el estado a partir del archivo de configuración
 ESTADO=$?
-mostrarVariables
+#mostrarVariables
 instalarEstado $ESTADO		# Instalo a partir del estado que devolvió el CargarEstado en "$?"
 
-echo "Chau! =D"
+#echo "¡Chau! =D"
 exit 0
 
 ######################

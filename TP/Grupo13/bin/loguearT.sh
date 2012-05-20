@@ -8,9 +8,10 @@
 #Ayuda
 USAGE="USAGE: loguearT command [message_type] message\
        Example: loguearT instalar I INFO: Instalando variables de entorno"
-       
-source global.sh
-       
+
+if [ "$1" != "instalar" ] ; then
+  source global.sh      
+fi
 
 #chequea y trunca si es necesario el archivo en caso de que llegue al tam maximo.
 truncate() {
