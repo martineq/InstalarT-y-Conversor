@@ -74,7 +74,7 @@ if [ -z $LOGDIR ] ; then
 fi
 
 # Chequea que la variable logdir sea un directorio valido (salvo en el caso de la instalacion)
-if [ ! -d "$LOGDIR" ] && [ ! $COMMAND == "instalar" ] ; then
+if [ ! -d "$LOGDIR" ] && [ ! $1 == "instalar" ] ; then
 	echo "No existe el directorio destino de los logs"
 	exit 1
 fi
@@ -85,24 +85,30 @@ if [ -z $LOGEXT ] ; then
 fi
 
 # El tam max del log debe ser definido
-if [ -z $LOGSIZE ] && [ ! $COMMAND == "instalar" ] ; then
+if [ -z $LOGSIZE ] && [ ! $1 == "instalar" ] ; then
    echo "No esta definido el tamanio de log [$LOGSIZE]"
    exit 1
 fi 
 
 
 # En el caso de instalar emplea el directorio pasado en el parametro $4
-if [ "$COMMAND" == "instalar" ] ; then
-   echo "No existe el directorio [$LOGDIR], se emplea directorio default"
+if [ "$1" == "instalar" ] ; then
+   # No hago el echo, porque sino me sale cada vez que lo llamo
+   # echo "Para el comando 'instalar' se emplea la ruta de archivo de log $4"
    main "$1" "$2" "$3" "$4"
 fi
 
 #Tiene que tener tres parametros obligatoriamente.
 if [ $# \< 3 ] || [ $# \> 3 ]; then
+  if [ "$1" != "instalar" ] ; then
     echo $USAGE
     exit 2
+  fi
 fi
 
-main "$1" "$2" "$3"
+if [ "$1" != "instalar" ] ; then
+  main "$1" "$2" "$3"
+fi
+
 exit 0
 
