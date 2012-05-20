@@ -8,6 +8,9 @@
 #Ayuda
 USAGE="USAGE: loguearT command [message_type] message\
        Example: loguearT instalar I INFO: Instalando variables de entorno"
+       
+source global.sh
+       
 
 #chequea y trunca si es necesario el archivo en caso de que llegue al tam maximo.
 truncate() {
@@ -58,7 +61,8 @@ main() {
                 #Trunco el archivo en caso de que sea mas grande que lo permitido.
                 truncate
                 #Escribo en el log.
-		echo "$DATE-$USER-$COMMAND-$MSGTYPE-$MSG."
+		# Debug> 
+		#echo "$DATE-$USER-$COMMAND-$MSGTYPE-$MSG."
 		#echo "$LOGDIR/$COMMAND.$LOGEXT"
                 echo "$DATE-$USER-$COMMAND-$MSGTYPE-$MSG." >> "$LOGDIR/$COMMAND.$LOGEXT";;
     esac
