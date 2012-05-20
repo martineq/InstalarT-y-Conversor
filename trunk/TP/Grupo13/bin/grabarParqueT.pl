@@ -8,25 +8,29 @@
 #Parametros: -
 # ------------------------------------------------------------------------------------------------
 #
+################################################################################
+#
+#
+#
+#
+#
 
-#constantes definidas en el archivo de configuracion(las uso aca por cuestiones de desarrollo rapido)...
-$comandoLog 			= "Grupo13/bin/loguearT";
-$comando_grabarParque 	= "GrabarParqueT";
-$dir_archivosProcesar 	= "/inst_recibidas";
+################################################################################
+#defino aca las constantes que estan en instalarT.conf (hago asi por cuestiones de desarrollo rapido)...
+$grupo                  = "/home/ariel/ssoo1c-2012/TP/Grupo13";
+$ejecutable_loguearT	= $grupo."/bin/loguearT.sh";
+$nombre_grabarParqueT 	= "GrabarParqueT.pl";
+$dir_inst_recibidas 	= $grupo."/inst_recibidas";
+$dir_inst_rechazadas 	= $grupo."/inst_rechazadas";
+$dir_inst_procesadas 	= $grupo."/inst_procesadas";
+$dir_inst_ordenadas 	= $grupo."/inst_ordenadas";
 
-
-sub inicializarLogCon{
-		$cant_archivosProcesar_ = @_[0];
-		$grabarLog = `$comandoLog $comando_grabarParque I \"Inicio de GrabarparqueT: \<$cant_archivosProcesar_\>\"`;
+if ( !(-d $grupo) ){
+    print "ERROR SEVERO: corregir la variable \$grupo en grabarParqueT.pl\n";
+    exit 2;
 }
 
-sub procesarArchivoResivido{
-	$archivo_recibido = @_[0];
-	$grabarLog = `$comandoLog $comando_grabarParque I \"Archivo a Procesar: \<$archivo_recibido\>\"`;
-	
-	#TODO: proceso del archivo recibido... 
-}
-
+################################################################################
 sub ambienteInicializado{
 	$inicializado = "si";
 	#TODO: tiene que preguntar en el archivo de configuracion generado por el comando instalar, eso creo.
@@ -34,6 +38,7 @@ sub ambienteInicializado{
 	return ($inicializado);
 }
 
+################################################################################
 sub grabarParqueEstaCorriendo{
 	$estaCorriendo = "no";
 	#TODO: tiene que preguntar en el archivo de configuracion generado por el comando instalar, eso creo.
@@ -41,26 +46,80 @@ sub grabarParqueEstaCorriendo{
 	return ($estaCorriendo);
 }
 
-sub principal(){
-	
-	($estado_inicializacionAmbiente, $estado_corriendoGrabarParque) = sePuedeIniciar();
+################################################################################
+sub getNombresArchivosProcesar{
+    $dir_archivosProcesar_ = @_[0];
+    
+    @nombres_ArhivosProcesar;
+    
+    opendir ( DIR, $dir_archivosProcesar_ ) || die "Error in opening dir $dir_archivosProcesar_\n";
+    
+    while( $filename = readdir(DIR))
+    {
+        #si no tiene permiso de lectura se lo doy
+        if ( !(-r $filename) ){
+            $darPermiso_ = `chmod +x $dir_archivosProcesar_"/"$filename`;
+        }
+        # ignorar . y .., y tambien los archivos svn:
+        if (!($filename eq "." || $filename eq "..") && !($filename eq ".svn"))
+        {
+            push(@nombres_ArhivosProcesar, $filename);
+        }
+    }    
+    closedir(DIR);    
+    
+    return ( @nombres_ArhivosProcesar );
+}
+
+################################################################################
+sub inicializarLogCon{
+		$cant_archivosProcesar_ = @_[0];
+		
+		#le doy permiso de ejecucion al comando LoguearT si es que no lo tiene
+        if (!(-x $ejecutable_loguearT)){
+            print $ejecutable_loguearT.": NO es ejecutable\n";
+            $darPermiso = `chmod +x $ejecutable_loguearT`;
+        }		
+        
+		$grabarLog = `$ejecutable_loguearT $nombre_grabarParqueT I \"Inicio de GrabarparqueT: \<$cant_archivosProcesar_\>\"`;
+		#print "Log: ";
+		#print $grabarLog;
+}
+
+################################################################################
+sub procesarArchivoRecibido{
+	$nombre_archivo_recibido = @_[0];
+	$grabarLog = `$ejecutable_loguearT $nombre_grabarParqueT I \"Archivo a Procesar: \<$nombre_archivo_recibido\>\"`;
+    #print "Log: ";
+    #print $grabarLog;
+	#TODO: proceso del archivo recibido... 
+    $archivo_procesar = $dir_archivosProcesar_."/".$nombre_archivo_recibido;
+    print $archivo_procesar."\n";
+
+}
+
+################################################################################
+sub principal{
 	
 	$esAmbienteInit = ( ambienteInicializado() eq "si" );
 	$corriendoGrabarParque = ( grabarParqueEstaCorriendo() eq "no" );
 	
 	#verifica si se puede iniciar la ejecucion del comando...
-	if ( $esAmbienteInit && $corriendoGrabarParque ){
-		@nombres_ArhivosProcesar = getNombresArchivosProcesar($dir_archivosProcesar);
+	if ( $esAmbienteInit && $corriendoGrabarParque )
+	{
+		@nombres_ArhivosProcesar = getNombresArchivosProcesar($dir_inst_recibidas);
 		$cant_archivosProcesar = @nombres_ArhivosProcesar;
 		inicializarLogCon($cant_archivosProcesar);
+		
 		#procesa los archivos detectados en el directorio de archivos a procesar
-		foreach (@flist){
+		print "Archivos a procesar...\n";
+		foreach (@nombres_ArhivosProcesar){
 			procesarArchivoRecibido($_);
 		}
 		
 		#TODO: seguir en base a  "Pasos sugeridos" de la pagina 28 del enunciado, y mas 
 		#especificamente desde el punto "4.Verificar que no sea un archivo duplicado"
-		#...
+		#... 
 	
 	}else{
 		if ( !$esAmbienteInit ){
@@ -74,4 +133,8 @@ sub principal(){
 	}
 }
 
+
+principal();
+print "En proceso de construccion...\n";
+exit 0;	
 #...

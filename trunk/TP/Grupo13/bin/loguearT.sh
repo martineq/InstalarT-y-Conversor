@@ -59,7 +59,7 @@ main() {
                 truncate
                 #Escribo en el log.
 		echo "$DATE-$USER-$COMMAND-$MSGTYPE-$MSG."
-		echo "$LOGDIR/$COMMAND.$LOGEXT"
+		#echo "$LOGDIR/$COMMAND.$LOGEXT"
                 echo "$DATE-$USER-$COMMAND-$MSGTYPE-$MSG." >> "$LOGDIR/$COMMAND.$LOGEXT";;
     esac
 }
