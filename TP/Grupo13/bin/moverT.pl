@@ -49,7 +49,7 @@ sub  separar_enDir_yArchivo{
 		return (@return);
 }
 
-# FUNCION PARA SEPARAR EL PATH PASADO POR PARAMETRO EN DIRECTORIO Y EN ARCHIVO
+# FUNCION PARA VERIFICAR LA EXISTENCIA DE UN ARCHIVO 
 # parametro1: archivo para verificar su existencia en parametro2
 # parametro2: directorio destino en el cual comparar 
 # return devuelve si o no, dependiendo si existe argumento1 en argumento2
