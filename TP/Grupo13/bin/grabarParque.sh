@@ -26,6 +26,38 @@ chequeaVariables(){
 
 }
 
+validacionCabecera(){
+
+	echo "Validando linea: $LINEA"
+	QTY_FIELDS=`echo $LINEA | grep , -o | wc -l`
+	if [ $QTY_FIELDS -gt 5 ] ; then
+	  # Campo mal formado, se envia a rechazados
+	  echo 1
+	fi
+	
+	CUSTID=`echo $LINEA | cut -d "," -f 1`
+	OPDATE=`echo $LINEA | cut -d "," -f 2`
+	CPID=`echo $LINEA | cut -d "," -f 3`
+	CSID=`echo $LINEA | cut -d "," -f 4`
+	CSR=`echo $LINEA | cut -d "," -f 5`
+	ITEMID=`echo $LINEA | cut -d "," -f 6`
+	
+	if [ ! -z $CUSTID ] && [ ! -z $OPDATE ] && [ ! -z $CPID ] \
+	  && [ ! -z $CSID ] && [ ! -z $CSR ] && [ ! -z $ITEMID ] ; then
+	  # Todos NO vacios
+	  echo 0
+	else
+	  echo 1
+	fi
+	
+	echo 0
+	
+}
+
+
+
+
+
 chequeaArchivosMaestros(){
 
   CLIENTES=$MAEDIR/cli.mae
@@ -410,7 +442,7 @@ chequeaProceso(){
 	# TODO REMPLAZO
 	for (( i=0;i<$QTYLINEAS;i++)); do 
 	  FILENAME=`echo $ARCHIVO | sed 's/.*\///'`
-	  echo "Guardando en archivo $INSTORD/$FILENAME"
+	  #echo "Guardando en archivo $INSTORD/$FILENAME"
 	  echo ${LINEA_ORD[i]} >> "$INSTORD/$FILENAME"
 	done
 	
@@ -418,7 +450,31 @@ chequeaProceso(){
 	perl moverT.pl "$INSTREC/$FILENAME" "$INSTPROC/" $COMANDO
   done
   
-  # Comienzo el procesamiento de los archivos
+  # Comienzo el procesamiento de los archivos ordenados
+  
+  #Lee todos los archivos del directorio de arribos uno por uno
+  ARCH_ORD="$INSTORD/*"
+  QTY_ARCH=`ls $INSTORD | wc -l`
+  bash loguearT.sh "$COMANDO" "I" "Inicio de $COMANDO, cantidad de archivos ordenados a procesar: $QTY_ARCH"
+
+  for ARCHIVO in $ARCH_ORD; 
+    do
+	
+	for LINEA in `cat $ARCHIVO`
+	  do
+	
+	  # Validaciones
+	  validacionCabecera
+	  #validacionDetalle
+	  #validacionCampo
+	  
+	done
+	
+	
+	
+  done
+  
+  
   
 	
 	
