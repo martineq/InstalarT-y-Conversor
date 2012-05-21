@@ -268,6 +268,7 @@ chequeaProceso(){
 	  CSR=`echo $LINEA | cut -d "," -f 5`
 	  ITEMID=`echo $LINEA | cut -d "," -f 6`
 		
+	  echo "Procesando linea: $LINEA"
 	  # Pre chequeo si estan todos los campos y rechazo anticipadamente
 	  # Tambien valido formatos TODO
 	  # ...
@@ -283,6 +284,7 @@ chequeaProceso(){
 
 	  for (( i=0;i<$QTYLINEAS;i++)); do  
 	    echo $i
+		echo "${LINEA_ORD["$QTYLINEAS-1"]}"
 		AUX_CUSTID=`echo ${LINEA_ORD[$QTYLINEAS-1]} | cut -d "," -f 1`
 		AUX_OPDATE=`echo ${LINEA_ORD[$QTYLINEAS-1]} | cut -d "," -f 2`
 		AUX_CPID=`echo ${LINEA_ORD[$QTYLINEAS-1]} | cut -d "," -f 3`
@@ -295,7 +297,7 @@ chequeaProceso(){
 		  LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
 		  echo "cust id iguales"
 		  #for j in {$QTYLINEAS..$i} 
-		  for (( j=$QTYLINEAS;j<$i;j--)); do
+		  for (( j=$QTYLINEAS;j>$i;j--)); do
 			echo "${j}"
 			echo "${LINEA_ORD[$j]}"
 			LINEA_ORD[$j]=`echo ${LINEA_ORD[$j+1]}`			  
@@ -317,7 +319,7 @@ chequeaProceso(){
 		    LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
 			#for j in {$QTYLINEAS..$i} 
 			#  do
-			for (( j=$QTYLINEAS;j<$i;j--)); do
+			for (( j=$QTYLINEAS;j>$i;j--)); do
 			  LINEA_ORD[$j]=`echo ${LINEA_ORD[$j+1]}`
 			done
 			LINEA_ORD[$i]=`echo $LINEA_AUX`
@@ -333,7 +335,7 @@ chequeaProceso(){
 		    LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
 			#for j in {$QTYLINEAS..$i} 
 			#  do
-			for (( j=$QTYLINEAS;j<$i;j--)); do
+			for (( j=$QTYLINEAS;j>$i;j--)); do
 			  LINEA_ORD[$j]=`echo ${LINEA_ORD[$j+1]}`			  
 			done
 			LINEA_ORD[$i]=`echo $LINEA_AUX`
