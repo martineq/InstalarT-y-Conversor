@@ -6,11 +6,11 @@
 #
 
 source global.sh
-COMANDO = "grabarParque"
+COMANDO="grabarParque"
 
-INSTREC = "$GRUPO/inst_recibidas"
-INSTORD = "$GRUPO/inst_ordenadas"
-INSTPROC = "$GRUPO/inst_procesadas"
+INSTREC="$GRUPO/inst_recibidas"
+INSTORD="$GRUPO/inst_ordenadas"
+INSTPROC="$GRUPO/inst_procesadas"
 
 chequeaVariables(){
 
@@ -272,13 +272,13 @@ chequeaProceso(){
 	  # Tambien valido formatos TODO
 	  # ...
 	  
-	  if [ $QTYLINEAS == 0] ; then
+	  if [ $QTYLINEAS == 0 ] ; then
 	    LINEA_ORD[$QTYLINEAS]="$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"
-		let QTYLINEAS = $QTYLINEAS+1
+		let QTYLINEAS=$QTYLINEAS+1
 		continue
 	  fi
 
-	  for i {0..$QTYLINEAS}
+	  for i in {0..$QTYLINEAS}
         do  
 		AUX_CUSTID=`echo $LINEA_ORD[$QTYLINEAS-1] | cut -d "," -f 1`
 		AUX_OPDATE=`echo $LINEA_ORD[$QTYLINEAS-1] | cut -d "," -f 2`
@@ -286,60 +286,71 @@ chequeaProceso(){
 		AUX_CSID=`echo $LINEA_ORD[$QTYLINEAS-1] | cut -d "," -f 4`
 		  
 		# Primero comparo por CUST_ID
-		if [ $AUX_CUSTID > $CUSTID] ; then
+		if [ $AUX_CUSTID -gt $CUSTID ] ; then
 		  LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID"
-		  for j {$QTYLINEAS..$i} 
+		  
+
+		for (( i=0;i<$QTYLINEAS;i++)); do
+    		  echo $i
+		done 
+
+		  for j in {$QTYLINEAS..$i} 
 		    do
-			$LINEA_ORD[$j]=$LINEA_ORD[$j+1]			  
+			echo "${j}"
+			echo "${LINEA_ORD[${j}]}"
+			$LINEA_ORD["$j"]=$LINEA_ORD["$j+1"]			  
 		  done
 		  $LINEA_ORD[$i]=$LINEA_AUX
-		  let QTYLINEAS = $QTYLINEAS+1
+		  let QTYLINEAS=$QTYLINEAS+1
 		  continue
 		fi
 		 
 		# Si son iguales comparo por fecha
-		#if [ $AUX_CUSTID == $CUSTID] ; then
+		#if [ $AUX_CUSTID == $CUSTID ] ; then
 		  		  #TODO
 		#fi
 		  
 		# Si son iguales comparo por Commercial Plan ID (CPID)
-		if [ $AUX_OPDATE == $OPDATE] ; then
-		  if [ $AUX_CPID > $CPID] ; then
+		if [ $AUX_OPDATE == $OPDATE ] ; then
+		  if [ $AUX_CPID > $CPID ] ; then
 		    LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID"
-			for j {$QTYLINEAS..$i} 
+			for j in {$QTYLINEAS..$i} 
 			  do
 			  $LINEA_ORD[$j]=$LINEA_ORD[$j+1]			  
 			done
 			$LINEA_ORD[$i]=$LINEA_AUX
-			let QTYLINEAS = $QTYLINEAS+1
+			let QTYLINEAS=$QTYLINEAS+1
 			continue
 		  fi  
 		fi
 		  
 		# Si son iguales comparo por Class Service ID (CSID) 
-		if [ $AUX_CPID == $CPID] ; then
-		  if [ $AUX_CSID > $CSID] ; then
+		if [ $AUX_CPID == $CPID ] ; then
+		  if [ $AUX_CSID > $CSID ] ; then
 		    LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID"
-			for j {$QTYLINEAS..$i} 
+			for j in {$QTYLINEAS..$i} 
 			  do
 			  $LINEA_ORD[$j]=$LINEA_ORD[$j+1]			  
 			done
 			$LINEA_ORD[$i]=$LINEA_AUX
-			let QTYLINEAS = $QTYLINEAS+1
+			let QTYLINEAS=$QTYLINEAS+1
 			continue
 		  fi  
 		fi
 		
 	  done
-	  let QTYLINEAS = $QTYLINEAS+1	
+	  let QTYLINEAS=$QTYLINEAS+1	
 	done
 	
-	let QTYOK = $QTYOK+1
+	let QTYOK=$QTYOK+1
 	
 	# Grabar archivo ordenado en inst_ordenadas, si existe reemplazarlo
 	#TODO REMPLAZO
-	for i {0..$QTYLINEAS}
+	for i in {0..$QTYLINEAS}
 	  do
+	  echo $INSTORD
+	  echo $ARCHIVO
+
 	  echo $LINEA_ORD[$i] >> $INSTORD/$ARCHIVO
 	done
 	
