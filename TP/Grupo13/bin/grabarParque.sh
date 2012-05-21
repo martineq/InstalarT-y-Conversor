@@ -278,7 +278,7 @@ chequeaProceso(){
 		echo "DATA A GRABARLE: $CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"
 	    LINEA_ORD[$QTYLINEAS]=`echo "$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"`
 		echo "grabado : ${LINEA_ORD[$QTY_LINEAS]}"	
-	let QTYLINEAS=$QTYLINEAS+1
+	    let QTYLINEAS=$QTYLINEAS+1
 		continue
 	  fi
 
@@ -298,8 +298,8 @@ chequeaProceso(){
 		# Primero comparo por CUST_ID
 		if [ $AUX_CUSTID -gt $CUSTID ] ; then
 		  LINEA_AUX="$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"
-		echo "linea aux aca es: $LINEA_AUX"  
-		echo "cust id leido menor"
+		  echo "linea aux aca es: $LINEA_AUX"  
+		  echo "cust id leido menor"
 		  #for j in {$QTYLINEAS..$i} 
 		  for (( j=$QTYLINEAS;j>$i;j--)); do
 			echo "en for j es: $j"	
@@ -312,14 +312,26 @@ chequeaProceso(){
 		  let i=$i+1
 		  continue
 		fi
-		 
+		
+		if [ $AUX_CUSTID -lt $CUSTID ] ; then
+		  # Si es mayor debo avanzar salvo que sea el ultimo registro
+		  let j=$i+1
+		  if [ $j -eq $QTYLINES ] ; then
+			LINEA_ORD[$j]=`echo $LINEA_AUX`
+			let QTYLINEAS=$QTYLINEAS+1
+			let i=$i+1
+		    continue
+		  fi
+		  continue
+		fi
+				 
 		# Si son iguales comparo por fecha
 		#if [ $AUX_CUSTID -eq $CUSTID ] ; then
 		  		  #TODO
 		#fi
 		  
 		# Si son iguales comparo por Commercial Plan ID (CPID)
-		if [ $AUX_OPDATE -eq $OPDATE ] ; then
+		#if [ $AUX_OPDATE -eq $OPDATE ] ; then
 		echo "dates iguales"
 		  if [ $AUX_CPID -gt $CPID ] ; then
 		    LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
@@ -335,11 +347,23 @@ chequeaProceso(){
 			let i=$i+1
 			continue
 		  fi  
-		fi
+		  
+		  if [ $AUX_CPID -lt $CPID ] ; then
+		    # Si es mayor debo avanzar salvo que sea el ultimo registro
+		    let j=$i+1
+		    if [ $j -eq $QTYLINES ] ; then
+			  LINEA_ORD[$j]=`echo $LINEA_AUX`
+			  let QTYLINEAS=$QTYLINEAS+1
+			  let i=$i+1
+		      continue
+		    fi
+		    continue
+		  fi
+		#fi
 		  
 		# Si son iguales comparo por Class Service ID (CSID) 
 		if [ $AUX_CPID -eq $CPID ] ; then
-		echo "cpid iguales"
+		  echo "cpid iguales"
 		  if [ $AUX_CSID -gt $CSID ] ; then
 		    LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
 			#for j in {$QTYLINEAS..$i} 
@@ -353,7 +377,31 @@ chequeaProceso(){
 			let QTYLINEAS=$QTYLINEAS+1
 			let i=$i+1
 			continue
-		  fi  
+		  fi
+		  
+		  if [ $AUX_CSID -lt $CSID ] ; then
+		    # Si es mayor debo avanzar salvo que sea el ultimo registro
+		    let j=$i+1
+		    if [ $j -eq $QTYLINES ] ; then
+			  LINEA_ORD[$j]=`echo $LINEA_AUX`
+			  let QTYLINEAS=$QTYLINEAS+1
+			  let i=$i+1
+		      continue
+		    fi
+		    continue
+		  fi
+		  
+		  #Si no pude diferenciar por CSID debo ingresar de todos modos el valor
+			LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
+			for (( j=$QTYLINEAS;j>$i;j--)); do
+			  LINEA_ORD[$j]=`echo ${LINEA_ORD[$j-1]}`
+			  echo "Linea $j es ${LINEA_ORD[$j]}"				  
+			done
+			LINEA_ORD[$i]=`echo $LINEA_AUX`
+			echo "Linea $i es: ${LINEA_ORD[i]}"
+			let QTYLINEAS=$QTYLINEAS+1
+			let i=$i+1
+			continue
 		fi
 		
 	  done
