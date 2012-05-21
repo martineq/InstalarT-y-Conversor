@@ -287,11 +287,13 @@ chequeaProceso(){
 		AUX_OPDATE=`echo ${LINEA_ORD[$QTYLINEAS-1]} | cut -d "," -f 2`
 		AUX_CPID=`echo ${LINEA_ORD[$QTYLINEAS-1]} | cut -d "," -f 3`
 		AUX_CSID=`echo ${LINEA_ORD[$QTYLINEAS-1]} | cut -d "," -f 4`
+		
+		echo "Linea auxiliar: $AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
 		  
 		# Primero comparo por CUST_ID
 		if [ $AUX_CUSTID -gt $CUSTID ] ; then
 		  LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
-		  
+		  echo "cust id iguales"
 		  #for j in {$QTYLINEAS..$i} 
 		  for (( j=$QTYLINEAS;j<$i;j--)); do
 			echo "${j}"
@@ -310,6 +312,7 @@ chequeaProceso(){
 		  
 		# Si son iguales comparo por Commercial Plan ID (CPID)
 		if [ $AUX_OPDATE -eq $OPDATE ] ; then
+		echo "dates iguales"
 		  if [ $AUX_CPID -gt $CPID ] ; then
 		    LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
 			#for j in {$QTYLINEAS..$i} 
@@ -325,6 +328,7 @@ chequeaProceso(){
 		  
 		# Si son iguales comparo por Class Service ID (CSID) 
 		if [ $AUX_CPID -eq $CPID ] ; then
+		echo "cpid iguales"
 		  if [ $AUX_CSID -gt $CSID ] ; then
 		    LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
 			#for j in {$QTYLINEAS..$i} 
