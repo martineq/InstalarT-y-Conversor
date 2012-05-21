@@ -320,7 +320,8 @@ chequeaProceso(){
                   #LINEA_AUX="$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"
 		  if [ $j -eq $QTYLINEAS ] ; then
 			LINEA_ORD[$j]=`echo $LINEA_AUX`
-			echo "Linea $j es: ${LINEA_ORD[i]}"
+			echo "Linea $j es: ${LINEA_ORD[j]}"
+			echo "Linea $i es: ${LINEA_ORD[i]}"
 			let QTYLINEAS=$QTYLINEAS+1
 			let i=$i+1
 		    continue
