@@ -62,9 +62,10 @@ chequeaVariables(){
   && [ "$GRUPO" != "" ] && [ "$ARRIDIR" != "" ] && [ "$RECHDIR" != "" ] \
   && [ "$MAEDIR" != "" ] && [ "$REPODIR" != "" ] && [ "$LOGDIR" != "" ] \
   && [ "$LOGSIZE" != "" ]; then
-    echo 1
-  else
+    # Variables inicializadas correctamente
     echo 0
+  else
+    echo 1
   fi
 
 }
@@ -134,13 +135,6 @@ chequeaDirectorios(){
 
 chequearInstalacion(){
 
-  # Si alguna variable no esta definida error en la instalación
-  if [ `chequeaVariables` -eq 0 ] ; then
-    #echo "Instalacion no finalizada"
-    echo 1
-    return
-  fi
-  
   # Chequeo el log de instalarT en busca de "Estado de la instalacion: LISTA"
   #TODO> mirarT
   echo 0
@@ -183,6 +177,12 @@ chequeaProceso(){
   agregarVariablePath
   bash loguearT.sh "$COMANDO" "I" "NUeva variable de entorno PATH seteada a: $PATH" 
 
+  
+  if [ `chequeaVariables` -eq 1 ] ; then
+    bash loguearT.sh "$COMANDO" "SE" "Variables no definidas durante la instalacion o no disponibles"
+    echo "Error Severo: Variables no definidas durante la instalacion o no disponibles"
+    exit 1
+  fi
 
   if [ `chequearInstalacion` -eq 1 ] ; then
     bash loguearT.sh "$COMANDO" "SE" "Variables no definidas durante la instalacion o no disponibles"
