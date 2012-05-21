@@ -296,9 +296,9 @@ chequeaProceso(){
 		  for (( j=$QTYLINEAS;j<$i;j--)); do
 			echo "${j}"
 			echo "${LINEA_ORD[${j}]}"
-			${LINEA_ORD[$j]}=${LINEA_ORD[$j+1]}			  
+			${LINEA_ORD[$j]}=`echo ${LINEA_ORD[$j+1]}`			  
 		  done
-		  ${LINEA_ORD[$i]}=$LINEA_AUX
+		  ${LINEA_ORD[$i]}=`echo $LINEA_AUX`
 		  let QTYLINEAS=$QTYLINEAS+1
 		  continue
 		fi
@@ -315,9 +315,9 @@ chequeaProceso(){
 			#for j in {$QTYLINEAS..$i} 
 			#  do
 			for (( j=$QTYLINEAS;j<$i;j--)); do
-			  ${LINEA_ORD[$j]}=${LINEA_ORD[$j+1]}			  
+			  ${LINEA_ORD[$j]}=`echo ${LINEA_ORD[$j+1]}`
 			done
-			${LINEA_ORD[$i]}=$LINEA_AUX
+			${LINEA_ORD[$i]}=`echo $LINEA_AUX`
 			let QTYLINEAS=$QTYLINEAS+1
 			continue
 		  fi  
@@ -330,9 +330,9 @@ chequeaProceso(){
 			#for j in {$QTYLINEAS..$i} 
 			#  do
 			for (( j=$QTYLINEAS;j<$i;j--)); do
-			  ${LINEA_ORD[$j]}=${LINEA_ORD[$j+1]}			  
+			  ${LINEA_ORD[$j]}=`echo ${LINEA_ORD[$j+1]}`			  
 			done
-			${LINEA_ORD[$i]}=$LINEA_AUX
+			${LINEA_ORD[$i]}=`echo $LINEA_AUX`
 			let QTYLINEAS=$QTYLINEAS+1
 			continue
 		  fi  
