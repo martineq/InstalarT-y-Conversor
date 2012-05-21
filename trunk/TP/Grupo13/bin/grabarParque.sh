@@ -273,17 +273,17 @@ chequeaProceso(){
 	  # ...
 	  
 	  if [ $QTYLINEAS == 0 ] ; then
-	    LINEA_ORD[$QTYLINEAS]="$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"
+	    ${LINEA_ORD[$QTYLINEAS]}="$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"
 		let QTYLINEAS=$QTYLINEAS+1
 		continue
 	  fi
 
 	  for (( i=0;i<$QTYLINEAS;i++)); do  
 	    echo $i
-		AUX_CUSTID=`echo $LINEA_ORD[$QTYLINEAS-1] | cut -d "," -f 1`
-		AUX_OPDATE=`echo $LINEA_ORD[$QTYLINEAS-1] | cut -d "," -f 2`
-		AUX_CPID=`echo $LINEA_ORD[$QTYLINEAS-1] | cut -d "," -f 3`
-		AUX_CSID=`echo $LINEA_ORD[$QTYLINEAS-1] | cut -d "," -f 4`
+		AUX_CUSTID=`echo ${LINEA_ORD[$QTYLINEAS-1]} | cut -d "," -f 1`
+		AUX_OPDATE=`echo ${LINEA_ORD[$QTYLINEAS-1]} | cut -d "," -f 2`
+		AUX_CPID=`echo ${LINEA_ORD[$QTYLINEAS-1]} | cut -d "," -f 3`
+		AUX_CSID=`echo ${LINEA_ORD[$QTYLINEAS-1]} | cut -d "," -f 4`
 		  
 		# Primero comparo por CUST_ID
 		if [ $AUX_CUSTID -gt $CUSTID ] ; then
@@ -293,9 +293,9 @@ chequeaProceso(){
 		  for (( j=$QTYLINEAS;j<$i;j--)); do
 			echo "${j}"
 			echo "${LINEA_ORD[${j}]}"
-			$LINEA_ORD["$j"]=$LINEA_ORD["$j+1"]			  
+			${LINEA_ORD[$j]}=${LINEA_ORD[$j+1]}			  
 		  done
-		  $LINEA_ORD[$i]=$LINEA_AUX
+		  ${LINEA_ORD[$i]}=$LINEA_AUX
 		  let QTYLINEAS=$QTYLINEAS+1
 		  continue
 		fi
@@ -312,9 +312,9 @@ chequeaProceso(){
 			#for j in {$QTYLINEAS..$i} 
 			#  do
 			for (( j=$QTYLINEAS;j<$i;j--)); do
-			  $LINEA_ORD[$j]=$LINEA_ORD[$j+1]			  
+			  ${LINEA_ORD[$j]}=${LINEA_ORD[$j+1]}			  
 			done
-			$LINEA_ORD[$i]=$LINEA_AUX
+			${LINEA_ORD[$i]}=$LINEA_AUX
 			let QTYLINEAS=$QTYLINEAS+1
 			continue
 		  fi  
@@ -327,9 +327,9 @@ chequeaProceso(){
 			#for j in {$QTYLINEAS..$i} 
 			#  do
 			for (( j=$QTYLINEAS;j<$i;j--)); do
-			  $LINEA_ORD[$j]=$LINEA_ORD[$j+1]			  
+			  ${LINEA_ORD[$j]}=${LINEA_ORD[$j+1]}			  
 			done
-			$LINEA_ORD[$i]=$LINEA_AUX
+			${LINEA_ORD[$i]}=$LINEA_AUX
 			let QTYLINEAS=$QTYLINEAS+1
 			continue
 		  fi  
@@ -349,7 +349,7 @@ chequeaProceso(){
 	  echo $INSTORD
 	  echo $ARCHIVO
 
-	  echo $LINEA_ORD[$i] >> $INSTORD/$ARCHIVO
+	  echo ${LINEA_ORD[$i]} >> $INSTORD/$ARCHIVO
 	done
 	
 	# Muevo para evitar el reprocesamiento
