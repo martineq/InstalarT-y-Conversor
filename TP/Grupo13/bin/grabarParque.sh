@@ -12,6 +12,8 @@ INSTREC="$GRUPO/inst_recibidas"
 INSTORD="$GRUPO/inst_ordenadas"
 INSTPROC="$GRUPO/inst_procesadas"
 LINEA_ORD=()
+
+
 chequeaVariables(){
 
   if [ "$LOGEXT" != "" ] && [ "$BINDIR" != "" ] && [ "$DATASIZE" != "" ] \
@@ -26,7 +28,7 @@ chequeaVariables(){
 
 }
 
-validacionCabecera(){
+validacionCabeceraDetalle(){
 
 	echo "Validando linea: $LINEA"
 	QTY_FIELDS=`echo $LINEA | grep , -o | wc -l`
@@ -460,13 +462,26 @@ chequeaProceso(){
   for ARCHIVO in $ARCH_ORD; 
     do
 	
+	FILENAME=`echo $ARCHIVO | sed 's/.*\///'`
+	
 	for LINEA in `cat $ARCHIVO`
 	  do
 	
-	  # Validaciones
-	  validacionCabecera
-	  #validacionDetalle
+	  # Validacion Cabecera y Detalle
+	  if [ `validacionCabeceraDetalle` -eq 1 ]
+		# Error en la validacion de la cabecera
+		bash loguearT.sh "$COMANDO" "A" "Error en la validacion del archivo $ARCHIVO"
+		perl moverT.pl "$INSTORD/$FILENAME" "$RECHDIR/" "$COMANDO"
+	  fi
+	  
 	  #validacionCampo
+	  #validacionCampo(){
+	  #Valida la existencia del cliente en el archivo maestro
+	  
+	  CLIENTES="$MAEDIR/cli.mae"
+	  CUSTID=`echo $LINEA | cut -d "," -f 1`
+	  #Recorro todas las lineas de clientes que tienen y si lo encuentro da OK, sino no
+	  MAECLI= `echo $LINEA_CLIENTES | sed 's/;.*//' | grep $CUSTID
 	  
 	done
 	
