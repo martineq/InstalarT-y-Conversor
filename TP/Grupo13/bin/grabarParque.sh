@@ -311,7 +311,7 @@ chequeaProceso(){
 		  echo "Linea $i es: ${LINEA_ORD[i]}"
 		  let QTYLINEAS=$QTYLINEAS+1
 		  let i=$i+1
-		  continue
+		  break
 		fi
 		
 		if [ $AUX_CUSTID -lt $CUSTID ] ; then
@@ -324,7 +324,7 @@ chequeaProceso(){
 			echo "Linea $i es: ${LINEA_ORD[i]}"
 			let QTYLINEAS=$QTYLINEAS+1
 			let i=$i+1
-		    continue
+		    break
 		  fi
 		  continue
 		fi
@@ -349,7 +349,7 @@ chequeaProceso(){
 			echo "Linea $i es: ${LINEA_ORD[i]}"
 			let QTYLINEAS=$QTYLINEAS+1
 			let i=$i+1
-			continue
+			break
 		  fi  
 		  
 		  if [ $AUX_CPID -lt $CPID ] ; then
@@ -360,7 +360,7 @@ chequeaProceso(){
 			  echo "Linea $j es: ${LINEA_ORD[i]}"
 			  let QTYLINEAS=$QTYLINEAS+1
 			  let i=$i+1
-		      continue
+		      break
 		    fi
 		    continue
 		  fi
@@ -381,7 +381,7 @@ chequeaProceso(){
 			echo "Linea $i es: ${LINEA_ORD[i]}"
 			let QTYLINEAS=$QTYLINEAS+1
 			let i=$i+1
-			continue
+			break
 		  fi
 		  
 		  if [ $AUX_CSID -lt $CSID ] ; then
@@ -392,12 +392,13 @@ chequeaProceso(){
 			  echo "Linea $j es: ${LINEA_ORD[i]}"
 			  let QTYLINEAS=$QTYLINEAS+1
 			  let i=$i+1
-		      continue
+		      break
 		    fi
 		    continue
 		  fi
 		  
 		  #Si no pude diferenciar por CSID debo ingresar de todos modos el valor
+		  # TODO deberia chequear que no sea el mismo y en ese caso abortarlo
 			LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
 			for (( j=$QTYLINEAS;j>$i;j--)); do
 			  LINEA_ORD[$j]=`echo ${LINEA_ORD[$j-1]}`
@@ -407,7 +408,7 @@ chequeaProceso(){
 			echo "Linea $i es: ${LINEA_ORD[i]}"
 			let QTYLINEAS=$QTYLINEAS+1
 			let i=$i+1
-			continue
+			break
 		fi
 		
 	  done
