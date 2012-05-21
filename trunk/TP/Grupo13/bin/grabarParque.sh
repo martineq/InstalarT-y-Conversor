@@ -284,11 +284,12 @@ chequeaProceso(){
 
 	  for (( i=0;i<$QTYLINEAS;i++)); do  
 	    echo $i
-		echo "${LINEA_ORD["$QTYLINEAS-1"]}"
-		AUX_CUSTID=`echo ${LINEA_ORD[$QTYLINEAS-1]} | cut -d "," -f 1`
-		AUX_OPDATE=`echo ${LINEA_ORD[$QTYLINEAS-1]} | cut -d "," -f 2`
-		AUX_CPID=`echo ${LINEA_ORD[$QTYLINEAS-1]} | cut -d "," -f 3`
-		AUX_CSID=`echo ${LINEA_ORD[$QTYLINEAS-1]} | cut -d "," -f 4`
+		INDEX=$QTYLINEAS-1
+		echo "index es $INDEX"
+		AUX_CUSTID=`echo ${LINEA_ORD[INDEX]} | cut -d "," -f 1`
+		AUX_OPDATE=`echo ${LINEA_ORD[INDEX]} | cut -d "," -f 2`
+		AUX_CPID=`echo ${LINEA_ORD[INDEX]} | cut -d "," -f 3`
+		AUX_CSID=`echo ${LINEA_ORD[INDEX]} | cut -d "," -f 4`
 		
 		echo "Linea auxiliar: $AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
 		  
@@ -324,8 +325,10 @@ chequeaProceso(){
 			#  do
 			for (( j=$QTYLINEAS;j>$i;j--)); do
 			  LINEA_ORD[$j]=`echo ${LINEA_ORD[$j-1]}`
+			  echo "Linea $j es ${LINEA_ORD[$j]}"	
 			done
 			LINEA_ORD[$i]=`echo $LINEA_AUX`
+			echo "Linea $i es: ${LINEA_ORD[i]}"
 			let QTYLINEAS=$QTYLINEAS+1
 			let i=$i+1
 			continue
@@ -340,9 +343,11 @@ chequeaProceso(){
 			#for j in {$QTYLINEAS..$i} 
 			#  do
 			for (( j=$QTYLINEAS;j>$i;j--)); do
-			  LINEA_ORD[$j]=`echo ${LINEA_ORD[$j-1]}`			  
+			  LINEA_ORD[$j]=`echo ${LINEA_ORD[$j-1]}`
+			  echo "Linea $j es ${LINEA_ORD[$j]}"				  
 			done
 			LINEA_ORD[$i]=`echo $LINEA_AUX`
+			echo "Linea $i es: ${LINEA_ORD[i]}"
 			let QTYLINEAS=$QTYLINEAS+1
 			let i=$i+1
 			continue
