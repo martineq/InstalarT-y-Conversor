@@ -278,8 +278,8 @@ chequeaProceso(){
 		continue
 	  fi
 
-	  for i in {0..$QTYLINEAS}
-        do  
+	  for (( i=0;i<$QTYLINEAS;i++)); do  
+	    echo $i
 		AUX_CUSTID=`echo $LINEA_ORD[$QTYLINEAS-1] | cut -d "," -f 1`
 		AUX_OPDATE=`echo $LINEA_ORD[$QTYLINEAS-1] | cut -d "," -f 2`
 		AUX_CPID=`echo $LINEA_ORD[$QTYLINEAS-1] | cut -d "," -f 3`
@@ -289,13 +289,8 @@ chequeaProceso(){
 		if [ $AUX_CUSTID -gt $CUSTID ] ; then
 		  LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID"
 		  
-
-		for (( i=0;i<$QTYLINEAS;i++)); do
-    		  echo $i
-		done 
-
-		  for j in {$QTYLINEAS..$i} 
-		    do
+		  #for j in {$QTYLINEAS..$i} 
+		  for (( j=$QTYLINEAS;j<$i;j--)); do
 			echo "${j}"
 			echo "${LINEA_ORD[${j}]}"
 			$LINEA_ORD["$j"]=$LINEA_ORD["$j+1"]			  
@@ -314,8 +309,9 @@ chequeaProceso(){
 		if [ $AUX_OPDATE == $OPDATE ] ; then
 		  if [ $AUX_CPID > $CPID ] ; then
 		    LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID"
-			for j in {$QTYLINEAS..$i} 
-			  do
+			#for j in {$QTYLINEAS..$i} 
+			#  do
+			for (( j=$QTYLINEAS;j<$i;j--)); do
 			  $LINEA_ORD[$j]=$LINEA_ORD[$j+1]			  
 			done
 			$LINEA_ORD[$i]=$LINEA_AUX
@@ -328,8 +324,9 @@ chequeaProceso(){
 		if [ $AUX_CPID == $CPID ] ; then
 		  if [ $AUX_CSID > $CSID ] ; then
 		    LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID"
-			for j in {$QTYLINEAS..$i} 
-			  do
+			#for j in {$QTYLINEAS..$i} 
+			#  do
+			for (( j=$QTYLINEAS;j<$i;j--)); do
 			  $LINEA_ORD[$j]=$LINEA_ORD[$j+1]			  
 			done
 			$LINEA_ORD[$i]=$LINEA_AUX
@@ -346,8 +343,9 @@ chequeaProceso(){
 	
 	# Grabar archivo ordenado en inst_ordenadas, si existe reemplazarlo
 	#TODO REMPLAZO
-	for i in {0..$QTYLINEAS}
-	  do
+	#for i in {0..$QTYLINEAS}
+	#  do
+	for (( i=0;i<$QTYLINEAS;i++)); do 
 	  echo $INSTORD
 	  echo $ARCHIVO
 
