@@ -11,7 +11,7 @@ COMANDO="grabarParque"
 INSTREC="$GRUPO/inst_recibidas"
 INSTORD="$GRUPO/inst_ordenadas"
 INSTPROC="$GRUPO/inst_procesadas"
-
+LINEA_ORD=()
 chequeaVariables(){
 
   if [ "$LOGEXT" != "" ] && [ "$BINDIR" != "" ] && [ "$DATASIZE" != "" ] \
@@ -273,8 +273,11 @@ chequeaProceso(){
 	  # ...
 	  
 	  if [ $QTYLINEAS == 0 ] ; then
-	    ${LINEA_ORD[$QTYLINEAS]}="$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"
-		let QTYLINEAS=$QTYLINEAS+1
+	    echo "QTYLINEAS: $QTYLINEAS"
+		echo "DATA A GRABARLE: $CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"
+	    LINEA_ORD[$QTYLINEAS]=`echo "$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"`
+		echo "grabado : ${LINEA_ORD[$QTY_LINEAS]}"	
+	let QTYLINEAS=$QTYLINEAS+1
 		continue
 	  fi
 
