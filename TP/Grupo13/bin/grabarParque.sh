@@ -290,7 +290,7 @@ chequeaProceso(){
 		  
 		# Primero comparo por CUST_ID
 		if [ $AUX_CUSTID -gt $CUSTID ] ; then
-		  LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID"
+		  LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
 		  
 		  #for j in {$QTYLINEAS..$i} 
 		  for (( j=$QTYLINEAS;j<$i;j--)); do
@@ -311,7 +311,7 @@ chequeaProceso(){
 		# Si son iguales comparo por Commercial Plan ID (CPID)
 		if [ $AUX_OPDATE == $OPDATE ] ; then
 		  if [ $AUX_CPID > $CPID ] ; then
-		    LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID"
+		    LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
 			#for j in {$QTYLINEAS..$i} 
 			#  do
 			for (( j=$QTYLINEAS;j<$i;j--)); do
@@ -326,7 +326,7 @@ chequeaProceso(){
 		# Si son iguales comparo por Class Service ID (CSID) 
 		if [ $AUX_CPID == $CPID ] ; then
 		  if [ $AUX_CSID > $CSID ] ; then
-		    LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID"
+		    LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
 			#for j in {$QTYLINEAS..$i} 
 			#  do
 			for (( j=$QTYLINEAS;j<$i;j--)); do
