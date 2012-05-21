@@ -23,7 +23,7 @@ chequeaProceso(){
 # esto se va a comentar luego. Inicia afuera
 LOOP=true
 CANT_LOOP=0
-ESPERA=1
+ESPERA=5
 #ARRIDIR="./TP/ssoo1c-2012/TP/Grupo13/inst_recibidas/"
 ARRIDIR="../inst_recibidas/"
 DIRMAE="/home/lucas/TP/ssoo1c-2012/TP/Grupo13/maestro"
@@ -32,7 +32,7 @@ ARCHIVO="$DIRMAE/sucu.mae"
 
 #Detecto si detectarT esta corriendo
 DETECTAR_PID=`chequeaProceso detectarT.sh $$`
-if ([ -z "$DETECTAR_PID" ])then 
+#if ([ -z "$DETECTAR_PID" ])then 
  while [ $CANT_LOOP -lt 5 ]
  do
    if ([ -d $ARRIDIR ]) then
@@ -101,11 +101,11 @@ if ([ -z "$DETECTAR_PID" ])then
    	
  exit 0
 
-else
-   echo "PID $DETECTAR_PID"
-   echo "YA ESTA CORRIENDO detectarT.sh"
-   exit 1
-fi
+#else
+#   echo "PID $DETECTAR_PID"
+#   echo "YA ESTA CORRIENDO detectarT.sh"
+#   exit 1
+#fi
 
 
 
