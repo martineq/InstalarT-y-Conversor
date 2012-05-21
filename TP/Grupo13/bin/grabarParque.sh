@@ -295,22 +295,22 @@ chequeaProceso(){
 		  #for j in {$QTYLINEAS..$i} 
 		  for (( j=$QTYLINEAS;j<$i;j--)); do
 			echo "${j}"
-			echo "${LINEA_ORD[${j}]}"
-			${LINEA_ORD[$j]}=`echo ${LINEA_ORD[$j+1]}`			  
+			echo "${LINEA_ORD[$j]}"
+			LINEA_ORD[$j]=`echo ${LINEA_ORD[$j+1]}`			  
 		  done
-		  ${LINEA_ORD[$i]}=`echo $LINEA_AUX`
+		  LINEA_ORD[$i]=`echo $LINEA_AUX`
 		  let QTYLINEAS=$QTYLINEAS+1
 		  continue
 		fi
 		 
 		# Si son iguales comparo por fecha
-		#if [ $AUX_CUSTID == $CUSTID ] ; then
+		#if [ $AUX_CUSTID -eq $CUSTID ] ; then
 		  		  #TODO
 		#fi
 		  
 		# Si son iguales comparo por Commercial Plan ID (CPID)
-		if [ $AUX_OPDATE == $OPDATE ] ; then
-		  if [ $AUX_CPID > $CPID ] ; then
+		if [ $AUX_OPDATE -eq $OPDATE ] ; then
+		  if [ $AUX_CPID -gt $CPID ] ; then
 		    LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
 			#for j in {$QTYLINEAS..$i} 
 			#  do
@@ -324,8 +324,8 @@ chequeaProceso(){
 		fi
 		  
 		# Si son iguales comparo por Class Service ID (CSID) 
-		if [ $AUX_CPID == $CPID ] ; then
-		  if [ $AUX_CSID > $CSID ] ; then
+		if [ $AUX_CPID -eq $CPID ] ; then
+		  if [ $AUX_CSID -gt $CSID ] ; then
 		    LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
 			#for j in {$QTYLINEAS..$i} 
 			#  do
@@ -348,6 +348,7 @@ chequeaProceso(){
 	#TODO REMPLAZO
 	#for i in {0..$QTYLINEAS}
 	#  do
+
 	for (( i=0;i<$QTYLINEAS;i++)); do 
 	  echo $INSTORD
 	  echo $ARCHIVO
