@@ -268,47 +268,40 @@ chequeaProceso(){
 	  CSR=`echo $LINEA | cut -d "," -f 5`
 	  ITEMID=`echo $LINEA | cut -d "," -f 6`
 		
-	  echo "Procesando linea: $LINEA"
 	  # Pre chequeo si estan todos los campos y rechazo anticipadamente
 	  # Tambien valido formatos TODO
 	  # ...
 	  
 	  if [ $QTYLINEAS == 0 ] ; then
-	    echo "QTYLINEAS: $QTYLINEAS"
-		echo "DATA A GRABARLE: $CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"
 	    LINEA_ORD[$QTYLINEAS]=`echo "$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"`
-		echo "grabado : ${LINEA_ORD[$QTY_LINEAS]}"	
 	    let QTYLINEAS=$QTYLINEAS+1
 		continue
 	  fi
 
 	  for (( i=0;i<$QTYLINEAS;i++)); do  
-	    echo "Voy a leer del archivo el id: $i"
-		echo "QTYLINEAS ES $QTYLINEAS"
-		#INDEX=$QTYLINEAS
+		# Comienzo leyendo desde el ppio. si es menor puedo insertar sino continuo la busqueda
 		let INDEX=$i
-		echo "index es $INDEX"
 		AUX_CUSTID=`echo ${LINEA_ORD[INDEX]} | cut -d "," -f 1`
 		AUX_OPDATE=`echo ${LINEA_ORD[INDEX]} | cut -d "," -f 2`
 		AUX_CPID=`echo ${LINEA_ORD[INDEX]} | cut -d "," -f 3`
 		AUX_CSID=`echo ${LINEA_ORD[INDEX]} | cut -d "," -f 4`
 		
-		echo "Linea auxiliar: $AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
+		#echo "Linea auxiliar: $AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
         LINEA_AUX="$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"
-		echo "linea aux a agregar es: $LINEA_AUX"
+		#echo "linea aux a agregar es: $LINEA_AUX"
 		# Primero comparo por CUST_ID
 		if [ $AUX_CUSTID -gt $CUSTID ] ; then
 		  #LINEA_AUX="$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"
 		    
-		  echo "cust id leido menor"
+		  #echo "cust id leido menor"
 		  #for j in {$QTYLINEAS..$i} 
 		  for (( j=$QTYLINEAS;j>$i;j--)); do
-			echo "en for j es: $j"	
+			#echo "en for j es: $j"	
 			LINEA_ORD[$j]=`echo ${LINEA_ORD[$j-1]}`	
-			echo "Linea $j es ${LINEA_ORD[$j]}"			
+			#echo "Linea $j es ${LINEA_ORD[$j]}"			
 		  done
 		  LINEA_ORD[$i]=`echo $LINEA_AUX`
-		  echo "Linea $i es: ${LINEA_ORD[i]}"
+		  #echo "Linea $i es: ${LINEA_ORD[i]}"
 		  let QTYLINEAS=$QTYLINEAS+1
 		  let i=$i+1
 		  break
@@ -320,8 +313,8 @@ chequeaProceso(){
                   #LINEA_AUX="$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"
 		  if [ $j -eq $QTYLINEAS ] ; then
 			LINEA_ORD[$j]=`echo $LINEA_AUX`
-			echo "Linea $j es: ${LINEA_ORD[j]}"
-			echo "Linea $i es: ${LINEA_ORD[i]}"
+			#echo "Linea $j es: ${LINEA_ORD[j]}"
+			#echo "Linea $i es: ${LINEA_ORD[i]}"
 			let QTYLINEAS=$QTYLINEAS+1
 			let i=$i+1
 		    break
@@ -336,17 +329,13 @@ chequeaProceso(){
 		  
 		# Si son iguales comparo por Commercial Plan ID (CPID)
 		#if [ $AUX_OPDATE -eq $OPDATE ] ; then
-		echo "dates iguales"
 		  if [ $AUX_CPID -gt $CPID ] ; then
-		    #LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
-			#for j in {$QTYLINEAS..$i} 
-			#  do
 			for (( j=$QTYLINEAS;j>$i;j--)); do
 			  LINEA_ORD[$j]=`echo ${LINEA_ORD[$j-1]}`
-			  echo "Linea $j es ${LINEA_ORD[$j]}"	
+			  #echo "Linea $j es ${LINEA_ORD[$j]}"	
 			done
 			LINEA_ORD[$i]=`echo $LINEA_AUX`
-			echo "Linea $i es: ${LINEA_ORD[i]}"
+			#echo "Linea $i es: ${LINEA_ORD[i]}"
 			let QTYLINEAS=$QTYLINEAS+1
 			let i=$i+1
 			break
@@ -357,7 +346,7 @@ chequeaProceso(){
 		    let j=$i+1
 		    if [ $j -eq $QTYLINEAS ] ; then
 			  LINEA_ORD[$j]=`echo $LINEA_AUX`
-			  echo "Linea $j es: ${LINEA_ORD[i]}"
+			  #echo "Linea $j es: ${LINEA_ORD[i]}"
 			  let QTYLINEAS=$QTYLINEAS+1
 			  let i=$i+1
 		      break
@@ -368,17 +357,17 @@ chequeaProceso(){
 		  
 		# Si son iguales comparo por Class Service ID (CSID) 
 		if [ $AUX_CPID -eq $CPID ] ; then
-		  echo "cpid iguales"
+		  #echo "cpid iguales"
 		  if [ $AUX_CSID -gt $CSID ] ; then
 		    LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
 			#for j in {$QTYLINEAS..$i} 
 			#  do
 			for (( j=$QTYLINEAS;j>$i;j--)); do
 			  LINEA_ORD[$j]=`echo ${LINEA_ORD[$j-1]}`
-			  echo "Linea $j es ${LINEA_ORD[$j]}"				  
+			  #echo "Linea $j es ${LINEA_ORD[$j]}"				  
 			done
 			LINEA_ORD[$i]=`echo $LINEA_AUX`
-			echo "Linea $i es: ${LINEA_ORD[i]}"
+			#echo "Linea $i es: ${LINEA_ORD[i]}"
 			let QTYLINEAS=$QTYLINEAS+1
 			let i=$i+1
 			break
@@ -389,7 +378,7 @@ chequeaProceso(){
 		    let j=$i+1
 		    if [ $j -eq $QTYLINEAS ] ; then
 			  LINEA_ORD[$j]=`echo $LINEA_AUX`
-			  echo "Linea $j es: ${LINEA_ORD[i]}"
+			  #echo "Linea $j es: ${LINEA_ORD[i]}"
 			  let QTYLINEAS=$QTYLINEAS+1
 			  let i=$i+1
 		      break
@@ -402,10 +391,10 @@ chequeaProceso(){
 			LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
 			for (( j=$QTYLINEAS;j>$i;j--)); do
 			  LINEA_ORD[$j]=`echo ${LINEA_ORD[$j-1]}`
-			  echo "Linea $j es ${LINEA_ORD[$j]}"				  
+			  #echo "Linea $j es ${LINEA_ORD[$j]}"				  
 			done
 			LINEA_ORD[$i]=`echo $LINEA_AUX`
-			echo "Linea $i es: ${LINEA_ORD[i]}"
+			#echo "Linea $i es: ${LINEA_ORD[i]}"
 			let QTYLINEAS=$QTYLINEAS+1
 			let i=$i+1
 			break
@@ -418,19 +407,14 @@ chequeaProceso(){
 	let QTYOK=$QTYOK+1
 	
 	# Grabar archivo ordenado en inst_ordenadas, si existe reemplazarlo
-	#TODO REMPLAZO
-	#for i in {0..$QTYLINEAS}
-	#  do
-
+	# TODO REMPLAZO
 	for (( i=0;i<$QTYLINEAS;i++)); do 
-	  echo $INSTORD
-	  echo $ARCHIVO
-
-	  echo ${LINEA_ORD[i]} >> "$INSTORD/pepe"
+	  FILENAME= `echo $ARCHIVO | sed 's/.*\///'`
+	  echo ${LINEA_ORD[i]} >> "$INSTORD/$FILENAME"
 	done
 	
 	# Muevo para evitar el reprocesamiento
-	perl moverT.pl "$INSTREC/$ARCHIVO" "$INSTPROC/" $COMANDO
+	perl moverT.pl "$INSTREC/FILENAME" "$INSTPROC/" $COMANDO
   done
   
   # Comienzo el procesamiento de los archivos
