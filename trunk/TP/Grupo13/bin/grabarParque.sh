@@ -283,10 +283,10 @@ chequeaProceso(){
 	  fi
 
 	  for (( i=0;i<$QTYLINEAS;i++)); do  
-	    echo $i
+	    echo "Voy a leer del archivo el id: $i"
 		echo "QTYLINEAS ES $QTYLINEAS"
-		INDEX=$QTYLINEAS
-		let INDEX=$INDEX-1
+		#INDEX=$QTYLINEAS
+		let INDEX=$i
 		echo "index es $INDEX"
 		AUX_CUSTID=`echo ${LINEA_ORD[INDEX]} | cut -d "," -f 1`
 		AUX_OPDATE=`echo ${LINEA_ORD[INDEX]} | cut -d "," -f 2`
@@ -294,12 +294,12 @@ chequeaProceso(){
 		AUX_CSID=`echo ${LINEA_ORD[INDEX]} | cut -d "," -f 4`
 		
 		echo "Linea auxiliar: $AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
-                LINEA_AUX="$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"
-		  
+        LINEA_AUX="$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"
+		echo "linea aux a agregar es: $LINEA_AUX"
 		# Primero comparo por CUST_ID
 		if [ $AUX_CUSTID -gt $CUSTID ] ; then
 		  #LINEA_AUX="$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"
-		  echo "linea aux aca es: $LINEA_AUX"  
+		    
 		  echo "cust id leido menor"
 		  #for j in {$QTYLINEAS..$i} 
 		  for (( j=$QTYLINEAS;j>$i;j--)); do
@@ -320,6 +320,7 @@ chequeaProceso(){
                   #LINEA_AUX="$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"
 		  if [ $j -eq $QTYLINEAS ] ; then
 			LINEA_ORD[$j]=`echo $LINEA_AUX`
+			echo "Linea $j es: ${LINEA_ORD[i]}"
 			let QTYLINEAS=$QTYLINEAS+1
 			let i=$i+1
 		    continue
@@ -355,6 +356,7 @@ chequeaProceso(){
 		    let j=$i+1
 		    if [ $j -eq $QTYLINEAS ] ; then
 			  LINEA_ORD[$j]=`echo $LINEA_AUX`
+			  echo "Linea $j es: ${LINEA_ORD[i]}"
 			  let QTYLINEAS=$QTYLINEAS+1
 			  let i=$i+1
 		      continue
@@ -386,6 +388,7 @@ chequeaProceso(){
 		    let j=$i+1
 		    if [ $j -eq $QTYLINEAS ] ; then
 			  LINEA_ORD[$j]=`echo $LINEA_AUX`
+			  echo "Linea $j es: ${LINEA_ORD[i]}"
 			  let QTYLINEAS=$QTYLINEAS+1
 			  let i=$i+1
 		      continue
@@ -421,7 +424,7 @@ chequeaProceso(){
 	  echo $INSTORD
 	  echo $ARCHIVO
 
-	  echo ${LINEA_ORD[$i]} >> "$INSTORD/pepe"
+	  echo ${LINEA_ORD[i]} >> "$INSTORD/pepe"
 	done
 	
 	# Muevo para evitar el reprocesamiento
