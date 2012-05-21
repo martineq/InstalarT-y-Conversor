@@ -284,7 +284,9 @@ chequeaProceso(){
 
 	  for (( i=0;i<$QTYLINEAS;i++)); do  
 	    echo $i
-		INDEX=$QTYLINEAS-1
+		echo "QTYLINEAS ES $QTYLINEAS"
+		INDEX=$QTYLINEAS
+		let INDEX=$INDEX-1
 		echo "index es $INDEX"
 		AUX_CUSTID=`echo ${LINEA_ORD[INDEX]} | cut -d "," -f 1`
 		AUX_OPDATE=`echo ${LINEA_ORD[INDEX]} | cut -d "," -f 2`
@@ -355,7 +357,7 @@ chequeaProceso(){
 		fi
 		
 	  done
-	  let QTYLINEAS=$QTYLINEAS+1	
+	  #let QTYLINEAS=$QTYLINEAS+1	
 	done
 	
 	let QTYOK=$QTYOK+1
