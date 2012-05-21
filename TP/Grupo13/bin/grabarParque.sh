@@ -315,9 +315,9 @@ chequeaProceso(){
 			#for j in {$QTYLINEAS..$i} 
 			#  do
 			for (( j=$QTYLINEAS;j<$i;j--)); do
-			  ${LINEA_ORD[$j]}=`echo ${LINEA_ORD[$j+1]}`
+			  LINEA_ORD[$j]=`echo ${LINEA_ORD[$j+1]}`
 			done
-			${LINEA_ORD[$i]}=`echo $LINEA_AUX`
+			LINEA_ORD[$i]=`echo $LINEA_AUX`
 			let QTYLINEAS=$QTYLINEAS+1
 			continue
 		  fi  
@@ -330,9 +330,9 @@ chequeaProceso(){
 			#for j in {$QTYLINEAS..$i} 
 			#  do
 			for (( j=$QTYLINEAS;j<$i;j--)); do
-			  ${LINEA_ORD[$j]}=`echo ${LINEA_ORD[$j+1]}`			  
+			  LINEA_ORD[$j]=`echo ${LINEA_ORD[$j+1]}`			  
 			done
-			${LINEA_ORD[$i]}=`echo $LINEA_AUX`
+			LINEA_ORD[$i]=`echo $LINEA_AUX`
 			let QTYLINEAS=$QTYLINEAS+1
 			continue
 		  fi  
@@ -353,7 +353,7 @@ chequeaProceso(){
 	  echo $INSTORD
 	  echo $ARCHIVO
 
-	  echo ${LINEA_ORD[$i]} >> $INSTORD/$ARCHIVO
+	  echo ${LINEA_ORD[$i]} >> "$INSTORD/pepe"
 	done
 	
 	# Muevo para evitar el reprocesamiento
