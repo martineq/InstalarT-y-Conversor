@@ -88,17 +88,6 @@ sub inicializarLogCon{
 }
 
 ################################################################################
-#verificar si el archivo pasado por parametro proveniente de inst_ recibidas ya existe en inst_procesadas
-sub esArchivoDuplicado_En{
-	$archivo_comprobar = @_[0];
-	$dir_inst_recibidas_ = $GLOBAL_dir_inst_recibidas;
-	$esArchivoDuplicado = "si";
-	
-	
-	return ( $esArchivoDuplicado );
-}
-
-################################################################################
 sub exite_archivo_En{
 		$arch_origen = @_[0];
 		$dir_destino = @_[1];
@@ -126,6 +115,19 @@ sub exite_archivo_En{
 }
 
 ################################################################################
+#los archivos ordenados los escribe en el mismo directorio(inst_recibidas)
+#el criterio de ordenamiento es:
+#CUSTOMER_ID (asc),
+#OPERATION_DATE (de la mas antigüa a la más reciente), 
+#COMMERCIAL_PLAN_ID (asc),
+#CLASS_SERVICE_IS_REQUIRED (desc).
+sub ordenar_archivo{
+    $archivo_procesar = @_[0];
+    
+    #...
+}
+
+################################################################################
 sub procesarArchivoRecibido{
 	$nombre_archivo_recibido = @_[0];
 	$grabarLog = `$GLOBAL_ejecutable_loguearT $GLOBAL_nombre_grabarParqueT I \"Archivo a Procesar: \<$nombre_archivo_recibido\>\"`;
@@ -142,6 +144,9 @@ sub procesarArchivoRecibido{
     	$moverDuplicado = `$GLOBAL_ejecutable_moverT $archivo_procesar $GLOBAL_dir_inst_rechazadas`;
     	
     }else{
+    #...
+    ordenar_archivo($archivo_procesar);
+    
 		#TODO: continuar con los no duplicados
 		print $archivo_procesar."\n";
     }
