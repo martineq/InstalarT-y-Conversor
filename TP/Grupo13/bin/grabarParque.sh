@@ -295,7 +295,7 @@ chequeaProceso(){
 		# Primero comparo por CUST_ID
 		if [ $AUX_CUSTID -gt $CUSTID ] ; then
 		  LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
-		  echo "cust id iguales"
+		  echo "cust id leido menor"
 		  #for j in {$QTYLINEAS..$i} 
 		  for (( j=$QTYLINEAS;j>$i;j--)); do
 			echo "$j"	
@@ -304,6 +304,7 @@ chequeaProceso(){
 		  done
 		  LINEA_ORD[$i]=`echo $LINEA_AUX`
 		  let QTYLINEAS=$QTYLINEAS+1
+		  $i=$i+1
 		  continue
 		fi
 		 
@@ -324,6 +325,7 @@ chequeaProceso(){
 			done
 			LINEA_ORD[$i]=`echo $LINEA_AUX`
 			let QTYLINEAS=$QTYLINEAS+1
+			$i=$i+1
 			continue
 		  fi  
 		fi
@@ -340,6 +342,7 @@ chequeaProceso(){
 			done
 			LINEA_ORD[$i]=`echo $LINEA_AUX`
 			let QTYLINEAS=$QTYLINEAS+1
+			$i=$i+1
 			continue
 		  fi  
 		fi
