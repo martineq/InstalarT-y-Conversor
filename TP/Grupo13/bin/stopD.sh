@@ -21,3 +21,8 @@ chequeaProceso(){
   
 }
 
+DETECTAR_PID=`chequeaProceso detectarT.sh $$`
+kill -9 $DETECTAR_PID
+bash loguearT.sh "$COMANDO" "I" "Se detuvo correctamente el demonio de detectarD con PID: <$DETECTAR_PID>" 
+
+
