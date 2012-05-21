@@ -77,19 +77,19 @@ chequeaArchivosMaestros(){
   PRODUCTOS=$MAEDIR/prod.mae
 
   #Chequeo que los archivos existan
-  if [ ! -a "$CLIENTES" ] ; then
-    #Error severo - No hay archivo maestros
-      echo 1
-      return
-  fi
-  
-  if [ ! -a "$SUCURSALES" ] ; then
+  if [ ! -f $CLIENTES ] ; then
     #Error severo - No hay archivo maestros
     echo 1
     return
   fi
   
-  if [ ! -a "$PRODUCTOS" ] ; then
+  if [ ! -f $SUCURSALES ] ; then
+   #Error severo - No hay archivo maestros
+   echo 1
+   return
+  fi
+  
+  if [ ! -f $PRODUCTOS ] ; then
     #Error severo - No hay archivo maestros
     echo 1
     return
@@ -195,7 +195,7 @@ chequeaProceso(){
     echo "Error Severo: Directorios necesarios no creados en la instalacion o no disponibles"
     exit 1
   fi
-  
+
   if [ `chequeaArchivosMaestros` -eq 1 ] ; then
     bash loguearT.sh "$COMANDO" "SE" "Archivos maestros no accesibles/disponibles"
     echo "Error Severo: Archivos maestros no accesibles/disponibles"

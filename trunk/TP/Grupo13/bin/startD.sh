@@ -41,19 +41,19 @@ chequeaArchivosMaestros(){
   PRODUCTOS=$MAEDIR/prod.mae
 
   #Chequeo que los archivos existan
-  if [ ! -a "$CLIENTES" ] ; then
+  if [ ! -f $CLIENTES ] ; then
     #Error severo - No hay archivo maestros
       echo 1
       return
   fi
   
-  if [ ! -a "$SUCURSALES" ] ; then
+  if [ ! -f $SUCURSALES ] ; then
     #Error severo - No hay archivo maestros
     echo 1
     return
   fi
   
-  if [ ! -a "$PRODUCTOS" ] ; then
+  if [ ! -f $PRODUCTOS ] ; then
     #Error severo - No hay archivo maestros
     echo 1
     return
