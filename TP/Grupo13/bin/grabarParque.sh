@@ -409,12 +409,13 @@ chequeaProceso(){
 	# Grabar archivo ordenado en inst_ordenadas, si existe reemplazarlo
 	# TODO REMPLAZO
 	for (( i=0;i<$QTYLINEAS;i++)); do 
-	  FILENAME= `echo $ARCHIVO | sed 's/.*\///'`
+	  FILENAME=`echo $ARCHIVO | sed 's/.*\///'`
+	  echo "Guardando en archivo $INSTORD/$FILENAME"
 	  echo ${LINEA_ORD[i]} >> "$INSTORD/$FILENAME"
 	done
 	
 	# Muevo para evitar el reprocesamiento
-	perl moverT.pl "$INSTREC/FILENAME" "$INSTPROC/" $COMANDO
+	perl moverT.pl "$INSTREC/$FILENAME" "$INSTPROC/" $COMANDO
   done
   
   # Comienzo el procesamiento de los archivos
