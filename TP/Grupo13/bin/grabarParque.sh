@@ -28,8 +28,29 @@ chequeaVariables(){
 
 }
 
+# Compara las fechas de AUX_OPDATE y OPDATE
+# Devuelve 1 si AUX es mayor y 0 si es menor.
+comparaFechas(){
 
+	AUX_ANIO=`echo "$AUX_OPDATE" | cut -f3 -d'/'`
+	AUX_MES=`echo "$AUX_OPDATE" | cut -f2 -d'/'`
+	AUX_DIA=`echo "$AUX_OPDATE" | cut -f1 -d'/'`
+	ANIO=`echo "$OPDATE" | cut -f3 -d'/'`
+	MES=`echo "$OPDATE" | cut -f2 -d'/'`
+	DIA=`echo "$OPDATE" | cut -f1 -d'/'`
 
+	if [ $AUX_ANIO -gt $ANIO ] || ( [ $AUX_ANIO -eq $ANIO ] && [ $AUX_MES -gt $MES ] ) \
+		|| ( [ $AUX_ANIO -eq $ANIO ] && [ $AUX_MES -eq $MES ] && [ $AUX_DIA -gt $DIA ] ) ; then
+		echo 1
+		return
+	fi
+
+	if [ $AUX_ANIO -lt $ANIO ] || ( [ $AUX_ANIO -eq $ANIO ] && [ $AUX_MES -lt $MES ] ) \
+		|| ( [ $AUX_ANIO -eq $ANIO ] && [ $AUX_MES -eq $MES ] && [ $AUX_DIA -lt $DIA ] ) ; then
+		echo 0
+		return
+	fi	
+}
 
 
 validacionCabeceraDetalle(){
@@ -126,18 +147,6 @@ validacionCampo(){
 # 	 
 # 	#Recorro todas las lineas de clientes que tienen y si lo encuentro da OK, sino no
  	let OK=0
-# 	for LINEA_CLIENTES in `cat $CLIENTES`;
-# 	  do
-# 	  MAECLI= `echo $LINEA_CLIENTES | sed 's#;.*##' | grep $CUSTID`
-# 	  
-# 	  if [ -z $MAECLI ] ; then
-# 	    continue
-# 	  fi
-# 	  
-# 	  if [ $MAECLI == $CUSTID ] ; then
-# 	    let OK=1
-# 	  fi
-# 	done
 	for t in ${TABLACLIENTES[@]}
 	  do
 	  bash loguearT.sh "TEST" "I" "Comparando $t con $CUSTID"
@@ -153,7 +162,6 @@ validacionCampo(){
 	  echo 1
 	  return 1
 	fi
-	
 	echo 0
 }
 
@@ -374,7 +382,7 @@ chequeaProceso(){
 		let QTYARCHRECH=$QTYARCHRECH+1
 		continue
 	fi
-
+	
 	let QTYLINEAS=0
 	
     # Formato registros detalle/cabecera
@@ -400,8 +408,13 @@ chequeaProceso(){
 	  ITEMID=`echo $LINEA | cut -d "," -f 6`
 		
 	  # Pre chequeo si estan todos los campos y rechazo anticipadamente
-	  # Tambien valido formatos TODO
-	  # ...
+	  if [ `validacionCabeceraDetalle` -eq 1 ] ; then
+	      # Error en la validacion de la cabecera
+	      bash loguearT.sh "$COMANDO" "A" "Rechazando el registro por error en cabecera"
+	      let QTYREGRECH=$QTYREGRECH+1
+	      continue
+	  fi
+
 	  
 	  if [ $QTYLINEAS == 0 ] ; then
 	    LINEA_ORD[$QTYLINEAS]=`echo "$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"`
@@ -417,27 +430,22 @@ chequeaProceso(){
 		AUX_CPID=`echo ${LINEA_ORD[INDEX]} | cut -d "," -f 3`
 		AUX_CSID=`echo ${LINEA_ORD[INDEX]} | cut -d "," -f 4`
 		
-		echo "Linea auxiliar: $AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
+		#DEBUG - echo "Linea auxiliar: $AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
         LINEA_AUX="$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"
         
 		if [ -z $CUSTID ] || [ -z $OPDATE ] || [ -z $CPID ] \
 		  || [ -z $CSID ] || [ -z $CSR ] || [ -z $ITEMID ] ; then
 		  # Todos NO vacios
-		  echo "alguno de aca: $LINEA_AUX esta vacio"
 		  continue
 		fi
 		
 		if [ -z $AUX_CUSTID ] || [ -z $AUX_OPDATE ] || [ -z $AUX_CPID ] \
 		  || [ -z $AUX_CSID ] ; then
 		  # Todos NO vacios
-		  echo "alguno de estos es vacio?: $AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
 		  continue
 		fi
 		
-        
-        
-		#echo "linea aux a agregar es: $LINEA_AUX"
-		# Primero comparo por CUST_ID
+    	# Primero comparo por CUST_ID
 		if [ $AUX_CUSTID -gt $CUSTID ] ; then
 		  #LINEA_AUX="$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"
 		    
@@ -458,7 +466,6 @@ chequeaProceso(){
 		if [ $AUX_CUSTID -lt $CUSTID ] ; then
 		  # Si es mayor debo avanzar salvo que sea el ultimo registro
 		  let j=$i+1
-                  #LINEA_AUX="$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"
 		  if [ $j -eq $QTYLINEAS ] ; then
 			LINEA_ORD[$j]=`echo $LINEA_AUX`
 			#echo "Linea $j es: ${LINEA_ORD[j]}"
@@ -471,12 +478,36 @@ chequeaProceso(){
 		fi
 				 
 		# Si son iguales comparo por fecha
-		#if [ $AUX_CUSTID -eq $CUSTID ] ; then
-		  		  #TODO
-		#fi
+		if [ $AUX_CUSTID -eq $CUSTID ] ; then
+		  if [ `comparaFechas` -eq 1 ] ; then
+			# AUX_DATE es mayor
+			for (( j=$QTYLINEAS;j>$i;j--)); do
+			  LINEA_ORD[$j]=`echo ${LINEA_ORD[$j-1]}`
+			  #DEBUG - echo "Linea $j es ${LINEA_ORD[$j]}"	
+			done
+			LINEA_ORD[$i]=`echo $LINEA_AUX`
+			#DEBUG - echo "Linea $i es: ${LINEA_ORD[i]}"
+			let QTYLINEAS=$QTYLINEAS+1
+			let i=$i+1
+			break
+		  fi
+		  
+		  if [ `comparaFechas` -eq 0 ] ; then
+			# Si es mayor debo avanzar salvo que sea el ultimo registro
+		    let j=$i+1
+		    if [ $j -eq $QTYLINEAS ] ; then
+			  LINEA_ORD[$j]=`echo $LINEA_AUX`
+			  #echo "Linea $j es: ${LINEA_ORD[i]}"
+			  let QTYLINEAS=$QTYLINEAS+1
+			  let i=$i+1
+		      break
+		    fi
+		    continue
+		  fi
+		fi
 		  
 		# Si son iguales comparo por Commercial Plan ID (CPID)
-		#if [ $AUX_OPDATE -eq $OPDATE ] ; then
+		if [ $AUX_OPDATE == $OPDATE ] ; then
 		  if [ $AUX_CPID -gt $CPID ] ; then
 			for (( j=$QTYLINEAS;j>$i;j--)); do
 			  LINEA_ORD[$j]=`echo ${LINEA_ORD[$j-1]}`
@@ -501,21 +532,17 @@ chequeaProceso(){
 		    fi
 		    continue
 		  fi
-		#fi
+		fi
 		  
 		# Si son iguales comparo por Class Service ID (CSID) 
 		if [ $AUX_CPID -eq $CPID ] ; then
-		  #echo "cpid iguales"
 		  if [ $AUX_CSID -gt $CSID ] ; then
 		    LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
-			#for j in {$QTYLINEAS..$i} 
-			#  do
+
 			for (( j=$QTYLINEAS;j>$i;j--)); do
 			  LINEA_ORD[$j]=`echo ${LINEA_ORD[$j-1]}`
-			  #echo "Linea $j es ${LINEA_ORD[$j]}"				  
 			done
 			LINEA_ORD[$i]=`echo $LINEA_AUX`
-			#echo "Linea $i es: ${LINEA_ORD[i]}"
 			let QTYLINEAS=$QTYLINEAS+1
 			let i=$i+1
 			break
@@ -526,7 +553,6 @@ chequeaProceso(){
 		    let j=$i+1
 		    if [ $j -eq $QTYLINEAS ] ; then
 			  LINEA_ORD[$j]=`echo $LINEA_AUX`
-			  #echo "Linea $j es: ${LINEA_ORD[i]}"
 			  let QTYLINEAS=$QTYLINEAS+1
 			  let i=$i+1
 		      break
@@ -534,31 +560,33 @@ chequeaProceso(){
 		    continue
 		  fi
 		  
-		  #Si no pude diferenciar por CSID debo ingresar de todos modos el valor
-		  # TODO deberia chequear que no sea el mismo y en ese caso abortarlo
-			LINEA_AUX="$AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
-			for (( j=$QTYLINEAS;j>$i;j--)); do
-			  LINEA_ORD[$j]=`echo ${LINEA_ORD[$j-1]}`
-			  #echo "Linea $j es ${LINEA_ORD[$j]}"				  
-			done
-			LINEA_ORD[$i]=`echo $LINEA_AUX`
-			#echo "Linea $i es: ${LINEA_ORD[i]}"
-			let QTYLINEAS=$QTYLINEAS+1
-			let i=$i+1
+		  # Si no pude diferenciar por CSID debo ingresar de todos modos el valor
+		  # Antes tomo el recaudo de ver si no son el mismo, en ese caso no inserto
+		  if [ $LINEA_AUX == ${LINEA_ORD[i]} ]
+			#Son iguales
+			echo "iguales 100%, no inserto"
 			break
+		  fi
+		  
+		  for (( j=$QTYLINEAS;j>$i;j--)); do
+			LINEA_ORD[$j]=`echo ${LINEA_ORD[$j-1]}`
+		  done
+		  LINEA_ORD[$i]=`echo $LINEA_AUX`
+		  let QTYLINEAS=$QTYLINEAS+1
+		  let i=$i+1
+		  break
 		fi
-		
 	  done
-	  #let QTYLINEAS=$QTYLINEAS+1	
 	done
-	
-	let QTYREGOK=$QTYREGOK+1
-	
+		
 	# Grabar archivo ordenado en inst_ordenadas, si existe reemplazarlo
-	# TODO REMPLAZO
+	if [ -f "$INSTORD/$FILENAME" ] ; then
+	  # Vacio el archivo - eliminandolo -
+	  `rm $INSTORD/$FILENAME`
+	fi
+	
 	for (( i=0;i<$QTYLINEAS;i++)); do 
 	  FILENAME=`echo $ARCHIVO | sed 's#.*\/##'`
-	  echo "Guardando en archivo $INSTORD/$FILENAME"
 	  echo ${LINEA_ORD[i]} >> "$INSTORD/$FILENAME"
 	done
 	
@@ -574,9 +602,9 @@ chequeaProceso(){
   bash loguearT.sh "$COMANDO" "I" "Inicio de $COMANDO, cantidad de archivos ordenados a procesar: $QTY_ARCH"
 
   cargaClientes
-  printClientes
+  #DEBUG - printClientes
   cargaProductos
-  printProductos
+  #DEBUG - printProductos
 
   for ARCHIVO in $ARCH_ORD
     do
@@ -587,19 +615,17 @@ chequeaProceso(){
 	  do
 
 	  # Validacion Cabecera y Detalle
-	  echo "Validando linea: $LINEA"
+	  #echo "Validando linea: $LINEA"
 	  if [ `validacionCabeceraDetalle` -eq 1 ] ; then
 	      # Error en la validacion de la cabecera
-	      #perl moverT.pl "$INSTORD/$FILENAME.0" "$RECHDIR/" "$COMANDO"
-	      echo "rechazado por cabecera"
+	      bash loguearT.sh "$COMANDO" "A" "Rechazando el registro por error en cabecera"
 	      let QTYREGRECH=$QTYREGRECH+1
 	      continue
 	  fi
 	  
 	  # Validacion de cliente
 	  if [ `validacionCampo` -eq 1 ] ; then
-	      #perl moverT.pl "$INSTORD/$FILENAME" "$RECHDIR/" "$COMANDO"
-	      echo "rechazado por campo"
+	      bash loguearT.sh "$COMANDO" "A" "Rechazando el registro por error en campo"
 	      let QTYREGRECH=$QTYREGRECH+1
 	      continue
 	  fi
@@ -609,27 +635,25 @@ chequeaProceso(){
 	  CPID=`echo $LINEA | cut -d "," -f 3`
 	  PARQDIR="$GRUPO/parque_instalado"
 
-
-# 	  if [ `obtenerProducto` -eq 1 ] ; then
-# 	    echo "NO encontre el producto!"
-# 	    #TODO loguearT...
-# 	    let QTYREGRECH=$QTYREGRECH+1
-# 	    let QTYREGOK=$QTYREGOK-1
-# 	    continue
-# 	  fi
-
+	  let FOUND_PROD=0
 	  for t in ${TABLAPRODUCTOS[@]}
 	    do
 	    ID=`echo $t | cut -d "," -f 2`
 	    PROD=`echo $t | cut -d "," -f 1`
-	    bash loguearT.sh "PROD" "I" "comparando $CPID con $ID que responde a $PROD"
+	    
 	    if [ $ID -eq $CPID ] ; then
-	      bash loguearT.sh "PROD" "I" "EXITO!!"
+	      let FOUND_PROD=1
 	      break
 	    fi
 	  done
+	  
+	  if [ ! $FOUND_PROD -eq 1 ] ; then
+		let QTYREGOK=$QTYREGOK+1
+		let QTYREGRECH=$QTYREGRECH-1
+		bash loguearT.sh "$COMANDO" "I" "Codigo de producto no encontrado en archivo maestro"
+		continue
+	  fi
 	    
-	  echo "voy a grabar algo: $PROD"
 	  case $PROD in
 	    "INTERNETADSL")
 	      echo $LINEA >> "$PARQDIR/INTERNETADSL"
@@ -662,4 +686,10 @@ chequeaProceso(){
 	done
   done
   
-  #TODO loguearT con suma de registros
+  bash loguearT.sh "$COMANDO" "I" "Se leyeron $QTYREGOK registros correctamente"
+  bash loguearT.sh "$COMANDO" "I" "Se detectaron $QTYREGRECH registros que han sido rechazados"
+  bash loguearT.sh "$COMANDO" "I" "Se rechazaron $QTYARCHRECH archivos"
+  
+
+	
+  
