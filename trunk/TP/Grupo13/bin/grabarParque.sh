@@ -49,7 +49,9 @@ comparaFechas(){
 		|| ( [ $AUX_ANIO -eq $ANIO ] && [ $AUX_MES -eq $MES ] && [ $AUX_DIA -lt $DIA ] ) ; then
 		echo 0
 		return
-	fi	
+	fi
+	echo 2
+	return	
 }
 
 
@@ -562,7 +564,7 @@ chequeaProceso(){
 		  
 		  # Si no pude diferenciar por CSID debo ingresar de todos modos el valor
 		  # Antes tomo el recaudo de ver si no son el mismo, en ese caso no inserto
-		  if [ $LINEA_AUX == ${LINEA_ORD[i]} ]
+		  if [ $LINEA_AUX == ${LINEA_ORD[i]} ] ; then
 			#Son iguales
 			echo "iguales 100%, no inserto"
 			break
