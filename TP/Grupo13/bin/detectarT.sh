@@ -1,3 +1,11 @@
+#!/bin/bash
+
+# Grupo: 13
+# Name: iniciarT.sh
+
+source global.sh
+
+
 chequeaProceso(){
 
   #El Parametro 1 es el proceso que voy a buscar
@@ -22,18 +30,10 @@ agregarVariablePath(){
 
 
 #main()
-
-
-# esto se va a comentar luego. Inicia afuera
 LOOP=true
 CANT_LOOP=0
 ESPERA=1
-#ARRIDIR="./TP/ssoo1c-2012/TP/Grupo13/inst_recibidas/"
-ARRIDIR="../arribos/"
-DIRMAE="/home/lucas/TP/ssoo1c-2012/TP/Grupo13/maestro"
-ARCHIVO="$DIRMAE/sucu.mae"
-grupo="/home/lucas/TP/ssoo1c-2012/TP/Grupo13"
-RECHDIR="../inst_rechazadas"
+ARCHIVO="$MAEDIR/sucu.mae"
 
 
 if ([ ! -d $RECHDIR ]) then
@@ -41,8 +41,8 @@ if ([ ! -d $RECHDIR ]) then
    exit 1
 fi
 
-if ([ ! -d "$grupo/inst_recibidas" ]) then
-   echo "No existe Directorio de recibidos $grupo/inst_recibidas"
+if ([ ! -d "$GRUPO/inst_recibidas" ]) then
+   echo "No existe Directorio de recibidos $GRUPO/inst_recibidas"
    exit 1
 fi
 
@@ -84,15 +84,15 @@ do
                       END_DATE=$DATE
                    fi
  		   if ( ([ $START_DATE -lt $DATE ]) || ([ $START_DATE -eq $DATE ]) ) && ( ([ $END_DATE -gt $DATE ]) || ([ $END_DATE -eq $DATE ]) ) then 
-		      perl moverT.pl "$ARRIDIR$PARAM"  "$grupo/inst_recibidas"
-#		      bash loguearT.sh "$COMANDO" "I" "Archivo $PARAM enviado"  
+		      perl moverT.pl "$ARRIDIR$PARAM"  "$GRUPO/inst_recibidas"
+		      bash loguearT.sh "$COMANDO" "I" "Archivo $PARAM enviado"  
                    else
 		      perl moverT.pl "$ARRIDIR$PARAM"  "$RECHDIR"
-#	 	      bash loguearT.sh "$COMANDO" "I" "Archivo $PARAM rechazado por sucursal no vigente"  
+	 	      bash loguearT.sh "$COMANDO" "I" "Archivo $PARAM rechazado por sucursal no vigente"  
                    fi
 	       	else
   	           perl moverT.pl "$ARRIDIR$PARAM"  "$RECHDIR"		
-#		   bash loguearT.sh "$COMANDO" "I" "Archivo $PARAM rechazado por nombre incorrecto"  
+		   bash loguearT.sh "$COMANDO" "I" "Archivo $PARAM rechazado por nombre incorrecto"  
                 fi
             else
                echo "No existe el archivo de sucursales"
@@ -106,7 +106,7 @@ do
 
 
 
-   ENRECIBIDOS=`ls -1 "$grupo/inst_recibidas" | wc -l | awk '{print $1}'`
+   ENRECIBIDOS=`ls -1 "$GRUPO/inst_recibidas" | wc -l | awk '{print $1}'`
 
    echo "ENRECIBIDOS $ENRECIBIDOS"
    if ([ $ENRECIBIDOS -gt 0 ]) then

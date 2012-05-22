@@ -28,12 +28,17 @@ chequeaVariables(){
 
 }
 
+
+
+
+
 validacionCabeceraDetalle(){
 
-	echo "Validando linea: $LINEA"
+	#echo "Validando linea: $LINEA"
 	QTY_FIELDS=`echo $LINEA | grep , -o | wc -l`
 	if [ $QTY_FIELDS -gt 5 ] ; then
 	  # Campo mal formado, se envia a rechazados
+	  bash loguearT.sh "$COMANDO" "E" "Error validando archivo: $ARCHIVO, no posee el numero de campos indicados"
 	  echo 1
 	fi
 	
@@ -49,16 +54,43 @@ validacionCabeceraDetalle(){
 	  # Todos NO vacios
 	  echo 0
 	else
+	  bash loguearT.sh "$COMANDO" "E" "Error validando archivo: $ARCHIVO, alguno de los campos obligatorios se encuentra vacio"
 	  echo 1
 	fi
+	
+	#TODO: Validar formato Cabecera y detalle con validarFormato
 	
 	echo 0
 	
 }
 
-
-
-
+validacionCampo(){
+	#Valida la existencia del cliente en el archivo maestro
+	  
+	CLIENTES="$MAEDIR/cli.mae"
+	CUSTID=`echo $LINEA | cut -d "," -f 1`
+	  
+	#Recorro todas las lineas de clientes que tienen y si lo encuentro da OK, sino no
+	for LINEA_CLIENTES in `cat $CLIENTES`;
+	  do
+	  MAECLI= `echo $LINEA_CLIENTES | sed 's#;.*##' | grep $CUSTID`
+	  
+	  if [ -z $MAECLI ] ; then
+	    continue
+	  fi
+	  
+	  if [ $MAECLI == $CUSTID ] ; then
+	    let OK=1
+	  fi
+	done
+	  
+	if [ ! $OK -eq 1 ] ; then
+	  bash loguearT.sh "$COMANDO" "A" "Error en la validacion del archivo $ARCHIVO, el cliente $CUSTID no se encuentra en el archivo maestro"
+	  echo 1
+	fi
+	
+	echo 0
+}
 
 chequeaArchivosMaestros(){
 
@@ -213,10 +245,7 @@ chequeaProceso(){
 
 
 #main()
-
-  # For Debug Use: shows the vars on the current env.
-  # printVariables
-  
+ 
   bash loguearT.sh "$COMANDO" "I" "Comienzo de ejecucion de $COMANDO"
 
 
@@ -258,6 +287,10 @@ chequeaProceso(){
   QTY_ARCH=`ls $INSTREC | wc -l`
   bash loguearT.sh "$COMANDO" "I" "Inicio de $COMANDO, cantidad de archivos a procesar: $QTY_ARCH"
 
+  let QTYREGRECH=0
+  let QTYREGOK=0
+  let QTYARCHRECH=0
+  
   for ARCHIVO in $ARCH_REC; 
     do
 	bash loguearT.sh "$COMANDO" "I" "Procesando archivo: $ARCHIVO"
@@ -273,12 +306,11 @@ chequeaProceso(){
 	if [ -f "$INSTPROC/$ARCHIVO" ] ; then
 		perl moverT.pl "$INSTREC/$ARCHIVO" "$RECHDIR/" $COMANDO
 		bash loguearT.sh "$COMANDO" "A" "Archivo: $ARCHIVO duplicado, moviendo a $INSTREC"
+		let QTYARCHRECH=$QTYARCHRECH+1
 		continue
 	fi
 
 	let QTYLINEAS=0
-	let QTYRECH=0
-	let QTYOK=0
 	
     # Formato registros detalle/cabecera
     # Id del Cliente - numérico - CUSTOMER_ID
@@ -438,13 +470,13 @@ chequeaProceso(){
 	  #let QTYLINEAS=$QTYLINEAS+1	
 	done
 	
-	let QTYOK=$QTYOK+1
+	let QTYREGOK=$QTYREGOK+1
 	
 	# Grabar archivo ordenado en inst_ordenadas, si existe reemplazarlo
 	# TODO REMPLAZO
 	for (( i=0;i<$QTYLINEAS;i++)); do 
-	  FILENAME=`echo $ARCHIVO | sed 's/.*\///'`
-	  #echo "Guardando en archivo $INSTORD/$FILENAME"
+	  FILENAME=`echo $ARCHIVO | sed 's#.*\/##'`
+	  echo "Guardando en archivo $INSTORD/$FILENAME"
 	  echo ${LINEA_ORD[i]} >> "$INSTORD/$FILENAME"
 	done
 	
@@ -459,90 +491,61 @@ chequeaProceso(){
   QTY_ARCH=`ls $INSTORD | wc -l`
   bash loguearT.sh "$COMANDO" "I" "Inicio de $COMANDO, cantidad de archivos ordenados a procesar: $QTY_ARCH"
 
-  for ARCHIVO in $ARCH_ORD; 
+  for ARCHIVO in $ARCH_ORD
     do
-	
-	FILENAME=`echo $ARCHIVO | sed 's/.*\///'`
+	echo "entre"
+	FILENAME=`echo $ARCHIVO | sed 's#.*\/##'`
 	
 	for LINEA in `cat $ARCHIVO`
 	  do
 	
 	  # Validacion Cabecera y Detalle
-	  if [ `validacionCabeceraDetalle` -eq 1 ]
-		# Error en la validacion de la cabecera
-		bash loguearT.sh "$COMANDO" "A" "Error en la validacion del archivo $ARCHIVO"
-		perl moverT.pl "$INSTORD/$FILENAME" "$RECHDIR/" "$COMANDO"
+	  if [ `validacionCabeceraDetalle` -eq 1 ] ; then
+	      # Error en la validacion de la cabecera
+	      perl moverT.pl "$INSTORD/$FILENAME" "$RECHDIR/" "$COMANDO"
+	      let QTYREGRECH=$QTYREGRECH+1
+	      continue
 	  fi
 	  
-	  #validacionCampo
-	  #validacionCampo(){
-	  #Valida la existencia del cliente en el archivo maestro
-	  
-	  CLIENTES="$MAEDIR/cli.mae"
-	  CUSTID=`echo $LINEA | cut -d "," -f 1`
-	  #Recorro todas las lineas de clientes que tienen y si lo encuentro da OK, sino no
-	  MAECLI= `echo $LINEA_CLIENTES | sed 's/;.*//' | grep $CUSTID
-	  
+	  # Validacion de cliente
+	  if [ `validacionCampo` -eq 1 ] ; then
+	      perl moverT.pl "$INSTORD/$FILENAME" "$RECHDIR/" "$COMANDO"
+	      let QTYREGRECH=$QTYREGRECH+1
+	      continue
+	  fi
 	done
+	let QTYREGOK=$QTYREGOK+1
 	
+	CPID=`echo $LINEA | cut -d "," -f 3`
+	PARQDIR="$GRUPO/parque_instalado"
 	
-	
+	case $CPID in
+	  "INTERNETADSL")
+	      echo $LINEA >> "$PARQDIR/INTERNETADSL"
+	      bash loguearT.sh "$COMANDO" "I" "Grabando entrada en archivo $PARQDIR/INTERNETADSL"
+	      ;;
+	  "INTERNETCABLEMODEM")
+	      echo $LINEA >> "$PARQDIR/INTERNETCABLEMODEM"
+	      bash loguearT.sh "$COMANDO" "I" "Grabando entrada en archivo $PARQDIR/INTERNETCABLEMODEM"
+	      ;;
+	  "INTERNETDIALUP")
+	      echo $LINEA >> "$PARQDIR/INTERNETDIALUP"
+	      bash loguearT.sh "$COMANDO" "I" "Grabando entrada en archivo $PARQDIR/INTERNETDIALUP"
+	      ;;
+	  "INTERNETINALAMBRICO")
+	      echo $LINEA >> "$PARQDIR/INTERNETINALAMBRICO"
+	      bash loguearT.sh "$COMANDO" "I" "Grabando entrada en archivo $PARQDIR/INTERNETINALAMBRICO"
+	      ;;
+	  "TVPORAIRE")
+	      echo $LINEA >> "$PARQDIR/TVPORAIRE"
+	      bash loguearT.sh "$COMANDO" "I" "Grabando entrada en archivo $PARQDIR/TVPORAIRE"
+	      ;;
+	  "TVPORCABLE")
+	      echo $LINEA >> "$PARQDIR/TVPORCABLE"
+	      bash loguearT.sh "$COMANDO" "I" "Grabando entrada en archivo $PARQDIR/TVPORCABLE"
+	      ;;
+	  *)
+	    bash loguearT.sh "$COMANDO" "A" "Commercial Plan ID no reconocido"
+	    ;;	  
+	esac
   done
-  
-  
-  
-	
-	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
