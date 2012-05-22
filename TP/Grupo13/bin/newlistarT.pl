@@ -18,6 +18,7 @@ $cliMae = $maeDir."/cli.mae";
 $prodMae = $maeDir."/prod.mae";
 $sucMae = $maeDir."/sucu.mae";
 $parqueInstalado=$grupo."/parque_instalado";
+$reportes=$grupo."/reportes";
 #/var/tmp/TP/Grupo13/parque_instalado/TVPORCABLE
 }
 
@@ -65,37 +66,83 @@ close (F_PRODUCTOS);
 
 sub parseArgs{
 
+	$cantParams = @ARGV;
+	$matchSucFlag=0;
+	$matchCliFlag=0;
+	$matchStrFlag=0;
+	$printFlag=0;
+	$printScreen=0;
+	
+	if($cantParams == 1) {
+	# Si encuentra -h imprime ayuda y sale
+        if($ARGV[0] eq '-h' || $ARGV[0] eq '--help') {
+            printHelp();
+        }
+        else {
+            print "Comando incorrecto \n";
+			printHelp();
+        }
+        return 1;
+    }
+	
+	for($i = 0; $i < $cantParams; $i++) {
+	
+		if ( $ARGV[$i] eq '-c' ) {
+			# Si encuentra -c setea el flag de impresion solo por pantalla
+			$printScreen=1;
+		}
+	
+		if ( $ARGV[$i] eq '-e' ) {
+			# Si encuentra -e setea el flag de impresion en archivo
+			$printFlag=1;	
+		}
+		
+		if ( $ARGV[$i] eq '-t' ) {
+			# Si encuentra -t determina un arreglo con los archivos a mirar (nombre). Tambien valida que sean validos y
+			# que si es * exista un archivo en el directorio
+			$i++;
+			while ( (($ARGV[$i] ne '-e') || ($ARGV[$i] ne '-c') || ($ARGV[$i] ne '-h') || ($ARGV[$i] ne '-s') || ($ARGV[$i] ne '-k') || ($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
+				@filesToProcess=$ARGV[$i];
+				$i++;
+			}
+		}
+		
+		if ( $ARGV[$i] eq '-s' ) {
+		# Si encuentra -s guarda un array de id sucursales a matchear, si es * lo guarda y es interpretado luego como any
+		# Tambien realiza la validacion de los elementos, si alguno no es numerico (a excepcion de *) devuelve error.
+			$i++;
+			$j=0;
+			while ( (($ARGV[$i] ne '-e') || ($ARGV[$i] ne '-c') || ($ARGV[$i] ne '-h') || ($ARGV[$i] ne '-s') || ($ARGV[$i] ne '-k') || ($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
+				@sucArray=$ARGV[$i];
+				$matchSucFlag=1;
+				$i++;
+				$j++;
+				if ($j > 1){
+					print "El rango no pueden ser mas de dos elementos!"
+					exit 1
+				}
+			}
+		}
 
-# Si encuentra -h imprime ayuda y sale
-
-
-# Si encuentra -c setea el flag de impresion solo por pantalla
-$printScree=1;
-
-# Si encuentra -e setea el flag de impresion en archivo
-$printFlag=1;
-
-# Si encuentra -t determina un arreglo con los archivos a mirar (nombre). Tambien valida que sean validos y
-# que si es * exista un archivo en el directorio
-
-@filesToProcess=("TVPORCABLE");
-
-
-# Si encuentra -s guarda un array de id sucursales a matchear, si es * lo guarda y es interpretado luego como any
-# Tambien realiza la validacion de los elementos, si alguno no es numerico (a excepcion de *) devuelve error.
-@sucArray =("1044");
-$matchSucFlag=1;
-
-# Si encuentra -k guarda un array de id clientes a matchear, si es * lo guarda y es interpretado luego como any
-# Tambien realiza la validacion de los elementos, si alguno no es numerico (a excepcion de *) devuelve error.
-@cliArray =("199","194");
-$matchCliFlag=1;
-
-# Si encuentra -p guarda el string a matchear con el campo itemName.
-$matchStrFlag=1;
-$stringToMatch="Comercial";
-
-#Si hay mas de 11 tira error por exceder el maximo
+		if ( $ARGV[$i] eq '-k' ) {
+		# Si encuentra -k guarda un array de id clientes a matchear, si es * lo guarda y es interpretado luego como any
+		# Tambien realiza la validacion de los elementos, si alguno no es numerico (a excepcion de *) devuelve error.
+			$i++;
+			while ( (($ARGV[$i] ne '-e') || ($ARGV[$i] ne '-c') || ($ARGV[$i] ne '-h') || ($ARGV[$i] ne '-s') || ($ARGV[$i] ne '-k') || ($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
+				@cliArray=$ARGV[$i];
+				$matchCliFlag=1;
+				$i++;
+			}
+		}
+		
+		if ( $ARGV[$i] eq '-p' ) {
+			# Si encuentra -p guarda el string a matchear con el campo itemName.
+			$i++;
+			while ( (($ARGV[$i] ne '-e') || ($ARGV[$i] ne '-c') || ($ARGV[$i] ne '-h') || ($ARGV[$i] ne '-s') || ($ARGV[$i] ne '-k') || ($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
+				$stringToMatch=$ARGV[$i];
+				$matchStrFlag=1;
+			}
+		}
 
 }
 
@@ -105,31 +152,42 @@ sub addElementToBuffer(){
 
 sub generateOutputData{
 
+
 # Por cada archivo en el array lo abro y recorro secuencialmente
+# Si file to process es * debo leer todos los archivos del directorio
+if ( $filesToProcess[0] == "*" ){
+	$i=0;
+	opendir(DIR, $parqueInstalado) or die $!;
+	while ( my $file[] = readdir(DIR)) {
+        # Evito todo lo que comienze con "."
+        if ($file =~ m/^\./){
+		$i++;
+		next;
+		}
+		$filesToProcess[$i] = $file;
+    }
+    closedir(DIR);
+}
+
 foreach (@filesToProcess ){
 	open F_INPUT, "<", "$parqueInstalado/$_" or die "No se pudo abrir el archivo de $cliMae";
 	while (<F_INPUT>){
 		chomp;
 		($f_idSuc, $f_idCli, $desc)=split(",");
 		$flagEscritura = 0;
-		#print "$f_idSuc\n"; 
 		$prodTypeNameComp = $desc;
 		# Aplico los filtros de producto, cliente y sucursal
 		
 		# Primero chequeo si debeo ver la sucursal, si tiene mas de un elemento es busqueda por rango
 		# Sino busqueda precisa o con wildcard
 		if ( $matchSucFlag == 1) {
-			print "Comparo las suc";
 			$sucArraySize = $#sucArray + 1;
-			print "cantidad de sucs: $sucArraySize";
 			if ($sucArraySize == 2){
 				if ( $f_idSuc > $sucArray[0] && $f_idSuc < $sucArray[1] ){
 					#Esta dentro del rango
 					$flagEscritura = 1;
 				}
 			}
-
-			print "\nsucArray: $sucArray[0]\n";
 			if ( $sucArray[0] eq "*"){
 				$flagEscritura = 1;
 			}
@@ -178,12 +236,12 @@ foreach (@filesToProcess ){
 		# Si el resultado es OK guardo en mi buffer de salida
 		addElementToBuffer();
 	}
+	# Cierro el archivo
+	close (F_INPUT);
 }
 
-
-# Cierro el archivo
-
 # Ordeno buffer de salida por idCliente decreciente
+# sort
 
 };
 
@@ -200,7 +258,19 @@ sub printData{
 
 # Cierro el archivo de reporte
 
-
+	if ($printFlag == 1){
+		for $aref ( @bufferOutput ) {
+			print "\t [ @$aref ],\n";
+		};
+	}
+	
+	if ($printScreen == 1){
+		
+		open F_REPORTE, ">", "$reportes/reporte.rep" or die "No se pudo abrir el archivo de $cliMae";
+		for $aref ( @bufferOutput ) {
+			print F_REPORTE "\t [ @$aref ],\n"; 
+		};
+	}
 }
 
 sub printHelp{
@@ -208,33 +278,25 @@ sub printHelp{
 # Imprime informacion de uso de la herramienta
 # Usage:	listarT.pl -<c|e|h|s|k|p|t>
 #	
-#
-#
-#
-#
-#
-#
-#
-#
-
+	print "USAGE: listarT.pl -<c|e|h|s|k|p|t> ";
 
 }
 
 
 # main()
 
-parseConfig();
-parseArgs();
+if(parseArgs(@ARGV) != 0){
+		printHelp();
+        exit;
+}
 
+parseConfig();
 
 loadHashes();
-print "\nfin load hash\n";
 generateOutputData();
 printData();
 
-    for $aref ( @bufferOutput ) {
-        print "\t [ @$aref ],\n";
-    };
+
 
 
 
