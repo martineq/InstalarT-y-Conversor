@@ -12,8 +12,12 @@ chequeaProceso(){
   
 }
 
-
-
+agregarVariablePath(){
+  #echo $PATH
+  NEWPATH=`pwd`
+  export PATH=$PATH:$NEWPATH
+  #echo $PATH
+}
 
 
 
@@ -23,18 +27,27 @@ chequeaProceso(){
 # esto se va a comentar luego. Inicia afuera
 LOOP=true
 CANT_LOOP=0
-ESPERA=5
+ESPERA=1
 #ARRIDIR="./TP/ssoo1c-2012/TP/Grupo13/inst_recibidas/"
-ARRIDIR="../inst_recibidas/"
+ARRIDIR="../arribos/"
 DIRMAE="/home/lucas/TP/ssoo1c-2012/TP/Grupo13/maestro"
 ARCHIVO="$DIRMAE/sucu.mae"
+grupo="/home/lucas/TP/ssoo1c-2012/TP/Grupo13"
+RECHDIR="../inst_rechazadas"
 
 
-#Detecto si detectarT esta corriendo
-DETECTAR_PID=`chequeaProceso detectarT.sh $$`
-#if ([ -z "$DETECTAR_PID" ])then 
- while [ $CANT_LOOP -lt 5 ]
- do
+if ([ ! -d $RECHDIR ]) then
+   echo "No existe Directorio de Rechazos $RECHDIR"
+   exit 1
+fi
+
+if ([ ! -d "$grupo/inst_recibidas" ]) then
+   echo "No existe Directorio de recibidos $grupo/inst_recibidas"
+   exit 1
+fi
+
+while [ $CANT_LOOP -lt 1 ]
+do
    if ([ -d $ARRIDIR ]) then
         ARCHIVOS=`ls -p $ARRIDIR | grep -v '/$'`
         for PARAM in $ARCHIVOS
@@ -42,14 +55,11 @@ DETECTAR_PID=`chequeaProceso detectarT.sh $$`
             #Obtengo Sucursal y mes
             REGION=`echo "$PARAM" | cut -f 1 -d '-'`
             SUCURSAL=`echo "$PARAM" | cut -f 2 -d '-'`
-	    echo "Region: $REGION"
-	    echo "Sucursal: $SUCURSAL"
 	    if ([ -f $ARCHIVO ]) then
  	       a=0
     	       a=`cut -f1,3 -d',' $ARCHIVO | grep $REGION,$SUCURSAL -n | cut -f1 -d':'`
 
 	       if ([ $a ]) then
-              	   echo "a: $a"
                    START_DATE=`head -$a $ARCHIVO | tail -1 | cut -f7 -d','`
                    END_DATE=`head -$a $ARCHIVO | tail -1 | cut -f8 -d','` 
 
@@ -57,14 +67,12 @@ DETECTAR_PID=`chequeaProceso detectarT.sh $$`
 	           #FECHA ACTUAL PARA COMPARAR
                    DATE=`date +%y%m%d`
                    DATE=`echo "20$DATE"`
-                   echo "DATE $DATE"
 
 	           #FECHA DE INICIO SUCURSAL
                    ANO=`echo "$START_DATE" | cut -f3 -d'/'`
 	           MES=`echo "$START_DATE" | cut -f2 -d'/'`
 	           DIA=`echo "$START_DATE" | cut -f1 -d'/'`
 	           START_DATE=`echo $ANO$MES$DIA`
- 	           echo "START_DATE: $START_DATE"
 	       
                    if ( [ $END_DATE ] ) then
 	              #FECHA DE FIN SUCURSAL
@@ -75,39 +83,53 @@ DETECTAR_PID=`chequeaProceso detectarT.sh $$`
                    else
                       END_DATE=$DATE
                    fi
-		   echo "END_DATE: $END_DATE"
  		   if ( ([ $START_DATE -lt $DATE ]) || ([ $START_DATE -eq $DATE ]) ) && ( ([ $END_DATE -gt $DATE ]) || ([ $END_DATE -eq $DATE ]) ) then 
-		      echo "ENTRA" 
+		      perl moverT.pl "$ARRIDIR$PARAM"  "$grupo/inst_recibidas"
+#		      bash loguearT.sh "$COMANDO" "I" "Archivo $PARAM enviado"  
                    else
-                      echo "NO ENTRA"
+		      perl moverT.pl "$ARRIDIR$PARAM"  "$RECHDIR"
+#	 	      bash loguearT.sh "$COMANDO" "I" "Archivo $PARAM rechazado por sucursal no vigente"  
                    fi
 	       	else
-		   echo "No Existe la combinación Región-sucursal"
+  	           perl moverT.pl "$ARRIDIR$PARAM"  "$RECHDIR"		
+#		   bash loguearT.sh "$COMANDO" "I" "Archivo $PARAM rechazado por nombre incorrecto"  
                 fi
             else
-               echo "No encontre"
+               echo "No existe el archivo de sucursales"
             fi
         done
    else
-     echo "No Existe ARRIDIR!"
+     echo "No Existe $ARRIDIR!"
    fi
 
    let CANT_LOOP=CANT_LOOP+1
-   echo "CANT_LOOP: $CANT_LOOP"
+
+
+
+   ENRECIBIDOS=`ls -1 "$grupo/inst_recibidas" | wc -l | awk '{print $1}'`
+
+   echo "ENRECIBIDOS $ENRECIBIDOS"
+   if ([ $ENRECIBIDOS -gt 0 ]) then
+      #Detecto si grabarParqueT esta corriendo	
+      GRABARPARQUET_PID=`chequeaProceso grabarParqueT.sh $$`
+      if [ -z "$GRABARPARQUET_PID" ]; then
+#         bash grabarParqueT.sh
+#         echo "grabarParqueT corriendo bajo el numero de proceso: <`chequeaProceso grabarParqueT.sh $$`>" 
+	  echo "TODO BIEN"
+      else
+#         bash loguearT.sh "$COMANDO" "E" "Demonio grabarParqueT ya ejecutado bajo PID: <`chequeaProceso grabarParqueT.sh $$`>" 
+#         echo "Error: grabarParqueT ya ejecutado bajo PID: <`chequeaProceso grabarParqueT.sh $$`>"
+          echo "ERROR"
+         exit 1
+      fi
+   fi
+
+
+
    sleep ${ESPERA}s
- done
+done
 
- LOOP=0
+LOOP=0
    	
- exit 0
-
-#else
-#   echo "PID $DETECTAR_PID"
-#   echo "YA ESTA CORRIENDO detectarT.sh"
-#   exit 1
-#fi
-
-
-
-
+exit 0
 
