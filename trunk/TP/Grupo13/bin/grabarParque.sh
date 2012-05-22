@@ -40,6 +40,7 @@ validacionCabeceraDetalle(){
 	  # Campo mal formado, se envia a rechazados
 	  bash loguearT.sh "$COMANDO" "E" "Error validando archivo: $ARCHIVO, no posee el numero de campos indicados"
 	  echo 1
+	  return 1
 	fi
 	
 	CUSTID=`echo $LINEA | cut -d "," -f 1`
@@ -53,40 +54,104 @@ validacionCabeceraDetalle(){
 	  && [ ! -z $CSID ] && [ ! -z $CSR ] && [ ! -z $ITEMID ] ; then
 	  # Todos NO vacios
 	  echo 0
+	  return 0
 	else
 	  bash loguearT.sh "$COMANDO" "E" "Error validando archivo: $ARCHIVO, alguno de los campos obligatorios se encuentra vacio"
 	  echo 1
+	  return 1
 	fi
 	
 	#TODO: Validar formato Cabecera y detalle con validarFormato
 	
-	echo 0
-	
+	echo 0	
 }
+
+cargaClientes(){
+
+      CLIENTES="$MAEDIR/cli.mae"
+      TABLACLIENTES=( `cat "$CLIENTES" | sed 's#;.*##'`)
+}
+
+printClientes(){
+
+for t in ${TABLACLIENTES[@]}
+  do
+  echo $t
+done
+
+}
+
+
+cargaProductos(){
+  PRODUCTOS="$MAEDIR/prod.mae"
+  TABLAPRODUCTOS=( `cat $PRODUCTOS | cut -d "," -f 2,3 ` )
+}
+
+
+obtenerProducto(){
+  let OK=0
+  for t in ${TABLAPRODUCTOS[@]}
+    do
+    ID=`echo $t | cut -d "," -f 2`
+    $PROD=`echo $t | cut -d "," -f 1`
+    bash loguearT.sh "PROD" "I" "comparando $CPID con $ID que responde a $PROD"
+    if [ $ID -eq $CPID ] ; then
+      bash loguearT.sh "PROD" "I" "EXITO!!"
+      let OK=1
+      break
+    fi
+  done
+  
+  if [ $OK -eq 1 ] ; then
+    echo 0
+    return 0
+  fi
+  echo 1
+}
+
+
+printProductos(){
+for t in ${TABLAPRODUCTOS[@]}
+  do
+  echo $t
+done
+}
+
 
 validacionCampo(){
 	#Valida la existencia del cliente en el archivo maestro
 	  
-	CLIENTES="$MAEDIR/cli.mae"
-	CUSTID=`echo $LINEA | cut -d "," -f 1`
-	  
-	#Recorro todas las lineas de clientes que tienen y si lo encuentro da OK, sino no
-	for LINEA_CLIENTES in `cat $CLIENTES`;
+	
+ 	CUSTID=`echo $LINEA | cut -d "," -f 1`
+# 	 
+# 	#Recorro todas las lineas de clientes que tienen y si lo encuentro da OK, sino no
+ 	let OK=0
+# 	for LINEA_CLIENTES in `cat $CLIENTES`;
+# 	  do
+# 	  MAECLI= `echo $LINEA_CLIENTES | sed 's#;.*##' | grep $CUSTID`
+# 	  
+# 	  if [ -z $MAECLI ] ; then
+# 	    continue
+# 	  fi
+# 	  
+# 	  if [ $MAECLI == $CUSTID ] ; then
+# 	    let OK=1
+# 	  fi
+# 	done
+	for t in ${TABLACLIENTES[@]}
 	  do
-	  MAECLI= `echo $LINEA_CLIENTES | sed 's#;.*##' | grep $CUSTID`
-	  
-	  if [ -z $MAECLI ] ; then
-	    continue
-	  fi
-	  
-	  if [ $MAECLI == $CUSTID ] ; then
+	  bash loguearT.sh "TEST" "I" "Comparando $t con $CUSTID"
+	  if [ $t == $CUSTID ] ; then
 	    let OK=1
+	    bash loguearT.sh "TEST" "I" "EXITO!!"
+	    break
 	  fi
 	done
-	  
+
 	if [ ! $OK -eq 1 ] ; then
 	  bash loguearT.sh "$COMANDO" "A" "Error en la validacion del archivo $ARCHIVO, el cliente $CUSTID no se encuentra en el archivo maestro"
 	  echo 1
+	  return 1
 	fi
 	
 	echo 0
@@ -352,8 +417,25 @@ chequeaProceso(){
 		AUX_CPID=`echo ${LINEA_ORD[INDEX]} | cut -d "," -f 3`
 		AUX_CSID=`echo ${LINEA_ORD[INDEX]} | cut -d "," -f 4`
 		
-		#echo "Linea auxiliar: $AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
+		echo "Linea auxiliar: $AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
         LINEA_AUX="$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"
+        
+		if [ -z $CUSTID ] || [ -z $OPDATE ] || [ -z $CPID ] \
+		  || [ -z $CSID ] || [ -z $CSR ] || [ -z $ITEMID ] ; then
+		  # Todos NO vacios
+		  echo "alguno de aca: $LINEA_AUX esta vacio"
+		  continue
+		fi
+		
+		if [ -z $AUX_CUSTID ] || [ -z $AUX_OPDATE ] || [ -z $AUX_CPID ] \
+		  || [ -z $AUX_CSID ] ; then
+		  # Todos NO vacios
+		  echo "alguno de estos es vacio?: $AUX_CUSTID,$AUX_OPDATE,$AUX_CPID,$AUX_CSID,$CSR,$ITEMID"
+		  continue
+		fi
+		
+        
+        
 		#echo "linea aux a agregar es: $LINEA_AUX"
 		# Primero comparo por CUST_ID
 		if [ $AUX_CUSTID -gt $CUSTID ] ; then
@@ -491,6 +573,11 @@ chequeaProceso(){
   QTY_ARCH=`ls $INSTORD | wc -l`
   bash loguearT.sh "$COMANDO" "I" "Inicio de $COMANDO, cantidad de archivos ordenados a procesar: $QTY_ARCH"
 
+  cargaClientes
+  printClientes
+  cargaProductos
+  printProductos
+
   for ARCHIVO in $ARCH_ORD
     do
 	echo "entre"
@@ -498,54 +585,81 @@ chequeaProceso(){
 	
 	for LINEA in `cat $ARCHIVO`
 	  do
-	
+
 	  # Validacion Cabecera y Detalle
+	  echo "Validando linea: $LINEA"
 	  if [ `validacionCabeceraDetalle` -eq 1 ] ; then
 	      # Error en la validacion de la cabecera
-	      perl moverT.pl "$INSTORD/$FILENAME" "$RECHDIR/" "$COMANDO"
+	      #perl moverT.pl "$INSTORD/$FILENAME.0" "$RECHDIR/" "$COMANDO"
+	      echo "rechazado por cabecera"
 	      let QTYREGRECH=$QTYREGRECH+1
 	      continue
 	  fi
 	  
 	  # Validacion de cliente
 	  if [ `validacionCampo` -eq 1 ] ; then
-	      perl moverT.pl "$INSTORD/$FILENAME" "$RECHDIR/" "$COMANDO"
+	      #perl moverT.pl "$INSTORD/$FILENAME" "$RECHDIR/" "$COMANDO"
+	      echo "rechazado por campo"
 	      let QTYREGRECH=$QTYREGRECH+1
 	      continue
 	  fi
-	done
-	let QTYREGOK=$QTYREGOK+1
 	
-	CPID=`echo $LINEA | cut -d "," -f 3`
-	PARQDIR="$GRUPO/parque_instalado"
+	  let QTYREGOK=$QTYREGOK+1
 	
-	case $CPID in
-	  "INTERNETADSL")
+	  CPID=`echo $LINEA | cut -d "," -f 3`
+	  PARQDIR="$GRUPO/parque_instalado"
+
+
+# 	  if [ `obtenerProducto` -eq 1 ] ; then
+# 	    echo "NO encontre el producto!"
+# 	    #TODO loguearT...
+# 	    let QTYREGRECH=$QTYREGRECH+1
+# 	    let QTYREGOK=$QTYREGOK-1
+# 	    continue
+# 	  fi
+
+	  for t in ${TABLAPRODUCTOS[@]}
+	    do
+	    ID=`echo $t | cut -d "," -f 2`
+	    PROD=`echo $t | cut -d "," -f 1`
+	    bash loguearT.sh "PROD" "I" "comparando $CPID con $ID que responde a $PROD"
+	    if [ $ID -eq $CPID ] ; then
+	      bash loguearT.sh "PROD" "I" "EXITO!!"
+	      break
+	    fi
+	  done
+	    
+	  echo "voy a grabar algo: $PROD"
+	  case $PROD in
+	    "INTERNETADSL")
 	      echo $LINEA >> "$PARQDIR/INTERNETADSL"
 	      bash loguearT.sh "$COMANDO" "I" "Grabando entrada en archivo $PARQDIR/INTERNETADSL"
 	      ;;
-	  "INTERNETCABLEMODEM")
+	    "INTERNETCABLEMODEM")
 	      echo $LINEA >> "$PARQDIR/INTERNETCABLEMODEM"
 	      bash loguearT.sh "$COMANDO" "I" "Grabando entrada en archivo $PARQDIR/INTERNETCABLEMODEM"
 	      ;;
-	  "INTERNETDIALUP")
+	    "INTERNETDIALUP")
 	      echo $LINEA >> "$PARQDIR/INTERNETDIALUP"
 	      bash loguearT.sh "$COMANDO" "I" "Grabando entrada en archivo $PARQDIR/INTERNETDIALUP"
 	      ;;
-	  "INTERNETINALAMBRICO")
+	    "INTERNETINALAMBRICO")
 	      echo $LINEA >> "$PARQDIR/INTERNETINALAMBRICO"
 	      bash loguearT.sh "$COMANDO" "I" "Grabando entrada en archivo $PARQDIR/INTERNETINALAMBRICO"
 	      ;;
-	  "TVPORAIRE")
+	    "TVPORAIRE")
 	      echo $LINEA >> "$PARQDIR/TVPORAIRE"
 	      bash loguearT.sh "$COMANDO" "I" "Grabando entrada en archivo $PARQDIR/TVPORAIRE"
 	      ;;
-	  "TVPORCABLE")
+	    "TVPORCABLE")
 	      echo $LINEA >> "$PARQDIR/TVPORCABLE"
 	      bash loguearT.sh "$COMANDO" "I" "Grabando entrada en archivo $PARQDIR/TVPORCABLE"
 	      ;;
-	  *)
-	    bash loguearT.sh "$COMANDO" "A" "Commercial Plan ID no reconocido"
-	    ;;	  
-	esac
+	    *)
+	      bash loguearT.sh "$COMANDO" "A" "Commercial Plan ID no reconocido"
+	      ;;	  
+	  esac
+	done
   done
+  
+  #TODO loguearT con suma de registros
