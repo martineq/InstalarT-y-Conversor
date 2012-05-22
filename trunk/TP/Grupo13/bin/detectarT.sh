@@ -1,7 +1,26 @@
 #!/bin/bash
 
-# Grupo: 13
-# Name: global.sh
+#########################################
+#					#
+#	Sistemas Operativos 75.08	#
+#	Grupo: 	13			#
+#	Nombre:	detectarT.sh		#
+#					#
+#########################################
+
+
+##################################################
+# 1. Verificar si se puede iniciar la ejecución del comando (inicialización de ambiente realizada,
+# y que no haya otro demonio corriendo).
+#
+# 2. Se debe chequear la existencia de archivos en el directorio ARRIDIR y si existen archivos,
+# por cada archivo que se detecta
+# 
+# 3. Una vez que se hayan procesado todos los archivos que existen en ARRIDIR se debe
+# chequear la existencia de archivos en el directorio $grupo/inst_recibidas (ya sean del ciclo
+# actual o de ciclos anteriores). Si existen archivos en $grupo/inst_recibidas
+##################################################
+
 
 source global.sh
 COMANDO="detectarT"

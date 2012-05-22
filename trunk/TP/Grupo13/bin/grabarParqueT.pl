@@ -3,7 +3,7 @@
 #Grupo: 13
 #Autor: Ariel M. y Ariel L.
 #Fecha: 18/05/2012
-#Comando: GrabarParqueT
+#Comando: GrabarParqueT.pl
 #Descripcion: Genera los archivos de parque instalado
 #Parametros: -
 # ------------------------------------------------------------------------------------------------

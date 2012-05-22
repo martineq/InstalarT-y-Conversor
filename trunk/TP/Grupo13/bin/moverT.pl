@@ -1,9 +1,11 @@
 #!/usr/bin/perl 
+
 # ------------------------------------------------------------------------------------------------
+# Sistemas Operativos 75.08
 #grupo: 13
 #autor: Ariel M.
 #fecha: 30/04/2012
-#comando: moverT
+#comando: moverT.pl
 #Parametros
 #     Parametro 1 (obligatorio): origen  --> el path de este archivo no tiene que tener asignado un numero de secuencia
 #     Parametro 2 (obligatorio): destino --> este directorio tiene que finalizar con la barra

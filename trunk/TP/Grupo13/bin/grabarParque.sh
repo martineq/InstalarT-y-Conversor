@@ -1,9 +1,14 @@
 #!/bin/bash
 
-# Grupo: 13
-# Name: logT.sh
+#########################################
+#					#
+#	Sistemas Operativos 75.08	#
+#	Grupo: 	13			#
+#	Nombre:	grabarParqueT.sh	#
+#					#
+#########################################
+
 # Usage: see below
-#
 
 source global.sh
 COMANDO="grabarParque"
@@ -681,8 +686,10 @@ chequeaProceso(){
 	  let FOUND_DESC=0
 	  let i=0
           CUSTID=`echo $LINEA | cut -d "," -f 1`
-          CSR=`echo $LINEA | cut -d "," -f 5 | sed -e 's///g'`
-          ITEMID=`echo $LINEA | cut -d "," -f 6 | sed -e 's///g'`
+          CSR=`echo $LINEA | cut -d "," -f 5 | sed -e 's/
+//g'`
+          ITEMID=`echo $LINEA | cut -d "," -f 6 | sed -e 's/
+//g'`
 	  OLDIFS=$IFS
 	  IFS=$'\n'
 	  for s in ${TABLADESCRIPCIONES[@]}
