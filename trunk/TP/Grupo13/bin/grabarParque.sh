@@ -582,10 +582,10 @@ chequeaProceso(){
 	done
 		
 	# Grabar archivo ordenado en inst_ordenadas, si existe reemplazarlo
-	if [ -f "$INSTORD/$FILENAME" ] ; then
+	#if [ -f "$INSTORD/$FILENAME" ] ; then
 	  # Vacio el archivo - eliminandolo -
-	  `rm $INSTORD/$FILENAME`
-	fi
+	 # `rm $INSTORD/$FILENAME`
+	#fi
 	
 	for (( i=0;i<$QTYLINEAS;i++)); do 
 	  FILENAME=`echo $ARCHIVO | sed 's#.*\/##'`
