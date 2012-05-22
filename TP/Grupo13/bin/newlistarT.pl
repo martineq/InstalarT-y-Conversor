@@ -83,17 +83,17 @@ $printFlag=1;
 
 # Si encuentra -s guarda un array de id sucursales a matchear, si es * lo guarda y es interpretado luego como any
 # Tambien realiza la validacion de los elementos, si alguno no es numerico (a excepcion de *) devuelve error.
-@sucArray =();
+@sucArray =("1044");
 $matchSucFlag=1;
 
 # Si encuentra -k guarda un array de id clientes a matchear, si es * lo guarda y es interpretado luego como any
 # Tambien realiza la validacion de los elementos, si alguno no es numerico (a excepcion de *) devuelve error.
-@cliArray =();
+@cliArray =("199","194");
 $matchCliFlag=1;
 
 # Si encuentra -p guarda el string a matchear con el campo itemName.
 $matchStrFlag=1;
-$stringToMatch="";
+$stringToMatch="Comercial";
 
 #Si hay mas de 11 tira error por exceder el maximo
 
@@ -119,23 +119,29 @@ foreach (@filesToProcess ){
 		# Primero chequeo si debeo ver la sucursal, si tiene mas de un elemento es busqueda por rango
 		# Sino busqueda precisa o con wildcard
 		if ( $matchSucFlag == 1) {
+			print "Comparo las suc";
 			$sucArraySize = $#sucArray + 1;
+			print "cantidad de sucs: $sucArraySize";
 			if ($sucArraySize == 2){
 				if ( $f_idSuc > $sucArray[0] && $f_idSuc < $sucArray[1] ){
 					#Esta dentro del rango
 					$flagEscritura = 1;
 				}
 			}
-			if ($sucArray[0] == "*"){
+
+			print "\nsucArray: $sucArray[0]\n";
+			if ( $sucArray[0] eq "*"){
 				$flagEscritura = 1;
 			}
 			if ($sucArray[0] == $f_idSuc ){
 				$flagEscritura = 1;
 			}
 			# Si no matchea sigo con el proximo registro
-			next;
+			if ($flagEscritura == 0){
+				next;
+			}
 		}
-		
+		$flagEscritura=0;
 		if ( $matchCliFlag == 1 ){
 			$cliArraySize = $#cliArray + 1;
 			if ($cliArray[0] == "*"){
@@ -152,22 +158,25 @@ foreach (@filesToProcess ){
 				}
 			}
 			# Si no matchea sigo con el proximo registro
-			next;
+                        if ($flagEscritura == 0){
+                                next;
+                        }
+
 		}
-		
+		$flagEscritura=0;
 		if ( $matchStrFlag == 1 ){
 			if ( $desc =~ $stringToMatch ){
 				#Si es un substring o incluso el string sigo adelante!
 				$prodTypeNameComp = $desc;
 				$flagEscritura = 1;
 			}		
-			next;
+                        if ($flagEscritura == 0){
+                                next;
+                        }
 		}
 		
 		# Si el resultado es OK guardo en mi buffer de salida
-		if ( $flagEscritura == 1 ){
-			addElementToBuffer();
-		}
+		addElementToBuffer();
 	}
 }
 
