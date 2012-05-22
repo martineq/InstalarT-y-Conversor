@@ -684,15 +684,19 @@ chequeaProceso(){
 	  let i=0
 	  for s in ${TABLADESCRIPCIONES[@]}
 	    do
-	    if [ $i -eq 0 ] ; then
-			CLASS_REQ=$s	
-	    fi 
- 	    if [ $i -eq 1 ] ; then
-			ITEMDESC=$s
-        fi
-        if [ $i -eq 2 ] ; then
-			DESC=$s
-			let i=0
+	    # if [ $i -eq 0 ] ; then
+			# CLASS_REQ=$s	
+	    # fi 
+ 	    # if [ $i -eq 1 ] ; then
+			# ITEMDESC=$s
+        # fi
+        # if [ $i -eq 2 ] ; then
+			# DESC=$s
+			# let i=0
+			echo $s
+			ITEMDESC=`echo $s | cut -d "," -f 2`
+			DESC=`echo $s | cut -d "," -f 3`
+			CLASS_REQ=`echo $s | cut -d "," -f 1`
 			echo "comparando: $ITEMDESC CON $ITEMID y $CLASS_REQ CON $CSR, desc: $DESC"
 	        if [ $ITEMDESC ==  $ITEMID ] && [ $CLASS_REQ == $CSR] ; then
               		let FOUND_DESC=1
