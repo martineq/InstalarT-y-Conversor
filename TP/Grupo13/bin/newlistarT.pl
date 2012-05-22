@@ -104,6 +104,7 @@ sub parseArgs{
 			# que si es * exista un archivo en el directorio
 			$i++;
 			while ( (($ARGV[$i] ne '-e') &&($ARGV[$i] ne '-c') &&($ARGV[$i] ne '-h') &&($ARGV[$i] ne '-s') &&($ARGV[$i] ne '-k') &&($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
+				print "$i ,  $ARGV[$i]";
 				@filesToProcess=$ARGV[$i];
 				$i++;
 			}
@@ -158,6 +159,7 @@ sub generateOutputData{
 
 # Por cada archivo en el array lo abro y recorro secuencialmente
 # Si file to process es * debo leer todos los archivos del directorio
+print $filesToProcess[0];
 if ( $filesToProcess[0] == "*" ){
 	$i=0;
 	opendir(DIR, $parqueInstalado) or die $!;
@@ -174,6 +176,7 @@ if ( $filesToProcess[0] == "*" ){
 
 foreach (@filesToProcess ){
 	open F_INPUT, "<", "$parqueInstalado/$_" or die "No se pudo abrir el archivo de $parqueInstalado/$_";
+	print "procesando $parqueInstalado/$_";
 	while (<F_INPUT>){
 		chomp;
 		($f_idSuc, $f_idCli, $desc)=split(",");
@@ -301,7 +304,9 @@ printData();
 
 
 
-
+		for $aref ( @bufferOutput ) {
+			print "\t [ @$aref ],\n";
+		};
 
 
 
