@@ -1,15 +1,53 @@
 #!/usr/bin/perl 
 
 
+################################################################################
+#defino aca las constantes que estan en instalarT.conf (hago asi por cuestiones de desarrollo rapido)...
+$GLOBAL_grupo                  	= "/home/mart/ssoo1c-2012/TP/Grupo13";
+
+$dir_productos = $GLOBAL_grupo."/maestro/prod.mae";
+$dir_sucursales = $GLOBAL_grupo."/maestro/sucu.mae";
+$dir_clientes = $GLOBAL_grupo."/maestro/cli.mae";
+
 sub parseConfig{
 
 }
 
 sub loadHashes{
 
+	$dir_pro_ = $dir_productos;
+	$dir_suc_ = $dir_sucursales;
+	$dir_cli_ = $dir_clientes;
+	
+	@flist_pro;
+	@flist_suc;
+	@flist_cli;
+			
+	$error_open_pro = "si";
+	$error_open_suc = "si";
+	$error_open_cli = "si";
+	
 # Abre los archivos de productos, sucursales y clientes
-
+	if (opendir(DIR_PRO, "$dir_pro_")){
+		$error_open_pro = "no";
+		@flist_pro = readdir(DIR_PRO);
+		closedir(DIR_PRO);
+	}
+	if (opendir(DIR_SUC, "$dir_suc_")){
+		$error_open_suc = "no";
+		@flist_suc = readdir(DIR_SUC);
+		closedir(DIR_SUC);
+	}
+	if (opendir(DIR_CLI, "$dir_cli_")){
+		$error_open_cli = "no";
+		@flist_cli = readdir(DIR_CLI);
+		closedir(DIR_CLI);
+	}
 # En caso de error informa y sale
+	if ($error_open_pro eq "si" || $error_open_suc eq "si" || $error_open_cli eq "si"){
+		print "No se puedo abrir archivos del parque instalado\n";
+		exit 1;
+	}
 
 # Recorre secuencialmente el archivo
 
@@ -30,6 +68,8 @@ sub loadHashes{
 # Realiza split dejando los campos que interesan para el hash, clave y valor
 
 # Carga el hash de clientes, valor clave: idClient, valor asoc.: clientName
+
+exit 0;
 
 }
 
@@ -89,7 +129,7 @@ sub printData{
 
 }
 
-printHelp{
+sub printHelp{
 
 # Imprime informacion de uso de la herramienta
 # Usage:	listarT.pl -<c|e|h|s|k|p|t>

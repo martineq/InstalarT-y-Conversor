@@ -15,7 +15,7 @@
 
 5. El comando "instalarT" realizará una sucesión de pasos, los cuales incluyen:
   a. El comando graba un archivo de log.
-  b. Detecta si el paquete o alguno de sus componentes ya está instalado
+  b. Detecta si el paquete o alguno de sus componentes ya está instalado.
   c. Si todo el paquete ya está instalado termina el proceso.
   d. Si falta instalar algún componente, se encarga de guiar al usuario para completar la instalación.
   e. Chequea que Perl esté instalado.
@@ -25,7 +25,7 @@
   g. Muestra la estructura de directorios resultante y valores de parámetros configurados.
   h. Instala todas las estructuras definidas.
   i. Borrar archivos temporarios, si se hubiesen generado.
-  h. Finaliza la instalación
+  h. Finaliza la instalación.
 
 6. Una vez completo el proceso de instalación el primer comando a ejecutar para corree el programa es "IniciarT"
 
