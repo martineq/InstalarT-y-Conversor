@@ -107,21 +107,22 @@ done
 
 cargaProductos(){
   PRODUCTOS="$MAEDIR/prod.mae"
-  TABLAPRODUCTOS=( `cat $PRODUCTOS | cut -d "," -f 2,3 ` )
+  TABLAPRODUCTOS=( `cat $PRODUCTOS | cut -d "," -f 2,3` )
 }
 
 cargaDescripciones(){
   #PRODUCTOS="$MAEDIR/prod.mae"
-  TABLADESCRIPCIONES=( )
+  OLDIFS=$IFS
   let i=0
 	IFS=,
 	[ ! -f $PRODUCTOS ] && { echo "$INPUT file not found"; exit 99; }
 	while read a b c d e f csr it desc
 		do
+echo "en la posicion $i de la tabla puse $csr,$it,$desc"
         TABLADESCRIPCIONES[$i]="$csr,$it,$desc"
 		let i=$i+1
 	done < $PRODUCTOS
-  
+  IFS=$OLDIFS
 }
 
 
@@ -154,6 +155,12 @@ for t in ${TABLAPRODUCTOS[@]}
 done
 }
 
+printDesc(){
+for t in ${TABLADESCRIPCIONES[@]}
+  do
+  echo $t
+done
+}
 
 validacionCampo(){
 	#Valida la existencia del cliente en el archivo maestro
@@ -424,12 +431,12 @@ chequeaProceso(){
 	  ITEMID=`echo $LINEA | cut -d "," -f 6`
 		
 	  # Pre chequeo si estan todos los campos y rechazo anticipadamente
-	  if [ `validacionCabeceraDetalle` -eq 1 ] ; then
-	      # Error en la validacion de la cabecera
-	      bash loguearT.sh "$COMANDO" "A" "Rechazando el registro por error en cabecera"
-	      let QTYREGRECH=$QTYREGRECH+1
-	      continue
-	  fi
+	  #if [ `validacionCabeceraDetalle` -eq 1 ] ; then
+	   #   # Error en la validacion de la cabecera
+	    #  bash loguearT.sh "$COMANDO" "A" "Rechazando el registro por error en cabecera"
+	     # let QTYREGRECH=$QTYREGRECH+1
+	      #continue
+	  #fi
 
 	  
 	  if [ $QTYLINEAS == 0 ] ; then
@@ -620,9 +627,9 @@ chequeaProceso(){
   cargaClientes
   #DEBUG - printClientes
   cargaProductos
-  #DEBUG - printProductos
+   printProductos
   cargaDescripciones
-
+#printDesc
   for ARCHIVO in $ARCH_ORD
     do
 	echo "entre"
@@ -655,9 +662,10 @@ chequeaProceso(){
 	  let FOUND_PROD=0
 	  for t in ${TABLAPRODUCTOS[@]}
 	    do
+	    echo $t
 	    ID=`echo $t | cut -d "," -f 2`
 	    PROD=`echo $t | cut -d "," -f 1`
-	    
+	   echo "comparo antes: $ID con $CPID, prod: $PROD" 
 	    if [ $ID -eq $CPID ] ; then
 	      let FOUND_PROD=1
 	      break
@@ -673,30 +681,37 @@ chequeaProceso(){
 	    
 	  # Formo la linea nueva
 	  let FOUND_DESC=0
-	  for s in ${TABLADESCRIPCIONES[@]}
-	    do
-	    ITEMDESC=`echo $s | cut -d "," -f 2`
-	    DESC=`echo $s | cut -d "," -f 3`
-	    CLASS_REQ=`echo $s | cut -d "," -f 1`
-		
-		
-	    if [ $ITEMDESC -eq $ITEMID ] && [ $CLASS_REQ == $CSR] ; then
-	      let FOUND_DESC=1
-	      break
-	    fi
-	  done
+	  let i=0
+	  #for s in ${TABLADESCRIPCIONES[@]}
+	   # do
+	    #if [ $i -eq 0 ] ; then
+	#	CLASS_REQ=$s	
+	 #   fi 
+ 	  #  if [ $i -eq 1 ] ; then
+           #     ITEMDESC=$s
+            #fi
+            #if [ $i -eq 2 ] ; then
+             #   DESC=$s
+	#	let i=0
+	#	echo "comparando: $ITEMDESC CON $ITEMID y $CLASS_REQ CON $CSR, desc: $DESC"
+	 #       if [ $ITEMDESC ==  $ITEMID ] && [ $CLASS_REQ == $CSR] ; then
+          #    		let FOUND_DESC=1
+           #   		break
+            #	fi
+            #fi
+	  #done
 	  
-	  if [ ! $FOUND_DESC -eq 1 ] ; then
-		let QTYREGOK=$QTYREGOK+1
-		let QTYREGRECH=$QTYREGRECH-1
-		bash loguearT.sh "$COMANDO" "I" "Codigo de desc. de prod no encontrado en archivo maestro"
-		continue
-	  fi
+	  #if [ ! $FOUND_DESC -eq 1 ] ; then
+	#	let QTYREGOK=$QTYREGOK+1
+	#	let QTYREGRECH=$QTYREGRECH-1
+	#	bash loguearT.sh "$COMANDO" "I" "Codigo de desc. de prod no encontrado en archivo maestro"
+	#	continue
+	 # fi
 	  
 	  #Del nombre del archivo obtenfo el nombre de la suc (suc id en realidad)
 	  BRANCHID=`echo $FILENAME | cut -d "-" -f2`
-	  LINEA_NUEVA="$BRANCHID,$CUSTID,$DESCRIPTION"
-		
+	  LINEA_NUEVA="$BRANCHID,$CUSTID"
+		echo "escribo $PROD"
 	  case $PROD in
 	    "INTERNETADSL")
 	      echo $LINEA_NUEVA >> "$PARQDIR/INTERNETADSL"
