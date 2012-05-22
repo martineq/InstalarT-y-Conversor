@@ -111,8 +111,17 @@ cargaProductos(){
 }
 
 cargaDescripciones(){
-  PRODUCTOS="$MAEDIR/prod.mae"
-  TABLADESCRIPCIONES=( `cat $PRODUCTOS | cut -d "," -f 7,8,9 ` )
+  #PRODUCTOS="$MAEDIR/prod.mae"
+  TABLADESCRIPCIONES=( )
+  let i=0
+	IFS=,
+	[ ! -f $PRODUCTOS ] && { echo "$INPUT file not found"; exit 99; }
+	while read a b c d e f csr it desc
+		do
+        TABLADESCRIPCIONES[$i]="$csr,$it,$desc"
+		let i=$i+1
+	done < $PRODUCTOS
+  
 }
 
 
