@@ -77,10 +77,12 @@ sub parseArgs{
 	# Si encuentra -h imprime ayuda y sale
         if($ARGV[0] eq '-h' || $ARGV[0] eq '--help') {
             printHelp();
+	    exit 1;
         }
         else {
             print "Comando incorrecto \n";
-			printHelp();
+		printHelp();
+		exit 1;
         }
         return 1;
     }
@@ -118,8 +120,8 @@ sub parseArgs{
 				$i++;
 				$j++;
 				if ($j > 1){
-					print "El rango no pueden ser mas de dos elementos!"
-					exit 1
+					print "El rango no pueden ser mas de dos elementos!";
+					exit 1;
 				}
 			}
 		}
@@ -143,6 +145,7 @@ sub parseArgs{
 				$matchStrFlag=1;
 			}
 		}
+	}
 
 }
 
@@ -158,7 +161,7 @@ sub generateOutputData{
 if ( $filesToProcess[0] == "*" ){
 	$i=0;
 	opendir(DIR, $parqueInstalado) or die $!;
-	while ( my $file[] = readdir(DIR)) {
+	while ( my $file = readdir(DIR)) {
         # Evito todo lo que comienze con "."
         if ($file =~ m/^\./){
 		$i++;
@@ -170,7 +173,7 @@ if ( $filesToProcess[0] == "*" ){
 }
 
 foreach (@filesToProcess ){
-	open F_INPUT, "<", "$parqueInstalado/$_" or die "No se pudo abrir el archivo de $cliMae";
+	open F_INPUT, "<", "$parqueInstalado/$_" or die "No se pudo abrir el archivo de $parqueInstalado/$_";
 	while (<F_INPUT>){
 		chomp;
 		($f_idSuc, $f_idCli, $desc)=split(",");
