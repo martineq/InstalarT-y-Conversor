@@ -54,33 +54,35 @@ sub loadHashes{
 	$dir_suc_ = $dir_sucursales;
 	$dir_cli_ = $dir_clientes;
 	
-	@flist_pro;
-	@flist_suc;
-	@flist_cli;
+	@array_pro;
+	@array_suc;
+	@array_cli;
 			
 	$error_open_pro = "si";
 	$error_open_suc = "si";
 	$error_open_cli = "si";
 	
 # Abre los archivos de productos, sucursales y clientes
-	if (opendir(DIR_PRO, "$dir_pro_")){
+	if ( open(FILE_PRO," < $dir_pro_") ){
 		$error_open_pro = "no";
-		@flist_pro = readdir(DIR_PRO);
-		closedir(DIR_PRO);
+		@array_pro = <FILE_PRO>;
+		close(FILE_PRO);
 	}
-	if (opendir(DIR_SUC, "$dir_suc_")){
+	if ( open(FILE_SUC," < $dir_suc_") ){
 		$error_open_suc = "no";
-		@flist_suc = readdir(DIR_SUC);
-		closedir(DIR_SUC);
+		@array_suc = <FILE_SUC>;
+		close(FILE_SUC);
 	}
-	if (opendir(DIR_CLI, "$dir_cli_")){
+	if ( open(FILE_CLI," < $dir_cli_") ){
 		$error_open_cli = "no";
-		@flist_cli = readdir(DIR_CLI);
-		closedir(DIR_CLI);
-	}
+		@array_cli = <FILE_CLI>;
+		close(FILE_CLI);
+	}		
 # En caso de error informa y sale
 	if ($error_open_pro eq "si" || $error_open_suc eq "si" || $error_open_cli eq "si"){
-		print "No se puedo abrir archivos del parque instalado\n";
+		if ($error_open_pro eq "si"){ print "error lectura de productos\n";}
+		if ($error_open_suc eq "si"){ print "error lectura sucursales\n";}
+		if ($error_open_cli eq "si"){ print "error lectura clientes\n";}				
 		exit 1;
 	}
 
