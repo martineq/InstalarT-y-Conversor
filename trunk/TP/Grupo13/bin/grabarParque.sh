@@ -110,6 +110,11 @@ cargaProductos(){
   TABLAPRODUCTOS=( `cat $PRODUCTOS | cut -d "," -f 2,3 ` )
 }
 
+cargaDescripciones(){
+  PRODUCTOS="$MAEDIR/prod.mae"
+  TABLADESCRIPCIONES=( `cat $PRODUCTOS | cut -d "," -f 7,8,9 ` )
+}
+
 
 obtenerProducto(){
   let OK=0
@@ -607,6 +612,7 @@ chequeaProceso(){
   #DEBUG - printClientes
   cargaProductos
   #DEBUG - printProductos
+  cargaDescripciones
 
   for ARCHIVO in $ARCH_ORD
     do
@@ -656,29 +662,55 @@ chequeaProceso(){
 		continue
 	  fi
 	    
+	  # Formo la linea nueva
+	  let FOUND_DESC=0
+	  for s in ${TABLADESCRIPCIONES[@]}
+	    do
+	    ITEMDESC=`echo $s | cut -d "," -f 2`
+	    DESC=`echo $s | cut -d "," -f 3`
+	    CLASS_REQ=`echo $s | cut -d "," -f 1`
+		
+		
+	    if [ $ITEMDESC -eq $ITEMID ] && [ $CLASS_REQ == $CSR] ; then
+	      let FOUND_DESC=1
+	      break
+	    fi
+	  done
+	  
+	  if [ ! $FOUND_DESC -eq 1 ] ; then
+		let QTYREGOK=$QTYREGOK+1
+		let QTYREGRECH=$QTYREGRECH-1
+		bash loguearT.sh "$COMANDO" "I" "Codigo de desc. de prod no encontrado en archivo maestro"
+		continue
+	  fi
+	  
+	  #Del nombre del archivo obtenfo el nombre de la suc (suc id en realidad)
+	  BRANCHID=`echo $FILENAME | cut -d "-" -f2`
+	  LINEA_NUEVA="$BRANCHID,$CUSTID,$DESCRIPTION"
+		
 	  case $PROD in
 	    "INTERNETADSL")
-	      echo $LINEA >> "$PARQDIR/INTERNETADSL"
+	      echo $LINEA_NUEVA >> "$PARQDIR/INTERNETADSL"
 	      bash loguearT.sh "$COMANDO" "I" "Grabando entrada en archivo $PARQDIR/INTERNETADSL"
 	      ;;
 	    "INTERNETCABLEMODEM")
-	      echo $LINEA >> "$PARQDIR/INTERNETCABLEMODEM"
+	      echo $LINEA_NUEVA >> "$PARQDIR/INTERNETCABLEMODEM"
 	      bash loguearT.sh "$COMANDO" "I" "Grabando entrada en archivo $PARQDIR/INTERNETCABLEMODEM"
 	      ;;
 	    "INTERNETDIALUP")
-	      echo $LINEA >> "$PARQDIR/INTERNETDIALUP"
+	      echo $LINEA_NUEVA >> "$PARQDIR/INTERNETDIALUP"
 	      bash loguearT.sh "$COMANDO" "I" "Grabando entrada en archivo $PARQDIR/INTERNETDIALUP"
 	      ;;
 	    "INTERNETINALAMBRICO")
-	      echo $LINEA >> "$PARQDIR/INTERNETINALAMBRICO"
+	      echo $LINEA_NUEVA >> "$PARQDIR/INTERNETINALAMBRICO"
 	      bash loguearT.sh "$COMANDO" "I" "Grabando entrada en archivo $PARQDIR/INTERNETINALAMBRICO"
 	      ;;
 	    "TVPORAIRE")
-	      echo $LINEA >> "$PARQDIR/TVPORAIRE"
+	      echo $LINEA_NUEVA >> "$PARQDIR/TVPORAIRE"
 	      bash loguearT.sh "$COMANDO" "I" "Grabando entrada en archivo $PARQDIR/TVPORAIRE"
 	      ;;
 	    "TVPORCABLE")
-	      echo $LINEA >> "$PARQDIR/TVPORCABLE"
+	      echo $LINEA_NUEVA >> "$PARQDIR/TVPORCABLE"
 	      bash loguearT.sh "$COMANDO" "I" "Grabando entrada en archivo $PARQDIR/TVPORCABLE"
 	      ;;
 	    *)
