@@ -5,13 +5,11 @@
 #	Sistemas Operativos 75.08	#
 #	Grupo: 	13			#
 #	Nombre:	instalarT.sh		#
-#	Estado: <<INCOMPLETO>>		#
-#	Porcentaje completo: 99%	#
 #					#
 #########################################
 
 ##########################################################################################################################################
-# NOTAS:
+# 
 # + En el achivo instalarT.conf las primeras 10 líneas SIEMPRE son:
 #   1-GRUPO 2-ARRIDIR 3-RECHDIR 4-BINDIR 5-MAEDIR 6-REPODIR 7-LOGDIR 8-LOGEXT 9-LOGSIZE 10-DATASIZE
 # + La línea que uso para leer el estado de instalación es la N° 21 del arch de configuración
