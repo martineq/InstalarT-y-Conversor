@@ -161,7 +161,7 @@ sub main{
 		
 		if ($cant_parametros_ >= 3){
 			$comando_invocante = @argumentos_[2];
-			print "INFORMATIVO(moverT): comando que invocante a moverT: ".$comando_invocante."\n";		
+			#print "INFORMATIVO(moverT): comando que invocante a moverT: ".$comando_invocante."\n";		
 		}
 		
 	}else{

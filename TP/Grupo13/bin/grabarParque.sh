@@ -118,8 +118,8 @@ cargaDescripciones(){
 	[ ! -f $PRODUCTOS ] && { echo "$INPUT file not found"; exit 99; }
 	while read a b c d e f csr it desc
 		do
-echo "en la posicion $i de la tabla puse $csr,$it,$desc"
-        TABLADESCRIPCIONES[$i]="$csr,$it,$desc"
+		#echo "en la posicion $i de la tabla puse $csr,$it,$desc"
+        	TABLADESCRIPCIONES[$i]="$csr,$it,$desc"
 		let i=$i+1
 	done < $PRODUCTOS
   IFS=$OLDIFS
@@ -601,15 +601,17 @@ chequeaProceso(){
 		fi
 	  done
 	done
-		
+
+        FILENAME=`echo $ARCHIVO | sed 's#.*\/##'`
+
 	# Grabar archivo ordenado en inst_ordenadas, si existe reemplazarlo
 	if [ -f "$INSTORD/$FILENAME" ] ; then
 	  # Vacio el archivo - eliminandolo -
+          echo "Vacio el archivo $INSTORD/$FILENAME"
 	  `rm $INSTORD/$FILENAME`
 	fi
 	
 	for (( i=0;i<$QTYLINEAS;i++)); do 
-	  FILENAME=`echo $ARCHIVO | sed 's#.*\/##'`
 	  echo ${LINEA_ORD[i]} >> "$INSTORD/$FILENAME"
 	done
 	
@@ -658,7 +660,7 @@ chequeaProceso(){
 	  let FOUND_PROD=0
 	  for t in ${TABLAPRODUCTOS[@]}
 	    do
-	    echo $t
+	    #echo $t
 	    ID=`echo $t | cut -d "," -f 2`
 	    PROD=`echo $t | cut -d "," -f 1`
 	   #echo "comparo antes: $ID con $CPID, prod: $PROD" 
