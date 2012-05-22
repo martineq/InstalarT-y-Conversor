@@ -103,7 +103,7 @@ sub parseArgs{
 			# Si encuentra -t determina un arreglo con los archivos a mirar (nombre). Tambien valida que sean validos y
 			# que si es * exista un archivo en el directorio
 			$i++;
-			while ( (($ARGV[$i] ne '-e') || ($ARGV[$i] ne '-c') || ($ARGV[$i] ne '-h') || ($ARGV[$i] ne '-s') || ($ARGV[$i] ne '-k') || ($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
+			while ( (($ARGV[$i] ne '-e') &&($ARGV[$i] ne '-c') &&($ARGV[$i] ne '-h') &&($ARGV[$i] ne '-s') &&($ARGV[$i] ne '-k') &&($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
 				@filesToProcess=$ARGV[$i];
 				$i++;
 			}
@@ -114,7 +114,7 @@ sub parseArgs{
 		# Tambien realiza la validacion de los elementos, si alguno no es numerico (a excepcion de *) devuelve error.
 			$i++;
 			$j=0;
-			while ( (($ARGV[$i] ne '-e') || ($ARGV[$i] ne '-c') || ($ARGV[$i] ne '-h') || ($ARGV[$i] ne '-s') || ($ARGV[$i] ne '-k') || ($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
+			while ( (($ARGV[$i] ne '-e') &&($ARGV[$i] ne '-c') &&($ARGV[$i] ne '-h') &&($ARGV[$i] ne '-s') &&($ARGV[$i] ne '-k') &&($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
 				@sucArray=$ARGV[$i];
 				$matchSucFlag=1;
 				$i++;
@@ -130,7 +130,7 @@ sub parseArgs{
 		# Si encuentra -k guarda un array de id clientes a matchear, si es * lo guarda y es interpretado luego como any
 		# Tambien realiza la validacion de los elementos, si alguno no es numerico (a excepcion de *) devuelve error.
 			$i++;
-			while ( (($ARGV[$i] ne '-e') || ($ARGV[$i] ne '-c') || ($ARGV[$i] ne '-h') || ($ARGV[$i] ne '-s') || ($ARGV[$i] ne '-k') || ($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
+			while ( (($ARGV[$i] ne '-e') &&($ARGV[$i] ne '-c') &&($ARGV[$i] ne '-h') &&($ARGV[$i] ne '-s') &&($ARGV[$i] ne '-k') &&($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
 				@cliArray=$ARGV[$i];
 				$matchCliFlag=1;
 				$i++;
@@ -140,7 +140,7 @@ sub parseArgs{
 		if ( $ARGV[$i] eq '-p' ) {
 			# Si encuentra -p guarda el string a matchear con el campo itemName.
 			$i++;
-			while ( (($ARGV[$i] ne '-e') || ($ARGV[$i] ne '-c') || ($ARGV[$i] ne '-h') || ($ARGV[$i] ne '-s') || ($ARGV[$i] ne '-k') || ($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
+			while ( (($ARGV[$i] ne '-e') &&($ARGV[$i] ne '-c') &&($ARGV[$i] ne '-h') &&($ARGV[$i] ne '-s') &&($ARGV[$i] ne '-k') &&($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
 				$stringToMatch=$ARGV[$i];
 				$matchStrFlag=1;
 			}
