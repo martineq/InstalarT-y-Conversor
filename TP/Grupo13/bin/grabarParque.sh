@@ -627,7 +627,7 @@ chequeaProceso(){
   cargaClientes
   #DEBUG - printClientes
   cargaProductos
-   printProductos
+#   printProductos
   cargaDescripciones
 #printDesc
   for ARCHIVO in $ARCH_ORD
@@ -682,6 +682,9 @@ chequeaProceso(){
 	  # Formo la linea nueva
 	  let FOUND_DESC=0
 	  let i=0
+          CUSTID=`echo $LINEA | cut -d "," -f 1`
+          CSR=`echo $LINEA | cut -d "," -f 5 | sed -e 's///g'`
+          ITEMID=`echo $LINEA | cut -d "," -f 6 | sed -e 's///g'`
 	  OLDIFS=$IFS
 	  IFS=$'\n'
 	  for s in ${TABLADESCRIPCIONES[@]}
@@ -701,8 +704,9 @@ chequeaProceso(){
 			DESC=`echo $s | cut -d "," -f 3`
 			CLASS_REQ=`echo $s | cut -d "," -f 1`
 			echo "comparando: $ITEMDESC CON $ITEMID y $CLASS_REQ CON $CSR, desc: $DESC"
-	        if [ $ITEMDESC ==  $ITEMID ] && [ $CLASS_REQ == $CSR] ; then
-              		let FOUND_DESC=1
+	        if [ $ITEMDESC -eq  $ITEMID ] && [ "$CLASS_REQ" == "$CSR" ] ; then
+              		echo "it works"
+			let FOUND_DESC=1
               		break
             fi
        #fi
