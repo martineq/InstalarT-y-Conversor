@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Grupo: 13
-# Name: iniciarT.sh
+# Name: global.sh
 
 source global.sh
-
+COMANDO="detectarT"
 
 chequeaProceso(){
 
@@ -30,19 +30,27 @@ agregarVariablePath(){
 
 
 #main()
+
+
+# esto se va a comentar luego. Inicia afuera
 LOOP=true
 CANT_LOOP=0
 ESPERA=1
+#ARRIDIR="./TP/ssoo1c-2012/TP/Grupo13/inst_recibidas/"
+#ARRIDIR="../arribos/"
+#DIRMAE="/home/lucas/TP/ssoo1c-2012/TP/Grupo13/maestro"
 ARCHIVO="$MAEDIR/sucu.mae"
+#grupo="/home/lucas/TP/ssoo1c-2012/TP/Grupo13"
+#RECHDIR="../inst_rechazadas"
 
 
 if ([ ! -d $RECHDIR ]) then
-   echo "No existe Directorio de Rechazos $RECHDIR"
+   bash loguearT.sh "$COMANDO" "SE" "No existe Directorio de Rechazos $RECHDIR"
    exit 1
 fi
 
-if ([ ! -d "$GRUPO/inst_recibidas" ]) then
-   echo "No existe Directorio de recibidos $GRUPO/inst_recibidas"
+if ([ ! -d "$grupo/inst_recibidas" ]) then
+   bash loguearT.sh "$COMANDO" "SE" "No existe Directorio de recibidos $grupo/inst_recibidas"
    exit 1
 fi
 
@@ -84,7 +92,7 @@ do
                       END_DATE=$DATE
                    fi
  		   if ( ([ $START_DATE -lt $DATE ]) || ([ $START_DATE -eq $DATE ]) ) && ( ([ $END_DATE -gt $DATE ]) || ([ $END_DATE -eq $DATE ]) ) then 
-		      perl moverT.pl "$ARRIDIR$PARAM"  "$GRUPO/inst_recibidas"
+		      perl moverT.pl "$ARRIDIR$PARAM"  "$grupo/inst_recibidas"
 		      bash loguearT.sh "$COMANDO" "I" "Archivo $PARAM enviado"  
                    else
 		      perl moverT.pl "$ARRIDIR$PARAM"  "$RECHDIR"
@@ -92,21 +100,21 @@ do
                    fi
 	       	else
   	           perl moverT.pl "$ARRIDIR$PARAM"  "$RECHDIR"		
-		   bash loguearT.sh "$COMANDO" "I" "Archivo $PARAM rechazado por nombre incorrecto"  
+			   bash loguearT.sh "$COMANDO" "I" "Archivo $PARAM rechazado por nombre incorrecto"  
                 fi
             else
-               echo "No existe el archivo de sucursales"
+               #echo "No existe el archivo de sucursales"
             fi
         done
    else
-     echo "No Existe $ARRIDIR!"
+     #echo "No Existe $ARRIDIR!"
    fi
 
    let CANT_LOOP=CANT_LOOP+1
 
 
 
-   ENRECIBIDOS=`ls -1 "$GRUPO/inst_recibidas" | wc -l | awk '{print $1}'`
+   ENRECIBIDOS=`ls -1 "$grupo/inst_recibidas" | wc -l | awk '{print $1}'`
 
    echo "ENRECIBIDOS $ENRECIBIDOS"
    if ([ $ENRECIBIDOS -gt 0 ]) then
@@ -114,10 +122,10 @@ do
       GRABARPARQUET_PID=`chequeaProceso grabarParqueT.sh $$`
       if [ -z "$GRABARPARQUET_PID" ]; then
 #         bash grabarParqueT.sh
-#         echo "grabarParqueT corriendo bajo el numero de proceso: <`chequeaProceso grabarParqueT.sh $$`>" 
-	  echo "TODO BIEN"
+          bash loguearT.sh "$COMANDO" "I" "grabarParqueT corriendo bajo el numero de proceso: <`chequeaProceso grabarParqueT.sh $$`>" 
+	  #echo "TODO BIEN"
       else
-#         bash loguearT.sh "$COMANDO" "E" "Demonio grabarParqueT ya ejecutado bajo PID: <`chequeaProceso grabarParqueT.sh $$`>" 
+          bash loguearT.sh "$COMANDO" "E" "Demonio grabarParqueT ya ejecutado bajo PID: <`chequeaProceso grabarParqueT.sh $$`>" 
 #         echo "Error: grabarParqueT ya ejecutado bajo PID: <`chequeaProceso grabarParqueT.sh $$`>"
           echo "ERROR"
          exit 1
