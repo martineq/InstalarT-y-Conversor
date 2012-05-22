@@ -22,15 +22,10 @@ $parqueInstalado=$grupo."/parque_instalado";
 }
 
 sub loadHashes{
-print $cliMae;
 # Abre los archivos de productos, sucursales y clientes
 open F_CLIENTES, "<", "$cliMae" or die "No se pudo abrir el archivo de $cliMae";
 open F_PRODUCTOS, "<", "$prodMae" or die "No se pudo abrir el archivo de $cliMae";
 open F_SUCURSALES, "<", "$sucMae" or die "No se pudo abrir el archivo de $cliMae";
-
-print $prodMae;
-print $sucMae."\n";
-
 
 # Recorre secuencialmente el archivo
 while (<F_CLIENTES>){
@@ -40,7 +35,7 @@ while (<F_CLIENTES>){
 	# Carga el hash de clientes, valor clave: idCliente, valor asoc.: clientName
 	$cliHash{$idCliente}=$cliName;
 }
-print "SOME\n";
+
 # Recorre secuencialmente el archivo
 while (<F_SUCURSALES>){
 	chomp;
@@ -60,7 +55,11 @@ while (<F_PRODUCTOS>){
 	$sucHash{$prodTypeName}=$itemName;
 }
 
-print "SOME\n";
+# Cierro archivos
+
+close (F_CLIENTES);
+close (F_SUCURSALES);
+close (F_PRODUCTOS);
 
 };
 
@@ -89,9 +88,12 @@ $matchSucFlag=1;
 
 # Si encuentra -k guarda un array de id clientes a matchear, si es * lo guarda y es interpretado luego como any
 # Tambien realiza la validacion de los elementos, si alguno no es numerico (a excepcion de *) devuelve error.
+@cliArray =();
+$matchCliFlag=1;
 
-
-# Si encuentra -p guarda el string a matchear con el campo itemName. 
+# Si encuentra -p guarda el string a matchear con el campo itemName.
+$matchStrFlag=1;
+$stringToMatch="";
 
 #Si hay mas de 11 tira error por exceder el maximo
 
@@ -106,14 +108,12 @@ sub generateOutputData{
 # Por cada archivo en el array lo abro y recorro secuencialmente
 foreach (@filesToProcess ){
 	open F_INPUT, "<", "$parqueInstalado/$_" or die "No se pudo abrir el archivo de $cliMae";
-	print "$parqueInstalado/$_";
 	while (<F_INPUT>){
 		chomp;
 		($f_idSuc, $f_idCli, $desc)=split(",");
 		$flagEscritura = 0;
-		print "$f_idSuc\n"; 
-print "recorro\n";
-	$prodTypeNameComp = $desc;
+		#print "$f_idSuc\n"; 
+		$prodTypeNameComp = $desc;
 		# Aplico los filtros de producto, cliente y sucursal
 		
 		# Primero chequeo si debeo ver la sucursal, si tiene mas de un elemento es busqueda por rango
@@ -132,15 +132,43 @@ print "recorro\n";
 			if ($sucArray[0] == $f_idSuc ){
 				$flagEscritura = 1;
 			}
+			# Si no matchea sigo con el proximo registro
+			next;
+		}
+		
+		if ( $matchCliFlag == 1 ){
+			$cliArraySize = $#cliArray + 1;
+			if ($cliArray[0] == "*"){
+				$flagEscritura = 1;
+			}
+			if ($cliArray[0] == $f_idCli ){
+				$flagEscritura = 1;
+			}
+			if ( $cliArraySize > 1 ){
+				 foreach (@cliArray) {
+					if ( $f_idCli == $_ ){
+						$flagEscritura = 1;
+					}
+				}
+			}
+			# Si no matchea sigo con el proximo registro
+			next;
+		}
+		
+		if ( $matchStrFlag == 1 ){
+			if ( $desc =~ $stringToMatch ){
+				#Si es un substring o incluso el string sigo adelante!
+				$prodTypeNameComp = $desc;
+				$flagEscritura = 1;
+			}		
+			next;
 		}
 		
 		# Si el resultado es OK guardo en mi buffer de salida
 		if ( $flagEscritura == 1 ){
 			addElementToBuffer();
 		}
-		
 	}
-
 }
 
 
@@ -188,15 +216,12 @@ sub printHelp{
 
 parseConfig();
 parseArgs();
-print "some";
+
 
 loadHashes();
-print "fin load hashn";
+print "\nfin load hash\n";
 generateOutputData();
 printData();
-print "some\n";
-print $bufferOutput;
-print "some\n";
 
     for $aref ( @bufferOutput ) {
         print "\t [ @$aref ],\n";
