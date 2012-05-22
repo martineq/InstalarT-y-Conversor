@@ -1,7 +1,13 @@
 #!/bin/bash
 
-# Grupo: 13
-# Name: iniciarT.sh
+#########################################
+#					#
+#	Sistemas Operativos 75.08	#
+#	Grupo: 	13			#
+#	Nombre:	stopD.sh		#
+#					#
+#########################################
+
 
 source global.sh
 

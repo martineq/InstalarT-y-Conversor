@@ -1,7 +1,12 @@
 #!/bin/bash
 
-# Grupo: 13
-# Name: global.sh
+#########################################
+#					#
+#	Sistemas Operativos 75.08	#
+#	Grupo: 	13			#
+#	Nombre:	global.sh		#
+#					#
+#########################################
 
 #Devuelve la ruta de la variable a buscar
 

@@ -9,7 +9,9 @@
 #########################################
 
 ##########################################################################################################################################
-# 
+# El script instala el programa a partir de los de directorios y valores dados por el usuario
+# + No recibe parámetros para su ejecución
+# + Informa en pantalla y en log el estado de la instalación, no devuelve valores de retorno
 # + En el achivo instalarT.conf las primeras 10 líneas SIEMPRE son:
 #   1-GRUPO 2-ARRIDIR 3-RECHDIR 4-BINDIR 5-MAEDIR 6-REPODIR 7-LOGDIR 8-LOGEXT 9-LOGSIZE 10-DATASIZE
 # + La línea que uso para leer el estado de instalación es la N° 21 del arch de configuración
@@ -35,19 +37,19 @@ LINEAESTADOINSTALACION=21		# La línea que uso para leer el estado de instalaci�
 function log	
 {
   if [ -z $2 ] ; then  # ./loguearT.sh "instalar" "I" "Soy una prueba" "/home/mart/ssoo1c-2012/TP/Grupo13/confdir/instalarT.log"
-	. loguearT.sh "instalar" "I" "$1" "$LOGINST" &
+	. loguearT.sh "instalarT" "I" "$1" "$LOGINST" &
 	echo "$1"
   else
     if [ "$2" == "SE" ] ; then 
-        . loguearT.sh "instalar" "SE" "$1" "$LOGINST" &
+        . loguearT.sh "instalarT" "SE" "$1" "$LOGINST" &
        	echo "[Error Severo]: $1"
     fi
     if [ "$2" == "E" ] ; then 
-        . loguearT.sh "instalar" "E" "$1" "$LOGINST" &
+        . loguearT.sh "instalarT" "E" "$1" "$LOGINST" &
        	echo "[Error]: $1"
     fi
     if [ "$2" == "A" ] ; then 
-        . loguearT.sh "instalar" "A" "$1" "$LOGINST" &
+        . loguearT.sh "instalarT" "A" "$1" "$LOGINST" &
        	echo "[Alerta]: $1"
     fi
   fi

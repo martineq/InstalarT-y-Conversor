@@ -1,5 +1,14 @@
 #!/bin/bash
 
+#########################################
+#					#
+#	Sistemas Operativos 75.08	#
+#	Grupo: 	13			#
+#	Nombre:	grabarParqueT.sh	#
+#					#
+#########################################
+
+
 # Grupo: 13
 # Name: logT.sh
 # Usage: see below 
@@ -7,9 +16,9 @@
 
 #Ayuda
 USAGE="USAGE: loguearT command [message_type] message\
-       Example: loguearT instalar I INFO: Instalando variables de entorno"
+       Example: loguearT instalarT I INFO: Instalando variables de entorno"
 
-if [ "$1" != "instalar" ] ; then
+if [ "$1" != "instalarT" ] ; then
   source global.sh      
 fi
 
@@ -55,8 +64,8 @@ main() {
 
     case $COMMAND in
 
-    'instalar')
-                #Para cuando el COMMAND sea INSTALAR el log va al directorio default segun enunciado: logdir
+    'instalarT')
+                #Para cuando el COMMAND sea instalarT el log va al directorio default segun enunciado: logdir
                 echo "$DATE-$USER-$COMMAND-$MSGTYPE-$MSG." >> "$4";;
     *)
                 #Trunco el archivo en caso de que sea mas grande que lo permitido.
@@ -75,7 +84,7 @@ if [ -z $LOGDIR ] ; then
 fi
 
 # Chequea que la variable logdir sea un directorio valido (salvo en el caso de la instalacion)
-if [ ! -d "$LOGDIR" ] && [ ! $1 == "instalar" ] ; then
+if [ ! -d "$LOGDIR" ] && [ ! $1 == "instalarT" ] ; then
 	echo "No existe el directorio destino de los logs"
 	exit 1
 fi
@@ -86,28 +95,28 @@ if [ -z $LOGEXT ] ; then
 fi
 
 # El tam max del log debe ser definido
-if [ -z $LOGSIZE ] && [ ! $1 == "instalar" ] ; then
+if [ -z $LOGSIZE ] && [ ! $1 == "instalarT" ] ; then
    echo "No esta definido el tamanio de log [$LOGSIZE]"
    exit 1
 fi 
 
 
-# En el caso de instalar emplea el directorio pasado en el parametro $4
-if [ "$1" == "instalar" ] ; then
+# En el caso de instalarT emplea el directorio pasado en el parametro $4
+if [ "$1" == "instalarT" ] ; then
    # No hago el echo, porque sino me sale cada vez que lo llamo
-   # echo "Para el comando 'instalar' se emplea la ruta de archivo de log $4"
+   # echo "Para el comando 'instalarT' se emplea la ruta de archivo de log $4"
    main "$1" "$2" "$3" "$4"
 fi
 
 #Tiene que tener tres parametros obligatoriamente.
 if [ $# \< 3 ] || [ $# \> 3 ]; then
-  if [ "$1" != "instalar" ] ; then
+  if [ "$1" != "instalarT" ] ; then
     echo $USAGE
     exit 2
   fi
 fi
 
-if [ "$1" != "instalar" ] ; then
+if [ "$1" != "instalarT" ] ; then
   main "$1" "$2" "$3"
 fi
 

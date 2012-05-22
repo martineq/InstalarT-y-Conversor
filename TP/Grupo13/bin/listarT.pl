@@ -1,5 +1,13 @@
 #!/usr/bin/perl 
 
+#########################################
+#					#
+#	Sistemas Operativos 75.08	#
+#	Grupo: 	13			#
+#	Nombre:	listarT.pl		#
+#					#
+#########################################
+
 
 ################################################################################
 #defino aca las constantes que estan en instalarT.conf (hago asi por cuestiones de desarrollo rapido)...
