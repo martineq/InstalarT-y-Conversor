@@ -682,44 +682,44 @@ chequeaProceso(){
 	  # Formo la linea nueva
 	  let FOUND_DESC=0
 	  let i=0
-OLDIFS=$IFS
-IFS=$'\n'
+	  OLDIFS=$IFS
+	  IFS=$'\n'
 	  for s in ${TABLADESCRIPCIONES[@]}
 	    do
-		echo $s
-	     if [ $i -eq 0 ] ; then
-			 CLASS_REQ=$s	
-	     fi 
- 	     if [ $i -eq 1 ] ; then
-			 ITEMDESC=$s
-         fi
-         if [ $i -eq 2 ] ; then
-			 DESC=$s
-			 let i=0
-		#	echo $s
-		#	ITEMDESC=`echo $s | cut -d "," -f 2`
-		#	DESC=`echo $s | cut -d "," -f 3`
-		#	CLASS_REQ=`echo $s | cut -d "," -f 1`
+		# echo $s
+	     # if [ $i -eq 0 ] ; then
+			 # CLASS_REQ=$s	
+	     # fi 
+ 	     # if [ $i -eq 1 ] ; then
+			 # ITEMDESC=$s
+         # fi
+         # if [ $i -eq 2 ] ; then
+			 # DESC=$s
+			 # let i=0
+			echo $s
+			ITEMDESC=`echo $s | cut -d "," -f 2`
+			DESC=`echo $s | cut -d "," -f 3`
+			CLASS_REQ=`echo $s | cut -d "," -f 1`
 			echo "comparando: $ITEMDESC CON $ITEMID y $CLASS_REQ CON $CSR, desc: $DESC"
 	        if [ $ITEMDESC ==  $ITEMID ] && [ $CLASS_REQ == $CSR] ; then
               		let FOUND_DESC=1
               		break
             fi
-       fi
-	let i=$i+1
+       #fi
+	#let i=$i+1
 	  done
 	IFS=$OLDIFS  
-	  #if [ ! $FOUND_DESC -eq 1 ] ; then
-	#	let QTYREGOK=$QTYREGOK+1
-	#	let QTYREGRECH=$QTYREGRECH-1
-	#	bash loguearT.sh "$COMANDO" "I" "Codigo de desc. de prod no encontrado en archivo maestro"
-	#	continue
-	 # fi
+	  if [ ! $FOUND_DESC -eq 1 ] ; then
+		let QTYREGOK=$QTYREGOK+1
+		let QTYREGRECH=$QTYREGRECH-1
+		bash loguearT.sh "$COMANDO" "I" "Codigo de desc. de prod no encontrado en archivo maestro"
+		continue
+	 fi
 	  
 	  #Del nombre del archivo obtenfo el nombre de la suc (suc id en realidad)
 	  BRANCHID=`echo $FILENAME | cut -d "-" -f2`
-	  LINEA_NUEVA="$BRANCHID,$CUSTID"
-		echo "escribo $PROD"
+	  LINEA_NUEVA="$BRANCHID,$CUSTID,$DESC"
+		echo "escribo $PROD, LINEA: $LINEA_NUEVA"
 	  case $PROD in
 	    "INTERNETADSL")
 	      echo $LINEA_NUEVA >> "$PARQDIR/INTERNETADSL"
