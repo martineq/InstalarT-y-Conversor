@@ -5,10 +5,10 @@
 #defino aca las constantes que estan en instalarT.conf (hago asi por cuestiones de desarrollo rapido)...
 
 
-my @bufferOutput =();
-my %prodHash;
-my %cliHash;
-my %sucuHash;
+@bufferOutput =();
+%prodHash;
+%cliHash;
+%sucuHash;
 	
 sub parseConfig{
 
@@ -18,15 +18,19 @@ $cliMae = $maeDir."/cli.mae";
 $prodMae = $maeDir."/prod.mae";
 $sucMae = $maeDir."/sucu.mae";
 $parqueInstalado=$grupo."/parque_instalado";
-
+#/var/tmp/TP/Grupo13/parque_instalado/TVPORCABLE
 }
 
 sub loadHashes{
-
+print $cliMae;
 # Abre los archivos de productos, sucursales y clientes
-open F_CLIENTES, "<", "$cliMae" or die "No se pudo abrir el archivo de $cliMae"
-open F_PRODUCTOS, "<", "$prodMae" or die "No se pudo abrir el archivo de $cliMae"
-open F_SUCURSALES, "<", "$sucMae" or die "No se pudo abrir el archivo de $cliMae"
+open F_CLIENTES, "<", "$cliMae" or die "No se pudo abrir el archivo de $cliMae";
+open F_PRODUCTOS, "<", "$prodMae" or die "No se pudo abrir el archivo de $cliMae";
+open F_SUCURSALES, "<", "$sucMae" or die "No se pudo abrir el archivo de $cliMae";
+
+print $prodMae;
+print $sucMae."\n";
+
 
 # Recorre secuencialmente el archivo
 while (<F_CLIENTES>){
@@ -36,7 +40,7 @@ while (<F_CLIENTES>){
 	# Carga el hash de clientes, valor clave: idCliente, valor asoc.: clientName
 	$cliHash{$idCliente}=$cliName;
 }
-
+print "SOME\n";
 # Recorre secuencialmente el archivo
 while (<F_SUCURSALES>){
 	chomp;
@@ -56,9 +60,9 @@ while (<F_PRODUCTOS>){
 	$sucHash{$prodTypeName}=$itemName;
 }
 
-exit 0;
+print "SOME\n";
 
-}
+};
 
 sub parseArgs{
 
@@ -75,7 +79,7 @@ $printFlag=1;
 # Si encuentra -t determina un arreglo con los archivos a mirar (nombre). Tambien valida que sean validos y
 # que si es * exista un archivo en el directorio
 
-@filesToProcess=("INTERNETCABLEMODEM");
+@filesToProcess=("TVPORCABLE");
 
 
 # Si encuentra -s guarda un array de id sucursales a matchear, si es * lo guarda y es interpretado luego como any
@@ -101,13 +105,15 @@ sub generateOutputData{
 
 # Por cada archivo en el array lo abro y recorro secuencialmente
 foreach (@filesToProcess ){
-	open F_INPUT, "<", "$parqueInstalado/$_" or die "No se pudo abrir el archivo de $cliMae"
-	while (<F_PRODUCTOS>){
+	open F_INPUT, "<", "$parqueInstalado/$_" or die "No se pudo abrir el archivo de $cliMae";
+	print "$parqueInstalado/$_";
+	while (<F_INPUT>){
 		chomp;
 		($f_idSuc, $f_idCli, $desc)=split(",");
 		$flagEscritura = 0;
-		
-		$prodTypeNameComp = $desc;
+		print "$f_idSuc\n"; 
+print "recorro\n";
+	$prodTypeNameComp = $desc;
 		# Aplico los filtros de producto, cliente y sucursal
 		
 		# Primero chequeo si debeo ver la sucursal, si tiene mas de un elemento es busqueda por rango
@@ -142,7 +148,7 @@ foreach (@filesToProcess ){
 
 # Ordeno buffer de salida por idCliente decreciente
 
-}
+};
 
 
 sub printData{
@@ -182,9 +188,15 @@ sub printHelp{
 
 parseConfig();
 parseArgs();
+print "some";
+
 loadHashes();
+print "fin load hashn";
 generateOutputData();
 printData();
+print "some\n";
+print $bufferOutput;
+print "some\n";
 
     for $aref ( @bufferOutput ) {
         print "\t [ @$aref ],\n";
