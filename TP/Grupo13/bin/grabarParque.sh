@@ -603,10 +603,10 @@ chequeaProceso(){
 	done
 		
 	# Grabar archivo ordenado en inst_ordenadas, si existe reemplazarlo
-	#if [ -f "$INSTORD/$FILENAME" ] ; then
+	if [ -f "$INSTORD/$FILENAME" ] ; then
 	  # Vacio el archivo - eliminandolo -
-	 # `rm $INSTORD/$FILENAME`
-	#fi
+	  `rm $INSTORD/$FILENAME`
+	fi
 	
 	for (( i=0;i<$QTYLINEAS;i++)); do 
 	  FILENAME=`echo $ARCHIVO | sed 's#.*\/##'`
@@ -625,19 +625,15 @@ chequeaProceso(){
   bash loguearT.sh "$COMANDO" "I" "Inicio de $COMANDO, cantidad de archivos ordenados a procesar: $QTY_ARCH"
 
   cargaClientes
-  #DEBUG - printClientes
   cargaProductos
-#   printProductos
   cargaDescripciones
-#printDesc
+
   for ARCHIVO in $ARCH_ORD
     do
-	echo "entre"
 	FILENAME=`echo $ARCHIVO | sed 's#.*\/##'`
 	
 	for LINEA in `cat $ARCHIVO`
 	  do
-
 	  # Validacion Cabecera y Detalle
 	  #echo "Validando linea: $LINEA"
 	  if [ `validacionCabeceraDetalle` -eq 1 ] ; then
@@ -689,30 +685,18 @@ chequeaProceso(){
 	  IFS=$'\n'
 	  for s in ${TABLADESCRIPCIONES[@]}
 	    do
-		# echo $s
-	     # if [ $i -eq 0 ] ; then
-			 # CLASS_REQ=$s	
-	     # fi 
- 	     # if [ $i -eq 1 ] ; then
-			 # ITEMDESC=$s
-         # fi
-         # if [ $i -eq 2 ] ; then
-			 # DESC=$s
-			 # let i=0
-			echo $s
+			#DEBUG  - echo $s
 			ITEMDESC=`echo $s | cut -d "," -f 2`
 			DESC=`echo $s | cut -d "," -f 3`
 			CLASS_REQ=`echo $s | cut -d "," -f 1`
-			echo "comparando: $ITEMDESC CON $ITEMID y $CLASS_REQ CON $CSR, desc: $DESC"
+			#DEBUG - echo "comparando: $ITEMDESC CON $ITEMID y $CLASS_REQ CON $CSR, desc: $DESC"
 	        if [ $ITEMDESC -eq  $ITEMID ] && [ "$CLASS_REQ" == "$CSR" ] ; then
-              		echo "it works"
-			let FOUND_DESC=1
-              		break
+				let FOUND_DESC=1
+              	break
             fi
-       #fi
-	#let i=$i+1
+
 	  done
-	IFS=$OLDIFS  
+	  IFS=$OLDIFS  
 	  if [ ! $FOUND_DESC -eq 1 ] ; then
 		let QTYREGOK=$QTYREGOK+1
 		let QTYREGRECH=$QTYREGRECH-1
@@ -723,7 +707,7 @@ chequeaProceso(){
 	  #Del nombre del archivo obtenfo el nombre de la suc (suc id en realidad)
 	  BRANCHID=`echo $FILENAME | cut -d "-" -f2`
 	  LINEA_NUEVA="$BRANCHID,$CUSTID,$DESC"
-		echo "escribo $PROD, LINEA: $LINEA_NUEVA"
+	  # DEBUG - echo "escribo $PROD, LINEA: $LINEA_NUEVA"
 	  case $PROD in
 	    "INTERNETADSL")
 	      echo $LINEA_NUEVA >> "$PARQDIR/INTERNETADSL"
