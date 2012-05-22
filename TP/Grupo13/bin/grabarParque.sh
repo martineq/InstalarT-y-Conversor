@@ -665,7 +665,7 @@ chequeaProceso(){
 	    echo $t
 	    ID=`echo $t | cut -d "," -f 2`
 	    PROD=`echo $t | cut -d "," -f 1`
-	   echo "comparo antes: $ID con $CPID, prod: $PROD" 
+	   #echo "comparo antes: $ID con $CPID, prod: $PROD" 
 	    if [ $ID -eq $CPID ] ; then
 	      let FOUND_PROD=1
 	      break
@@ -682,24 +682,24 @@ chequeaProceso(){
 	  # Formo la linea nueva
 	  let FOUND_DESC=0
 	  let i=0
-	  #for s in ${TABLADESCRIPCIONES[@]}
-	   # do
-	    #if [ $i -eq 0 ] ; then
-	#	CLASS_REQ=$s	
-	 #   fi 
- 	  #  if [ $i -eq 1 ] ; then
-           #     ITEMDESC=$s
-            #fi
-            #if [ $i -eq 2 ] ; then
-             #   DESC=$s
-	#	let i=0
-	#	echo "comparando: $ITEMDESC CON $ITEMID y $CLASS_REQ CON $CSR, desc: $DESC"
-	 #       if [ $ITEMDESC ==  $ITEMID ] && [ $CLASS_REQ == $CSR] ; then
-          #    		let FOUND_DESC=1
-           #   		break
-            #	fi
-            #fi
-	  #done
+	  for s in ${TABLADESCRIPCIONES[@]}
+	    do
+	    if [ $i -eq 0 ] ; then
+			CLASS_REQ=$s	
+	    fi 
+ 	    if [ $i -eq 1 ] ; then
+			ITEMDESC=$s
+        fi
+        if [ $i -eq 2 ] ; then
+			DESC=$s
+			let i=0
+			echo "comparando: $ITEMDESC CON $ITEMID y $CLASS_REQ CON $CSR, desc: $DESC"
+	        if [ $ITEMDESC ==  $ITEMID ] && [ $CLASS_REQ == $CSR] ; then
+              		let FOUND_DESC=1
+              		break
+            fi
+        fi
+	  done
 	  
 	  #if [ ! $FOUND_DESC -eq 1 ] ; then
 	#	let QTYREGOK=$QTYREGOK+1
