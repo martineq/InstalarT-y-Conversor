@@ -8,6 +8,38 @@
 #					#
 #########################################
 
+##################################################
+
+# 1. Inicializar el archivo de log
+# 1.1 Comando IniciarT Inicio de Ejecucion
+# 
+# 2. Verificar que ya no se haya ejecutado IniciarT en esta misma sesión de usuario
+# 2.1. Si IniciarT ya fue ejecutado ir al paso FINAL
+# 2.2.  Si IniciarT nunca fue ejecutado en esta sesión de usuario, seguir
+# 
+# 3. Setear la variable PATH
+# 
+# 4. Verificar si la instalación está completa
+# 4.1.  Si se detecta algún problema en la instalación, explicar la situación y terminar la
+#       ejecución.
+#       Este control debe incluir la verificación de los archivos indispensables para ejecutar el sistema,
+#       como ser los archivos maestros, comandos, etc.
+# 4.2.  Si no se detecta ningún problema, seguir
+# 
+# 5. En IniciarT se pueden setear además todas las variables que consideren necesarias, como
+# ser: GRUPO, ARRIDIR, RECHDIR, BINDIR, MAEDIR, REPODIR, LOGDIR LOGEXT,
+# LOGSIZE, DATASIZE y cualquier otra variable que se desee emplear en el sistema.
+# 
+# 6. Luego del seteo de las variables de ambiente y de la verificación de las condiciones
+# óptimas para la ejecución (pasos 2, 3 y 4), se debe invocar al script DetectarT siempre que
+# detectarT no se esté ejecutando (verificar con ps).
+# 
+# 8. FINAL:
+# IniciarT debe setear las variables de ambiente una sola vez por cada sesión de usuario. Si el
+# ambiente ya fue inicializado y se intenta ejecutar nuevamente este comando,
+# explicar la situación, mostrar un mensaje de advertencia con el contenido de las
+# variables ya seteadas e ir a FIN
+##################################################
 
 source global.sh
 

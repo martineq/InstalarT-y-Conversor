@@ -8,6 +8,33 @@
 #					#
 #########################################
 
+
+###########################################################
+# 1. Verificar si se puede iniciar la ejecución del comando (inicialización de ambiente realizada,
+# y que no haya otro GrabarParqueT corriendo).
+# 2. Inicializar el Log
+# 3. Procesar Un Archivo recibido
+# 4. Verificar que no sea un archivo duplicado
+# 5. Ordenar el archivo
+# 6. Mover el archivo recibido en $grupo/inst_procesadas empleando la función moverT para
+# evitar su reprocesamiento
+# 7. Grabar el archivo ordenado, si ya existe, un archivo ordenado del mismo nombre, reemplazarlo
+# 8. Procesar Un Archivo ordenado
+# 9. Verificar que el bloque este completo
+# 10. Verificar registro cabecera
+# 11. Verificar registros de detalle
+# 12. Verificar contenido de los campos y otras verificaciones que se consideren pertinentes
+# 13. Si todas las verificaciones fueron superadas grabar un registro en el archivo de parque
+# 14. Contabilizar la cantidad de registros validados ok
+# 15. Seguir con el siguiente bloque hasta terminar el archivo ordenado
+# 16. Grabar en el cuantos archivos se leyeron de $grupo/inst_recibidas, cuantos archivos se
+# ordenaron, cuantos se rechazaron-
+# 18. Grabar en el log cuantos registros se leyeron, cuantos se rechazaron y cuantos se
+# grabaron en algún parque instalado.
+# 19. Grabar en el log el total de control. Cerrar el Log.
+###########################################################
+
+
 # Usage: see below
 
 source global.sh

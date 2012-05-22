@@ -4,15 +4,25 @@
 #					#
 #	Sistemas Operativos 75.08	#
 #	Grupo: 	13			#
-#	Nombre:	grabarParqueT.sh	#
+#	Nombre:	logT.sh			#
 #					#
 #########################################
 
+#########################################
+# + Opciones y Parámetros
+# •Comando
+# •Tipo de Mensaje y Mensaje
+# •Para el caso de instalarT se usa un cuarto parámetro, donde se especifica la ruta del archivo de log
+# + El servicio que brinda esta función es la escritura en los archivos de log de los mensajes
+# pasados como parámetro por los consumidores de este servicio.
+# + Se crea a los efectos de estandarización de los mensajes de error y para homogeneizar la
+# lectura/escritura de los mismos.
+# + Puede ser invocado desde la línea de comando o bien desde otro comando.
+# +El responsable de este servicio debe gestionar entre sus consumidores la estand
+#########################################
 
-# Grupo: 13
-# Name: logT.sh
+
 # Usage: see below 
-#
 
 #Ayuda
 USAGE="USAGE: loguearT command [message_type] message\

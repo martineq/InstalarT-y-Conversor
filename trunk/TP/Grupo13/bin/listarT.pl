@@ -8,6 +8,33 @@
 #					#
 #########################################
 
+################################################################################
+# 1. El propósito de este programa perl es resolver cualquier tipo de consulta efectuada sobre el
+# parque instalado y emitir los informes correspondientes cuando se lo requiera.
+# 2. Se alimenta de los archivos de parque instalado y de los archivos maestros.
+# 3. Debe aceptar al menos los parámetros tipo de producto, ID de sucursal, Id de Cliente y la
+# Descripción del Ítem de Producto del Registro Cabecera
+# 4. Debe aceptar las opciones –c –e –h la combinación de las dos primeras.
+# 4.1. –c resuelve la consulta y muestra resultados no graba en archivo
+# 4.2. –e resuelve la consulta y graba un reporte
+# 4.3. –h muestra la ayuda del comando
+# 5. Si lo desean pueden agregar más parámetros y más opciones
+# 6. El nombre del archivo que se graba al emitir el informe debe ser lpi.<SEC> donde SEC es
+# un número de secuencia queda al criterio del desarrollador su definición, pero siempre
+# debe ser un nombre nuevo, no debe sobrescribir ningún informe previo.
+# 7. Los informes se graban en el directorio: REPODIR
+# 8. En el encabezado siempre mostrar titulo del reporte y los parámetros de invocación
+# 9. En los subtítulos, las etiquetas de los campos
+# 10. Mostrar los siguientes campos:
+# 10.1. Sucursal, además del Id, mostrar el BRANCH_NAME
+# 10.2. Cliente, además del Id, mostrar el CUSTOMER_1ST_NAME
+# 10.3. Tipo de producto (PRODUCT_TYPE_NAME)
+# 10.4. Plan Comercial, corresponde a la Desc. del Ítem de Prod. del Reg. Cabecera
+# 10.5. Item, corresponde a la Descripción del Ítem de Prod. del Reg. de detalle
+# 11. La salida siempre debe estar ordenada (criterio a elección) y mostrar subtotales y totales
+# (también a elección sobre que campos se calculan los totales)
+################################################################################
+
 
 ################################################################################
 #defino aca las constantes que estan en instalarT.conf (hago asi por cuestiones de desarrollo rapido)...
