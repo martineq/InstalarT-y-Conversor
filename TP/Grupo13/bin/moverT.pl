@@ -80,15 +80,14 @@ sub getNroSecuencia_ultimo{
 		
 		$long_nombresArch_split = @nombresArch_split;
 		
-		if ($long_nombresArch_split >= 2){
+		if ($long_nombresArch_split >= 1){
 			if (@nombresArch_patron_split[0] eq @nombresArch_split[0]){
-				if (@nombresArch_patron_split[1] eq @nombresArch_split[1]){
-					if ($long_nombresArch_split >= 3){
-						if (@nombresArch_split[2] > $nroMax_secuencia){
-							$nroMax_secuencia = @nombresArch_split[2];
+					if ($long_nombresArch_split >= 2){
+						if (@nombresArch_split[1] > $nroMax_secuencia){
+							$nroMax_secuencia = @nombresArch_split[1];
+
 						}
 					}
-				}
 			}
 		}
 	} #fin foreach
@@ -140,7 +139,7 @@ sub main{
 				$name_new_2 = $name_new;	
 				$extension_fantasma = ".movertmp";
 				$name_new = $name_new.$extension_fantasma;
-				rename($name_old, $name_new) or die "ERROR(moverT): imposible renombrar $name_old a $name_new/n";
+				rename($name_old, $name_new) or die "ERROR(moverT): imposible renombrar $name_old a $name_new(en origen) /n";
 				$origen_nuevo = $name_new;
 				#print "\tdestino: ".$destino."\n";
 			
@@ -153,7 +152,7 @@ sub main{
 				$name_new = $dir_destino.$nombre_nuevo;						
 				#print "name_old: $name_old\n";
 				#print "name_new: $name_new\n";
-				rename($name_old, $name_new) or die "ERROR(moverT): imposible renombrar $name_old a $name_new/n";
+				rename($name_old, $name_new) or die "ERROR(moverT): imposible renombrar $name_old a $name_new (en destino)/n";
 		
 			}else{
 					print "ERROR(moverT): origen y destino son iguales\n";

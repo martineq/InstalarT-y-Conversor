@@ -61,7 +61,7 @@ ESPERA=1
 ARCHIVO="$MAEDIR/sucu.mae"
 #grupo="/home/lucas/TP/ssoo1c-2012/TP/Grupo13"
 #RECHDIR="../inst_rechazadas"
-
+grupo=$GRUPO
 
 if ([ ! -d $RECHDIR ]) then
    bash loguearT.sh "$COMANDO" "SE" "No existe Directorio de Rechazos $RECHDIR"
@@ -110,23 +110,25 @@ do
                    else
                       END_DATE=$DATE
                    fi
+			
  		   if ( ([ $START_DATE -lt $DATE ]) || ([ $START_DATE -eq $DATE ]) ) && ( ([ $END_DATE -gt $DATE ]) || ([ $END_DATE -eq $DATE ]) ) then 
-		      perl moverT.pl "$ARRIDIR$PARAM"  "$grupo/inst_recibidas"
+
+			  perl moverT.pl "$ARRIDIR/$PARAM"  "$grupo/inst_recibidas/"
 		      bash loguearT.sh "$COMANDO" "I" "Archivo $PARAM enviado"  
                    else
-		      perl moverT.pl "$ARRIDIR$PARAM"  "$RECHDIR"
+		      perl moverT.pl "$ARRIDIR/$PARAM"  "$RECHDIR/"
 	 	      bash loguearT.sh "$COMANDO" "I" "Archivo $PARAM rechazado por sucursal no vigente"  
                    fi
 	       	else
-  	           perl moverT.pl "$ARRIDIR$PARAM"  "$RECHDIR"		
+  	           perl moverT.pl "$ARRIDIR/$PARAM"  "$RECHDIR/"		
 			   bash loguearT.sh "$COMANDO" "I" "Archivo $PARAM rechazado por nombre incorrecto"  
                 fi
             else
-               #echo "No existe el archivo de sucursales"
+               echo "No existe el archivo de sucursales"
             fi
         done
    else
-     #echo "No Existe $ARRIDIR!"
+     echo "No Existe $ARRIDIR!"
    fi
 
    let CANT_LOOP=CANT_LOOP+1
@@ -135,12 +137,12 @@ do
 
    ENRECIBIDOS=`ls -1 "$grupo/inst_recibidas" | wc -l | awk '{print $1}'`
 
-   echo "ENRECIBIDOS $ENRECIBIDOS"
+   #echo "ENRECIBIDOS $ENRECIBIDOS"
    if ([ $ENRECIBIDOS -gt 0 ]) then
       #Detecto si grabarParqueT esta corriendo	
       GRABARPARQUET_PID=`chequeaProceso grabarParqueT.sh $$`
       if [ -z "$GRABARPARQUET_PID" ]; then
-#         bash grabarParqueT.sh
+         bash grabarParqueT.sh
           bash loguearT.sh "$COMANDO" "I" "grabarParqueT corriendo bajo el numero de proceso: <`chequeaProceso grabarParqueT.sh $$`>" 
 	  #echo "TODO BIEN"
       else
