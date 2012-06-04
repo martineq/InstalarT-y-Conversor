@@ -89,15 +89,16 @@ sub parseArgs{
 	$printFlag=0;
 	$printScreen=0;
 	
-	GetOptions ('help|h' => \$help, 
-				"stdout|c" => \$stdout,
-				"fileout|e" => \$fileout,
-				"files|t" => \@files,
-				"suc|s" => \@sucursales,
-				"clientes|k" => \@clientes,
-				"string|p" => \$string
+	GetOptions('help|h' => \$help, 
+				"stdout|c=s" => \$stdout,
+				"fileout|e=s" => \$fileout,
+				"files|t=s{,}" => \@files,
+				"suc|s=s@" => \@sucursales,
+				"clientes|k=s@" => \@clientes,
+				"string|p=s" => \$string
 				);
 	
+print "\n files: $files[0] $files[1], cantidad: $#files  \n";
 	if( $help ) {
 		# Si encuentra -h imprime ayuda y sale
 		printHelp();
@@ -126,6 +127,7 @@ sub parseArgs{
 		for ( my $i=0; $i <= $#files; $i++ ){
 			#next if ( $files[$i] eq "." || $files[$i] eq ".." );
 			$filesToProcess[$i]=$files[$i];
+			print "File to process: $filesToProcess[$i] \n";
 		}
 	}
 	
@@ -191,7 +193,7 @@ sub generateOutputData{
 # Por cada archivo en el array lo abro y recorro secuencialmente
 # Si file to process es * debo leer todos los archivos del directorio
 print $filesToProcess[0];
-if ( $filesToProcess[0] == "*" ){
+if ( $filesToProcess[0] eq "*" ){
 	$i=0;
 	opendir(DIR, $parqueInstalado) or die $!;
 	while ( my $file = readdir(DIR)) {
@@ -203,8 +205,9 @@ if ( $filesToProcess[0] == "*" ){
 		$filesToProcess[$i] = $file;
     }
     closedir(DIR);
+	print "aca entre??\n";
 }
-
+print "aca: $_ \n";
 foreach (@filesToProcess ){
 	open F_INPUT, "<", "$parqueInstalado/$_" or die "No se pudo abrir el archivo de $parqueInstalado/$_";
 	print "procesando $parqueInstalado/$_";
