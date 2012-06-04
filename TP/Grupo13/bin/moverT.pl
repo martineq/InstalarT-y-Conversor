@@ -57,9 +57,8 @@ sub  separar_enDir_yArchivo{
 # parametro 1: archivo mediante el cual cacular su numero de secuencia
 # parametro 2: directorio en donde calcular el numero de secuencia
 # RETURN: -1, solo si el archivo origen no tiene definido un numero de secuencia
+#		  -2, solo si el archivo patron destino no tiene numero de secuencia y si el origen si lo tiene.
 sub getNroSecuencia_ultimo{
-	#readme: el formato de la extension del archivo origen tiene que ser asi: [nombreFile].[ExtensionFile], y por eso
-	#ese valor 2 hard-codeado
 	$nombreArh_patron = @_[0]; 	
 	$dir = @_[1]; 				
 	
@@ -68,33 +67,46 @@ sub getNroSecuencia_ultimo{
 		closedir(DIRH);
 	}
 	
+	$nroMax_secuencia = -1;
 	@nombresArch_patron_split = split("[.]", $nombreArh_patron);
+	$long_nombresArch_split = @nombresArch_patron_split;
+	if ($long_nombresArch_split >= 2){
+		$nroMax_secuencia = -2;
+	}else{
+	 
+			@flist_ordenado = sort(@flist);
 	
-	$nroMax_secuencia = -1; 
-	@flist_ordenado = sort(@flist);
-	
-	foreach(@flist_ordenado){
-		#ignoro . y ..
-		next if ($_ eq "." || $_ eq "..");
-		@nombresArch_split = split("[.]", $_);
+			foreach(@flist_ordenado){
+				#ignoro . y ..
+				next if ($_ eq "." || $_ eq "..");
+				@nombresArch_split = split("[.]", $_);
 		
-		$long_nombresArch_split = @nombresArch_split;
+				$long_nombresArch_split = @nombresArch_split;
 		
-		if ($long_nombresArch_split >= 1){
-			if (@nombresArch_patron_split[0] eq @nombresArch_split[0]){
-					if ($long_nombresArch_split >= 2){
-						if (@nombresArch_split[1] > $nroMax_secuencia){
-							$nroMax_secuencia = @nombresArch_split[1];
+				if ($long_nombresArch_split >= 1){
+					if (@nombresArch_patron_split[0] eq @nombresArch_split[0]){
+							if ($long_nombresArch_split >= 2){
+								if (@nombresArch_split[1] > $nroMax_secuencia){
+									$nroMax_secuencia = @nombresArch_split[1];
 
-						}
+								}
+							}
 					}
-			}
+				}
+			} #fin foreach
 		}
-	} #fin foreach
-	
 	return ($nroMax_secuencia);
 }
 
+################################################################################
+#FUNCION PARA MOVER CON ARGUMENTOS VALIDADOS Y TENIENDO EN CUENTA LOS NUMERO DE 
+#SECUENCIA
+sub moverValidado{
+	$origen_ = @_[0];
+	$destino_ = @_[1];	
+	$copiar = `cp $origen_ $destino_`;
+	$eliminar = `rm $origen_`;
+}
 ########################################################################
 
 sub main{
@@ -128,31 +140,44 @@ sub main{
 			
 				$nroSecuencia_ultimo = getNroSecuencia_ultimo($arch_origen, $destino);
 				#actualizo el numero de secuencia...
-				$nroSecuencia_archMover = $nroSecuencia_ultimo + 1;
-				$nombre_nuevo = $arch_origen.".".$nroSecuencia_archMover;
-				$name_old = $origen;
-				$name_new = $dir_origen.$nombre_nuevo;		
-				#print "name_old: $origen\n";
-				#print "name_new: $name_new\n";
-
-				#para no borrar en directorio origen un archivo con numero de secuencia ya creado
-				$name_new_2 = $name_new;	
-				$extension_fantasma = ".movertmp";
-				$name_new = $name_new.$extension_fantasma;
-				rename($name_old, $name_new) or die "ERROR(moverT): imposible renombrar $name_old a $name_new(en origen) /n";
-				$origen_nuevo = $name_new;
-				#print "\tdestino: ".$destino."\n";
-			
-				#aplicando la operacion mover despues de las validaciones
-					$copiar = `cp $origen_nuevo $destino`;
-					$eliminar = `rm $origen_nuevo`;
+				if ($nroSecuencia_ultimo == -2){
+					#aplicando la operacion mover despues de las validaciones
+					moverValidado($origen, $destino);
+					@nombresArch_split = split("[.]", $origen);
+					$nombre_transformado = @nombresArch_split[0];
+					$name_old = $dir_destino.$arch_origen;
+					$name_new = $dir_destino.$nombre_transformado;
+					rename($name_old, $name_new) 
+						or die "ERROR(moverT): imposible renombrar[sin NroSecuencia] $name_old a $name_new (en destino)/n";
+				}else{
 				
-				#para compenzar el agregado de la extension fantasma...
-				$name_old = $dir_destino.$nombre_nuevo.$extension_fantasma;	
-				$name_new = $dir_destino.$nombre_nuevo;						
-				#print "name_old: $name_old\n";
-				#print "name_new: $name_new\n";
-				rename($name_old, $name_new) or die "ERROR(moverT): imposible renombrar $name_old a $name_new (en destino)/n";
+						$nroSecuencia_archMover = $nroSecuencia_ultimo + 1;
+						print "nroSecuencia_archMover: $nroSecuencia_archMover\n";
+						$nombre_nuevo = $arch_origen.".".$nroSecuencia_archMover;
+						$name_old = $origen;
+						$name_new = $dir_origen.$nombre_nuevo;		
+						#print "name_old: $origen\n";
+						#print "name_new: $name_new\n";
+
+						#para no borrar en directorio origen un archivo con numero de secuencia ya creado
+						$name_new_2 = $name_new;	
+						$extension_fantasma = ".movertmp";
+						$name_new = $name_new.$extension_fantasma;
+						rename($name_old, $name_new) or die "ERROR(moverT): imposible renombrar $name_old a $name_new(en origen) /n";
+						$origen_nuevo = $name_new;
+						#print "\torigen_nuevo: ".$origen_nuevo."\n";						
+						#print "\tdestino: ".$destino."\n";
+			
+						#aplicando la operacion mover despues de las validaciones
+						moverValidado($origen_nuevo, $destino);
+				
+						#para compenzar el agregado de la extension fantasma...
+						$name_old = $dir_destino.$nombre_nuevo.$extension_fantasma;	
+						$name_new = $dir_destino.$nombre_nuevo;						
+						#print "name_old: $name_old\n";
+						#print "name_new: $name_new\n";
+						rename($name_old, $name_new) or die "ERROR(moverT): imposible renombrar $name_old a $name_new (en destino)/n";
+					}
 		
 			}else{
 					print "ERROR(moverT): origen y destino son iguales\n";
