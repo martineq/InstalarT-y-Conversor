@@ -24,6 +24,9 @@ $fileout = '';
 @clientes =();
 $string = '';
 
+$matchSucFlag=0;
+$matchCliFlag=0;
+$matchStrFlag=0;
 	
 sub parseConfig{
 
@@ -82,9 +85,7 @@ close (F_PRODUCTOS);
 sub parseArgs{
 
 	$cantParams = @ARGV;
-	$matchSucFlag=0;
-	$matchCliFlag=0;
-	$matchStrFlag=0;
+
 	$printFlag=0;
 	$printScreen=0;
 	
