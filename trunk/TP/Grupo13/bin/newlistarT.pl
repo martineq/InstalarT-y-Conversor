@@ -86,13 +86,10 @@ close (F_PRODUCTOS);
 
 sub parseArgs{
 
-	$cantParams = @ARGV;
 
-
-	
 	GetOptions('help|h' => \$help, 
-				"stdout|c=s" => sub { $printScreen=1 },
-				"fileout|e=s" =>  sub { $printFlag=1 },
+				'stdout|c' => sub { $printScreen=1 },
+				'fileout|e'=>  sub { $printFlag=1 },
 				"files|t=s{,}" => \@files,
 				"suc|s=s{,}" => \@sucursales,
 				"clientes|k=s{,}" => \@clientes,
@@ -166,7 +163,7 @@ print "\n files: $files[0] $files[1], cantidad: $#files  \n";
 			# $i++;
 		# }
 		for ( my $i=0; $i <= $#clientes; $i++ ){
-			$cliArray[$i]=$files[$i];
+			$cliArray[$i]=$clientes[$i];
 		}
 		$matchCliFlag=1;
 	}
@@ -190,6 +187,7 @@ sub addElementToBuffer(){
 
 sub generateOutputData{
 
+print "$filesToProcess[0]";
 
 # Por cada archivo en el array lo abro y recorro secuencialmente
 # Si file to process es * debo leer todos los archivos del directorio
@@ -240,8 +238,9 @@ foreach (@filesToProcess ){
 		}
 		$flagEscritura=0;
 		if ( $matchCliFlag == 1 ){
+			print "valido clientes : $cliArray[0] - $f_idCli\n";
 			$cliArraySize = $#cliArray + 1;
-			if ($cliArray[0] == "*"){
+			if ($cliArray[0] eq "*"){
 				$flagEscritura = 1;
 			}
 			if ($cliArray[0] == $f_idCli ){
@@ -250,6 +249,7 @@ foreach (@filesToProcess ){
 			if ( $cliArraySize > 1 ){
 				 foreach (@cliArray) {
 					if ( $f_idCli == $_ ){
+						print "comparando $f_idCli CON $_\n";
 						$flagEscritura = 1;
 					}
 				}
@@ -288,23 +288,17 @@ foreach (@filesToProcess ){
 sub printData{
 
 # Imprimo mi buffer por stdout
-
 # Si el flag es -e guardo en archivo
-
 # Creo archivo en repositorio default con nombre lpi.<aaaammddhhmmss>
-
 # Hago un vuelco de la info en el archivo
-
 # Cierro el archivo de reporte
 
-	if ($printFlag == 1){
+	if ($printScreen eq 1){
 		for $aref ( @bufferOutput ) {
 			print "\t [ @$aref ],\n";
 		};
 	}
-	
-	if ($printScreen == 1){
-		
+	if ($printFlag eq 1){
 		open F_REPORTE, ">", "$reportes/reporte.rep" or die "No se pudo abrir el archivo de $cliMae";
 		for $aref ( @bufferOutput ) {
 			print F_REPORTE "\t [ @$aref ],\n"; 
@@ -323,20 +317,15 @@ sub printHelp{
 
 
 # main()
-
-if(parseArgs(@ARGV) != 0){
-		printHelp();
-        exit;
-}
-
+parseArgs();
 parseConfig();
 loadHashes();
 generateOutputData();
 printData();
 
-		for $aref ( @bufferOutput ) {
-			print "\t [ @$aref ],\n";
-		};
+#		for $aref ( @bufferOutput ) {
+#			print "\t [ @$aref ],\n";
+#		};
 
 
 
