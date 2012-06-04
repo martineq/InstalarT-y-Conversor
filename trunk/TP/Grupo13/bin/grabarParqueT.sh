@@ -43,7 +43,15 @@ COMANDO="grabarParque"
 INSTREC="$GRUPO/inst_recibidas"
 INSTORD="$GRUPO/inst_ordenadas"
 INSTPROC="$GRUPO/inst_procesadas"
+PRODUCTOS="$MAEDIR/prod.mae"
+CLIENTES="$MAEDIR/cli.mae"
+SUCURSALES="$MAEDIR/sucu.mae"
+
 LINEA_ORD=()
+
+# Para desarrollo unicamente
+DEBUG=0
+
 
 
 chequeaVariables(){
@@ -122,8 +130,6 @@ validacionCabeceraDetalle(){
 }
 
 cargaClientes(){
-
-      CLIENTES="$MAEDIR/cli.mae"
       TABLACLIENTES=( `cat "$CLIENTES" | sed 's#;.*##'`)
 }
 
@@ -138,12 +144,10 @@ done
 
 
 cargaProductos(){
-  PRODUCTOS="$MAEDIR/prod.mae"
   TABLAPRODUCTOS=( `cat $PRODUCTOS | cut -d "," -f 2,3` )
 }
 
 cargaDescripciones(){
-  #PRODUCTOS="$MAEDIR/prod.mae"
   OLDIFS=$IFS
   let i=0
 	IFS=,
@@ -159,24 +163,16 @@ cargaDescripciones(){
 
 
 obtenerProducto(){
-  let OK=0
-  for t in ${TABLAPRODUCTOS[@]}
-    do
-    ID=`echo $t | cut -d "," -f 2`
-    $PROD=`echo $t | cut -d "," -f 1`
-    bash loguearT.sh "PROD" "I" "comparando $CPID con $ID que responde a $PROD"
-    if [ $ID -eq $CPID ] ; then
-      bash loguearT.sh "PROD" "I" "EXITO!!"
-      let OK=1
-      break
-    fi
-  done
+  CHEQPROD=`cat $PRODUCTOS | grep "^[^,]*,[^,]*,$CPID"`
   
-  if [ $OK -eq 1 ] ; then
-    echo 0
-    return 0
+  if [ -z "$CHEQPROD" ] ; then
+    if [ $DEBUG -eq 1 ]; then
+      bash loguearT.sh "DEBUG" "A" "Error al obtener el producto $CPID, el mismo no se encuentra en el archivo maestro"
+    fi
+    echo 1
+    return 1
   fi
-  echo 1
+  echo 0
 }
 
 
@@ -196,35 +192,27 @@ done
 
 validacionCampo(){
 	#Valida la existencia del cliente en el archivo maestro
-	  
-	
+	if [ $DEBUG -eq 1 ]; then
+	  bash loguearT.sh "DEBUG" "I" "validacionCampo>> linea = $LINEA"
+	fi
  	CUSTID=`echo $LINEA | cut -d "," -f 1`
-# 	 
-# 	#Recorro todas las lineas de clientes que tienen y si lo encuentro da OK, sino no
- 	let OK=0
-	for t in ${TABLACLIENTES[@]}
-	  do
-	  bash loguearT.sh "TEST" "I" "Comparando $t con $CUSTID"
-	  if [ $t == $CUSTID ] ; then
-	    let OK=1
-	    bash loguearT.sh "TEST" "I" "EXITO!!"
-	    break
-	  fi
-	done
+ 	#CLIENTES=$MAEDIR/cli.mae
+ 	
+        CHECKCLI=`cat $CLIENTES | grep "^$CUSTID;"`
+	if [ $DEBUG -eq 1 ]; then
+	  bash loguearT.sh "DEBUG" "I" "validacionCampo>> CUST ID: $CUSTID, CLI: $CHECKCLI"
+	fi
 
-	if [ ! $OK -eq 1 ] ; then
-	  bash loguearT.sh "$COMANDO" "A" "Error en la validacion del archivo $ARCHIVO, el cliente $CUSTID no se encuentra en el archivo maestro"
-	  echo 1
-	  return 1
+
+	if [ -z "$CHECKCLI" ] ; then
+ 	  bash loguearT.sh "$COMANDO" "A" "Error en la validacion del archivo $ARCHIVO, el cliente $CUSTID no se encuentra en el archivo maestro"
+ 	  echo 1
+ 	  return 1
 	fi
 	echo 0
 }
 
 chequeaArchivosMaestros(){
-
-  CLIENTES=$MAEDIR/cli.mae
-  SUCURSALES=$MAEDIR/sucu.mae
-  PRODUCTOS=$MAEDIR/prod.mae
 
   #Chequeo que los archivos existan
   if [ ! -f $CLIENTES ] ; then
@@ -405,7 +393,7 @@ chequeaProceso(){
 
   #Detecto si grabarParque esta corriendo
   GRABAR_PID=`chequeaProceso grabarParque.sh $$`
-  if [ ! -z "$DETECTAR_PID" ]; then
+  if [ ! -z "$GRABAR_PID" ]; then
 	bash loguearT.sh "$COMANDO" "SE" "$COMANDO se encuntra inicializado con PID: <$GRABAR_PID>"
 	exit 1
   fi
@@ -428,12 +416,12 @@ chequeaProceso(){
         bash loguearT.sh "$COMANDO" "I" "No restan mas archivos por procesar"
         break
       fi
-	
-	
+	FILENAMEAUX=`echo $ARCHIVO | sed 's#.*\/##'`
+	CHEQDUP=`ls -l $INSTPROC | grep $FILENAMEAUX `
 	# Chequea duplicado en carpeta de procesados
-	if [ -f "$INSTPROC/$ARCHIVO" ] ; then
-		perl moverT.pl "$INSTREC/$ARCHIVO" "$RECHDIR/" $COMANDO
-		bash loguearT.sh "$COMANDO" "A" "Archivo: $ARCHIVO duplicado, moviendo a $INSTREC"
+	if [ ! -z "$CHEQDUP" ] ; then
+		perl moverT.pl "$INSTREC/$FILENAMEAUX" "$RECHDIR/" $COMANDO
+		bash loguearT.sh "$COMANDO" "A" "Archivo: $ARCHIVO dup., moviendo a $RECHDIR/"
 		let QTYARCHRECH=$QTYARCHRECH+1
 		continue
 	fi
@@ -461,16 +449,7 @@ chequeaProceso(){
 	  CSID=`echo $LINEA | cut -d "," -f 4`
 	  CSR=`echo $LINEA | cut -d "," -f 5`
 	  ITEMID=`echo $LINEA | cut -d "," -f 6`
-		
-	  # Pre chequeo si estan todos los campos y rechazo anticipadamente
-	  #if [ `validacionCabeceraDetalle` -eq 1 ] ; then
-	   #   # Error en la validacion de la cabecera
-	    #  bash loguearT.sh "$COMANDO" "A" "Rechazando el registro por error en cabecera"
-	     # let QTYREGRECH=$QTYREGRECH+1
-	      #continue
-	  #fi
-
-	  
+  
 	  if [ $QTYLINEAS == 0 ] ; then
 	    LINEA_ORD[$QTYLINEAS]=`echo "$CUSTID,$OPDATE,$CPID,$CSID,$CSR,$ITEMID"`
 	    let QTYLINEAS=$QTYLINEAS+1
@@ -639,7 +618,6 @@ chequeaProceso(){
 	# Grabar archivo ordenado en inst_ordenadas, si existe reemplazarlo
 	if [ -f "$INSTORD/$FILENAME" ] ; then
 	  # Vacio el archivo - eliminandolo -
-          echo "Vacio el archivo $INSTORD/$FILENAME"
 	  `rm $INSTORD/$FILENAME`
 	fi
 	
@@ -658,90 +636,83 @@ chequeaProceso(){
   QTY_ARCH=`ls $INSTORD | wc -l`
   bash loguearT.sh "$COMANDO" "I" "Inicio de $COMANDO, cantidad de archivos ordenados a procesar: $QTY_ARCH"
 
-  cargaClientes
-  cargaProductos
-  cargaDescripciones
+# Para reducir IO se puede usar este esquema que realiza una carga inicial y luego busca sobre memoria,
+#   cargaClientes
+#   cargaProductos
+#   cargaDescripciones
 
   for ARCHIVO in $ARCH_ORD
     do
 	FILENAME=`echo $ARCHIVO | sed 's#.*\/##'`
-	
+	bash loguearT.sh "$COMANDO" "I" "Procesando archivo: $ARCHIVO  - fin."
+	bash loguearT.sh "$COMANDO" "I" "Procesando filename $FILENAME  - fin."
 	for LINEA in `cat $ARCHIVO`
 	  do
+
 	  # Validacion Cabecera y Detalle
-	  #echo "Validando linea: $LINEA"
 	  if [ `validacionCabeceraDetalle` -eq 1 ] ; then
 	      # Error en la validacion de la cabecera
 	      bash loguearT.sh "$COMANDO" "A" "Rechazando el registro por error en cabecera"
 	      let QTYREGRECH=$QTYREGRECH+1
 	      continue
 	  fi
-	  
+
 	  # Validacion de cliente
 	  if [ `validacionCampo` -eq 1 ] ; then
 	      bash loguearT.sh "$COMANDO" "A" "Rechazando el registro por error en campo"
 	      let QTYREGRECH=$QTYREGRECH+1
+	      #Lo agrego a los rechazados
+	      `echo $LINEA >> "$RECHDIR/$FILENAME"`
 	      continue
 	  fi
-	
-	  let QTYREGOK=$QTYREGOK+1
-	
+	  
 	  CPID=`echo $LINEA | cut -d "," -f 3`
 	  PARQDIR="$GRUPO/parque_instalado"
 
-	  let FOUND_PROD=0
-	  for t in ${TABLAPRODUCTOS[@]}
-	    do
-	    #echo $t
-	    ID=`echo $t | cut -d "," -f 2`
-	    PROD=`echo $t | cut -d "," -f 1`
-	   #echo "comparo antes: $ID con $CPID, prod: $PROD" 
-	    if [ $ID -eq $CPID ] ; then
-	      let FOUND_PROD=1
-	      break
-	    fi
-	  done
-	  
-	  if [ ! $FOUND_PROD -eq 1 ] ; then
-		let QTYREGOK=$QTYREGOK+1
-		let QTYREGRECH=$QTYREGRECH-1
-		bash loguearT.sh "$COMANDO" "I" "Codigo de producto no encontrado en archivo maestro"
-		continue
+	  # Valido el producto
+	  if [ `obtenerProducto` -eq 1 ] ; then
+	    let QTYREGRECH=$QTYREGRECH-1
+	    bash loguearT.sh "$COMANDO" "I" "Codigo de producto no encontrado en archivo maestro"
+	    #Lo agrego a los rechazados
+	    `echo $LINEA >> "$RECHDIR/$FILENAME"`
+	    continue
 	  fi
-	    
+
 	  # Formo la linea nueva
-	  let FOUND_DESC=0
-	  let i=0
           CUSTID=`echo $LINEA | cut -d "," -f 1`
           CSR=`echo $LINEA | cut -d "," -f 5 | sed -e 's///g'`
           ITEMID=`echo $LINEA | cut -d "," -f 6 | sed -e 's///g'`
-	  OLDIFS=$IFS
-	  IFS=$'\n'
-	  for s in ${TABLADESCRIPCIONES[@]}
-	    do
-			#DEBUG  - echo $s
-			ITEMDESC=`echo $s | cut -d "," -f 2`
-			DESC=`echo $s | cut -d "," -f 3`
-			CLASS_REQ=`echo $s | cut -d "," -f 1`
-			#debug - echo "comparando: $ITEMDESC CON $ITEMID y $CLASS_REQ CON $CSR, desc: $DESC"
-	        if [ $ITEMDESC -eq  $ITEMID ] && [ "$CLASS_REQ" == "$CSR" ] ; then
-				let FOUND_DESC=1
-              	break
-            fi
 
-	  done
-	  IFS=$OLDIFS  
-	  if [ ! $FOUND_DESC -eq 1 ] ; then
-		let QTYREGOK=$QTYREGOK+1
-		let QTYREGRECH=$QTYREGRECH-1
-		bash loguearT.sh "$COMANDO" "I" "Codigo de desc. de prod no encontrado en archivo maestro"
-		continue
-	 fi
+	CHEQDESC=`cat $PRODUCTOS | grep ".*,$CSR,$ITEMID,[^,]*$"`
+	if [ -z "$CHEQDESC" ] ; then
+	  let QTYREGRECH=$QTYREGRECH+1
+	  bash loguearT.sh "$COMANDO" "I" "Codigo de desc. de prod no encontrado en archivo maestro"
+	  #Lo agrego a los rechazados
+	  `echo $LINEA >> "$RECHDIR/$FILENAME"`
+	  continue
+	fi
+		
+	let QTYREGOK=$QTYREGOK+1
+	DESC=`cat $PRODUCTOS | grep "^[^,]*,[^,]*,$CPID,[^,]*,[^,]*,[^,]*,Y," | head -n 1 | cut -d "," -f 9`
+	DESCDET=`cat $PRODUCTOS | grep "$CPID,[^,]*,[^,]*,[^,]*,N,$ITEMID,[^,]*$" | head -n 1 | cut -d "," -f 9`
+	PROD=`cat $PRODUCTOS | grep "^[^,]*,[^,]*,$CPID" | head -n 1 | cut -d "," -f 2`
+
+	#Del nombre del archivo obtenfo el nombre de la suc (suc id en realidad)
+	BRANCHID=`echo $FILENAME | cut -d "-" -f2`
+	LINEA_NUEVA="$BRANCHID,$CUSTID,$DESC,$DESCDET"
+
+	if [ $DEBUG -eq 1 ]; then
+	  bash loguearT.sh "DEBUG" "Validacion parque_instalado"
+	  bash loguearT.sh "DEBUG" "Linea: $LINEA"
+	  bash loguearT.sh "DEBUG" "CPID: $CPID "
+	  bash loguearT.sh "DEBUG" "ITEM_ID: $ITEMID"
+	  bash loguearT.sh "DEBUG" "CSR: $CSR"
+	  bash loguearT.sh "DEBUG" "DESC $DESC"
+	  bash loguearT.sh "DEBUG" "DESCDET $DESCDET "
+	  bash loguearT.sh "DEBUG" "PROD $PROD"
+	  bash loguearT.sh "DEBUG" "A parqueInst $PROD >> $LINEA_NUEVA"
+	fi
 	  
-	  #Del nombre del archivo obtenfo el nombre de la suc (suc id en realidad)
-	  BRANCHID=`echo $FILENAME | cut -d "-" -f2`
-	  LINEA_NUEVA="$BRANCHID,$CUSTID,$DESC"
-	  # DEBUG - echo "escribo $PROD, LINEA: $LINEA_NUEVA"
 	  case $PROD in
 	    "INTERNETADSL")
 	      echo $LINEA_NUEVA >> "$PARQDIR/INTERNETADSL"
@@ -773,7 +744,8 @@ chequeaProceso(){
 	  esac
 	done
   done
-  
+  bash loguearT.sh "$COMANDO" "I" "Eliminando archivos ordenados temporales"
+  `rm $INSTORD/* &> /dev/null`
   bash loguearT.sh "$COMANDO" "I" "Se leyeron $QTYREGOK registros correctamente"
   bash loguearT.sh "$COMANDO" "I" "Se detectaron $QTYREGRECH registros que han sido rechazados"
   bash loguearT.sh "$COMANDO" "I" "Se rechazaron $QTYARCHRECH archivos"
