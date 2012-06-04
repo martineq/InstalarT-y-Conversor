@@ -27,6 +27,8 @@ $string = '';
 $matchSucFlag=0;
 $matchCliFlag=0;
 $matchStrFlag=0;
+$printFlag=0;
+$printScreen=0;
 	
 sub parseConfig{
 
@@ -86,15 +88,14 @@ sub parseArgs{
 
 	$cantParams = @ARGV;
 
-	$printFlag=0;
-	$printScreen=0;
+
 	
 	GetOptions('help|h' => \$help, 
-				"stdout|c=s" => \$stdout,
-				"fileout|e=s" => \$fileout,
+				"stdout|c=s" => sub { $printScreen=1 },
+				"fileout|e=s" =>  sub { $printFlag=1 },
 				"files|t=s{,}" => \@files,
-				"suc|s=s@" => \@sucursales,
-				"clientes|k=s@" => \@clientes,
+				"suc|s=s{,}" => \@sucursales,
+				"clientes|k=s{,}" => \@clientes,
 				"string|p=s" => \$string
 				);
 	
@@ -105,17 +106,17 @@ print "\n files: $files[0] $files[1], cantidad: $#files  \n";
 		exit 1;
     }
 
-	if ( $stdout ) {
+	# if ( $stdout ) {
 		# Si encuentra -c setea el flag de impresion solo por pantalla
-		$printScreen=1;
-	}
+		# $printScreen=1;
+	# }
 
-	if ( $fileout ) {
+	# if ( $fileout ) {
 		# Si encuentra -e setea el flag de impresion en archivo
-		$printFlag=1;	
-	}
+		# $printFlag=1;	
+	# }
 	
-	if ( $#files >= 1 ) {
+	if ( $#files >= 0 ) {
 		# Si encuentra -t determina un arreglo con los archivos a mirar (nombre). Tambien valida que sean validos y
 		# que si es * exista un archivo en el directorio
 		
@@ -131,7 +132,7 @@ print "\n files: $files[0] $files[1], cantidad: $#files  \n";
 		}
 	}
 	
-	if ( $#sucursales >= 1 ) {
+	if ( $#sucursales >= 0 ) {
 	# Si encuentra -s guarda un array de id sucursales a matchear, si es * lo guarda y es interpretado luego como any
 	# Tambien realiza la validacion de los elementos, si alguno no es numerico (a excepcion de *) devuelve error.
 		# $i++;
@@ -146,7 +147,7 @@ print "\n files: $files[0] $files[1], cantidad: $#files  \n";
 				# exit 1;
 			# }
 		# }
-		if ( $#sucursales >= 3 ){
+		if ( $#sucursales >= 2 ){
 			print "El rango no pueden ser mas de dos elementos!";
 			exit 1;
 		}
@@ -155,7 +156,7 @@ print "\n files: $files[0] $files[1], cantidad: $#files  \n";
 		$matchSucFlag=1;
 	}
 
-	if ( $#clientes >= 1 ) {
+	if ( $#clientes >= 0 ) {
 	# Si encuentra -k guarda un array de id clientes a matchear, si es * lo guarda y es interpretado luego como any
 	# Tambien realiza la validacion de los elementos, si alguno no es numerico (a excepcion de *) devuelve error.
 		# $i++;
@@ -192,7 +193,6 @@ sub generateOutputData{
 
 # Por cada archivo en el array lo abro y recorro secuencialmente
 # Si file to process es * debo leer todos los archivos del directorio
-print $filesToProcess[0];
 if ( $filesToProcess[0] eq "*" ){
 	$i=0;
 	opendir(DIR, $parqueInstalado) or die $!;
@@ -205,7 +205,6 @@ if ( $filesToProcess[0] eq "*" ){
 		$filesToProcess[$i] = $file;
     }
     closedir(DIR);
-	print "aca entre??\n";
 }
 print "aca: $_ \n";
 foreach (@filesToProcess ){
