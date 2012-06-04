@@ -37,7 +37,7 @@ $maeDir = "/var/tmp/TP/Grupo13/mae";
 $cliMae = $maeDir."/cli.mae";
 $prodMae = $maeDir."/prod.mae";
 $sucMae = $maeDir."/sucu.mae";
-$parqueInstalado=$grupo."/parque_instalado";
+$parqueInstalado="$grupo/parque_instalado";
 $reportes=$grupo."/reportes";
 #/var/tmp/TP/Grupo13/parque_instalado/TVPORCABLE
 }
@@ -73,6 +73,7 @@ while (<F_PRODUCTOS>){
 	# Realiza split dejando los campos que interesan para el hash, clave y valor
 	($prodTypeId, $prodTypeName, $a, $s, $d, $f, $g, $h, $itemName)=split(",");
 	# Carga el hash de productos, valor clave: prodTypeName, valor asoc.: itemName
+print "prodTypeId: $prodTypeId, prodTypeName: $prodTypeName, itemName: $itemName  ";
 	$sucHash{$prodTypeName}=$itemName;
 }
 
@@ -187,14 +188,17 @@ sub addElementToBuffer(){
 
 sub generateOutputData{
 
-print "$filesToProcess[0]";
+print "El 0 es: $filesToProcess[0]";
 
 # Por cada archivo en el array lo abro y recorro secuencialmente
 # Si file to process es * debo leer todos los archivos del directorio
+
 if ( $filesToProcess[0] eq "*" ){
 	$i=0;
 	opendir(DIR, $parqueInstalado) or die $!;
+	print "abri $parqueInstalado\n";
 	while ( my $file = readdir(DIR)) {
+	print "abro arch: $file";
         # Evito todo lo que comienze con "."
         if ($file =~ m/^\./){
 		$i++;
