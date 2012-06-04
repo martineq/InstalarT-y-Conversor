@@ -1,4 +1,5 @@
 #!/usr/bin/perl 
+use Getopt::Long;
 
 
 ################################################################################
@@ -6,9 +7,23 @@
 
 
 @bufferOutput =();
+@sucArray =();
+@cliArray =();
+@filesToProcess =();
 %prodHash;
 %cliHash;
 %sucuHash;
+$stringToMatch ='';
+
+# Variables de argumentos.
+$help = '';
+$stdout = '';
+$fileout = '';
+@files =();
+@sucursales =();
+@clientes =();
+$string = '';
+
 	
 sub parseConfig{
 
@@ -73,79 +88,94 @@ sub parseArgs{
 	$printFlag=0;
 	$printScreen=0;
 	
-	if($cantParams == 1) {
-	# Si encuentra -h imprime ayuda y sale
-        if($ARGV[0] eq '-h' || $ARGV[0] eq '--help') {
-            printHelp();
-	    exit 1;
-        }
-        else {
-            print "Comando incorrecto \n";
+	GetOptions ('help|h' => \$help, 
+				"stdout|c" => \$stdout,
+				"fileout|e" => \$fileout,
+				"files|t" => \@files,
+				"suc|s" => \@sucursales,
+				"clientes|k" => \@clientes,
+				"string|p" => \$string
+				);
+	
+	if( $help ) {
+		# Si encuentra -h imprime ayuda y sale
 		printHelp();
 		exit 1;
-        }
-        return 1;
     }
-	
-	for($i = 0; $i < $cantParams; $i++) {
-	
-		if ( $ARGV[$i] eq '-c' ) {
-			# Si encuentra -c setea el flag de impresion solo por pantalla
-			$printScreen=1;
-		}
-	
-		if ( $ARGV[$i] eq '-e' ) {
-			# Si encuentra -e setea el flag de impresion en archivo
-			$printFlag=1;	
-		}
-		
-		if ( $ARGV[$i] eq '-t' ) {
-			# Si encuentra -t determina un arreglo con los archivos a mirar (nombre). Tambien valida que sean validos y
-			# que si es * exista un archivo en el directorio
-			$i++;
-			while ( (($ARGV[$i] ne '-e') &&($ARGV[$i] ne '-c') &&($ARGV[$i] ne '-h') &&($ARGV[$i] ne '-s') &&($ARGV[$i] ne '-k') &&($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
-				print "$i ,  $ARGV[$i]";
-				@filesToProcess=$ARGV[$i];
-				$i++;
-			}
-		}
-		
-		if ( $ARGV[$i] eq '-s' ) {
-		# Si encuentra -s guarda un array de id sucursales a matchear, si es * lo guarda y es interpretado luego como any
-		# Tambien realiza la validacion de los elementos, si alguno no es numerico (a excepcion de *) devuelve error.
-			$i++;
-			$j=0;
-			while ( (($ARGV[$i] ne '-e') &&($ARGV[$i] ne '-c') &&($ARGV[$i] ne '-h') &&($ARGV[$i] ne '-s') &&($ARGV[$i] ne '-k') &&($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
-				@sucArray=$ARGV[$i];
-				$matchSucFlag=1;
-				$i++;
-				$j++;
-				if ($j > 1){
-					print "El rango no pueden ser mas de dos elementos!";
-					exit 1;
-				}
-			}
-		}
 
-		if ( $ARGV[$i] eq '-k' ) {
-		# Si encuentra -k guarda un array de id clientes a matchear, si es * lo guarda y es interpretado luego como any
-		# Tambien realiza la validacion de los elementos, si alguno no es numerico (a excepcion de *) devuelve error.
-			$i++;
-			while ( (($ARGV[$i] ne '-e') &&($ARGV[$i] ne '-c') &&($ARGV[$i] ne '-h') &&($ARGV[$i] ne '-s') &&($ARGV[$i] ne '-k') &&($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
-				@cliArray=$ARGV[$i];
-				$matchCliFlag=1;
-				$i++;
-			}
-		}
+	if ( $stdout ) {
+		# Si encuentra -c setea el flag de impresion solo por pantalla
+		$printScreen=1;
+	}
+
+	if ( $fileout ) {
+		# Si encuentra -e setea el flag de impresion en archivo
+		$printFlag=1;	
+	}
+	
+	if ( $#files >= 1 ) {
+		# Si encuentra -t determina un arreglo con los archivos a mirar (nombre). Tambien valida que sean validos y
+		# que si es * exista un archivo en el directorio
 		
-		if ( $ARGV[$i] eq '-p' ) {
-			# Si encuentra -p guarda el string a matchear con el campo itemName.
-			$i++;
-			while ( (($ARGV[$i] ne '-e') &&($ARGV[$i] ne '-c') &&($ARGV[$i] ne '-h') &&($ARGV[$i] ne '-s') &&($ARGV[$i] ne '-k') &&($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
-				$stringToMatch=$ARGV[$i];
-				$matchStrFlag=1;
-			}
+		# while ( (($ARGV[$i] ne '-e') &&($ARGV[$i] ne '-c') &&($ARGV[$i] ne '-h') &&($ARGV[$i] ne '-s') &&($ARGV[$i] ne '-k') &&($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
+			# print "$i ,  $ARGV[$i]";
+			# @filesToProcess=$ARGV[$i];
+			# $i++;
+		# }
+		for ( my $i=0; $i <= $#files; $i++ ){
+			#next if ( $files[$i] eq "." || $files[$i] eq ".." );
+			$filesToProcess[$i]=$files[$i];
 		}
+	}
+	
+	if ( $#sucursales >= 1 ) {
+	# Si encuentra -s guarda un array de id sucursales a matchear, si es * lo guarda y es interpretado luego como any
+	# Tambien realiza la validacion de los elementos, si alguno no es numerico (a excepcion de *) devuelve error.
+		# $i++;
+		# $j=0;
+		# while ( (($ARGV[$i] ne '-e') &&($ARGV[$i] ne '-c') &&($ARGV[$i] ne '-h') &&($ARGV[$i] ne '-s') &&($ARGV[$i] ne '-k') &&($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
+			# @sucArray=$ARGV[$i];
+			# $matchSucFlag=1;
+			# $i++;
+			# $j++;
+			# if ($j > 1){
+				# print "El rango no pueden ser mas de dos elementos!";
+				# exit 1;
+			# }
+		# }
+		if ( $#sucursales >= 3 ){
+			print "El rango no pueden ser mas de dos elementos!";
+			exit 1;
+		}
+		$sucArray[0] = $sucursales[0];
+		$sucArray[1] = $sucursales[1];
+		$matchSucFlag=1;
+	}
+
+	if ( $#clientes >= 1 ) {
+	# Si encuentra -k guarda un array de id clientes a matchear, si es * lo guarda y es interpretado luego como any
+	# Tambien realiza la validacion de los elementos, si alguno no es numerico (a excepcion de *) devuelve error.
+		# $i++;
+		# while ( (($ARGV[$i] ne '-e') &&($ARGV[$i] ne '-c') &&($ARGV[$i] ne '-h') &&($ARGV[$i] ne '-s') &&($ARGV[$i] ne '-k') &&($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
+			# @cliArray=$ARGV[$i];
+			# $matchCliFlag=1;
+			# $i++;
+		# }
+		for ( my $i=0; $i <= $#clientes; $i++ ){
+			$cliArray[$i]=$files[$i];
+		}
+		$matchCliFlag=1;
+	}
+	
+	if ( $string ) {
+		# Si encuentra -p guarda el string a matchear con el campo itemName.
+		# $i++;
+		# while ( (($ARGV[$i] ne '-e') &&($ARGV[$i] ne '-c') &&($ARGV[$i] ne '-h') &&($ARGV[$i] ne '-s') &&($ARGV[$i] ne '-k') &&($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
+			# $stringToMatch=$ARGV[$i];
+			# $matchStrFlag=1;
+		# }
+		$stringToMatch=$string;
+		$matchStrFlag=1;
 	}
 
 }
@@ -297,12 +327,9 @@ if(parseArgs(@ARGV) != 0){
 }
 
 parseConfig();
-
 loadHashes();
 generateOutputData();
 printData();
-
-
 
 		for $aref ( @bufferOutput ) {
 			print "\t [ @$aref ],\n";
