@@ -41,7 +41,7 @@ sub printHelp{
 # Imprime informacion de uso de la herramienta
 # Usage:	listarT.pl -<c|e|h|s|k|p|t>
 #	
-	print "\n Programa: listarT.pl  -- Autor: Grupo13  -  GNU GPLv3
+	print "\n\tPrograma: listarT.pl  -- Autor: Grupo13  -  GNU GPLv3
 	Descripcion: Genera un reporte de parques instalados en base a queries
 				 definidas por el usuario.
 				 
@@ -56,9 +56,9 @@ sub printHelp{
 	-p : String o sub-string para filtrar con el cod. cabecera.\n
 	-----------------------------------------------------------------------\n
 	Ejemplo:
-		listarT.pl -c -e -t INTERNETCABLEMODEM -s 100 -k 160 -p Cable
-		listarT.pl -e -t \"*\" -s 100 145 -p \"Plan Comercial Cablemodem \(Hoteles y Empresas\)\"
-		listarT.pl -c -t \"*\" -s \"*\" -k 169 124 177\"
+		listarT.pl -c -e -t INTERNETCABLEMODEM -s 100 -k 169 -p Cable
+		listarT.pl -e -c -t \"*\" -s 100 145 -p \"Plan Comercial Cablemodem \\(Hoteles y Empresas\\)\"
+		listarT.pl -c -t \"*\" -s \"*\" -k 169 124 177
 	\n";
 	exit 0;
 	
@@ -125,7 +125,7 @@ sub loadHashes{
 sub parseArgs{
 
 	@myArgs = @ARGV;
-	GetOptions('help|h' => \ sub { printHelp() }, 
+	GetOptions('help|h' => \$help, 
 				'stdout|c' => sub { $printScreen=1 },
 				'fileout|e'=>  sub { $printFlag=1 },
 				"files|t=s{,}" => \@files,
@@ -146,7 +146,7 @@ sub parseArgs{
 		for ( my $i=0; $i <= $#files; $i++ ){
 			#next if ( $files[$i] eq "." || $files[$i] eq ".." );
 			$filesToProcess[$i]=$files[$i];
-			print "File to process: $filesToProcess[$i] \n";
+			#print "File to process: $filesToProcess[$i] \n";
 		}
 	}
 	
@@ -235,7 +235,7 @@ sub generateOutputData{
 			}
 			$flagEscritura=0;
 			if ( $matchCliFlag == 1 ){
-				print "valido clientes : $cliArray[0] - $f_idCli\n";
+				#print "valido clientes : $cliArray[0] - $f_idCli\n";
 				$cliArraySize = $#cliArray + 1;
 				if ($cliArray[0] eq "*"){
 					$flagEscritura = 1;
@@ -246,7 +246,7 @@ sub generateOutputData{
 				if ( $cliArraySize > 1 ){
 					 foreach (@cliArray) {
 						if ( $f_idCli == $_ ){
-							print "comparando $f_idCli CON $_\n";
+							#print "comparando $f_idCli CON $_\n";
 							$flagEscritura = 1;
 						}
 					}
@@ -276,7 +276,7 @@ sub generateOutputData{
 	}
 
 	# Ordeno buffer de salida por f_idSuc creciente
-	@bufferOutput = sort { $a->[0] <==> $b->[0] } @bufferOutput;
+	@bufferOutput = sort { $a->[0] <=> $b->[0] } @bufferOutput;
 
 };
 
