@@ -47,15 +47,14 @@ sub printHelp{
 }
 
 sub parseConfig{
+	$maeDir = $ENV{"MAEDIR"};
+	$grupo = $ENV{"GRUPO"};
+	$reportes = $ENV{"REPODIR"};
 
-$grupo = "/var/tmp/TP/Grupo13";
-$maeDir = "/var/tmp/TP/Grupo13/mae";
-$cliMae = $maeDir."/cli.mae";
-$prodMae = $maeDir."/prod.mae";
-$sucMae = $maeDir."/sucu.mae";
-$parqueInstalado="$grupo/parque_instalado";
-$reportes=$grupo."/reportes";
-#/var/tmp/TP/Grupo13/parque_instalado/TVPORCABLE
+	$cliMae = $maeDir."/cli.mae";
+	$prodMae = $maeDir."/prod.mae";
+	$sucMae = $maeDir."/sucu.mae";
+	$parqueInstalado="$grupo/parque_instalado";
 }
 
 sub loadHashes{
@@ -113,7 +112,6 @@ sub parseArgs{
 				"string|p=s" => \$string
 				);
 	
-print "\n files: $files[0] $files[1], cantidad: $#files  \n";
 	if( $help ) {
 		# Si encuentra -h imprime ayuda y sale
 		printHelp();
@@ -195,7 +193,6 @@ print "\n files: $files[0] $files[1], cantidad: $#files  \n";
 		$stringToMatch=$string;
 		$matchStrFlag=1;
 	}
-
 }
 
 sub addElementToBuffer(){
@@ -203,104 +200,99 @@ sub addElementToBuffer(){
 }
 
 sub generateOutputData{
-
-print "El 0 es: $filesToProcess[0]";
-
-# Por cada archivo en el array lo abro y recorro secuencialmente
-# Si file to process es * debo leer todos los archivos del directorio
-
-if ( $filesToProcess[0] eq "*" ){
-	$i=0;
-	opendir(DIR, $parqueInstalado) or die $!;
-	print "abri $parqueInstalado\n";
-	while ( my $file = readdir(DIR)) {
-	print "abro arch: $file";
-        # Evito todo lo que comienze con "."
-        if ($file =~ m/^\./){
-		$i++;
-		next;
+	# Por cada archivo en el array lo abro y recorro secuencialmente
+	# Si file to process es * debo leer todos los archivos del directorio
+	if ( $filesToProcess[0] eq "*" ){
+		$i=0;
+		opendir(DIR, $parqueInstalado) or die $!;
+		print "abri $parqueInstalado\n";
+		while ( my $file = readdir(DIR)) {
+			# Evito todo lo que comienze con "."
+			if ($file =~ m/^\./){
+			$i++;
+			next;
+			}
+			$filesToProcess[$i] = $file;
 		}
-		$filesToProcess[$i] = $file;
-    }
-    closedir(DIR);
-}
-print "aca: $_ \n";
-foreach (@filesToProcess ){
-	open F_INPUT, "<", "$parqueInstalado/$_" or die "No se pudo abrir el archivo de $parqueInstalado/$_";
-	print "procesando $parqueInstalado/$_";
-	while (<F_INPUT>){
-		chomp;
-		($f_idSuc, $f_idCli, $descCabecera, $descDetalle)=split(",");
-		$flagEscritura = 0;
-		$prodTypeNameComp = $descCabecera;
-		# Aplico los filtros de producto, cliente y sucursal
-		
-		# Primero chequeo si debeo ver la sucursal, si tiene mas de un elemento es busqueda por rango
-		# Sino busqueda precisa o con wildcard
-		if ( $matchSucFlag == 1) {
-			$sucArraySize = $#sucArray + 1;
-			if ($sucArraySize == 2){
-				if ( $f_idSuc > $sucArray[0] && $f_idSuc < $sucArray[1] ){
-					#Esta dentro del rango
-					$flagEscritura = 1;
-				}
-			}
-			if ( $sucArray[0] eq "*"){
-				$flagEscritura = 1;
-			}
-			if ($sucArray[0] == $f_idSuc ){
-				$flagEscritura = 1;
-			}
-			# Si no matchea sigo con el proximo registro
-			if ($flagEscritura == 0){
-				next;
-			}
-		}
-		$flagEscritura=0;
-		if ( $matchCliFlag == 1 ){
-			print "valido clientes : $cliArray[0] - $f_idCli\n";
-			$cliArraySize = $#cliArray + 1;
-			if ($cliArray[0] eq "*"){
-				$flagEscritura = 1;
-			}
-			if ($cliArray[0] == $f_idCli ){
-				$flagEscritura = 1;
-			}
-			if ( $cliArraySize > 1 ){
-				 foreach (@cliArray) {
-					if ( $f_idCli == $_ ){
-						print "comparando $f_idCli CON $_\n";
+		closedir(DIR);
+	}
+
+	foreach (@filesToProcess ){
+		open F_INPUT, "<", "$parqueInstalado/$_" or die "No se pudo abrir el archivo de $parqueInstalado/$_";
+		#print "procesando $parqueInstalado/$_";
+		while (<F_INPUT>){
+			chomp;
+			($f_idSuc, $f_idCli, $descCabecera, $descDetalle)=split(",");
+			$flagEscritura = 0;
+			$prodTypeNameComp = $descCabecera;
+			# Aplico los filtros de producto, cliente y sucursal
+			
+			# Primero chequeo si debeo ver la sucursal, si tiene mas de un elemento es busqueda por rango
+			# Sino busqueda precisa o con wildcard
+			if ( $matchSucFlag == 1) {
+				$sucArraySize = $#sucArray + 1;
+				if ($sucArraySize == 2){
+					if ( $f_idSuc > $sucArray[0] && $f_idSuc < $sucArray[1] ){
+						#Esta dentro del rango
 						$flagEscritura = 1;
 					}
 				}
+				if ( $sucArray[0] eq "*"){
+					$flagEscritura = 1;
+				}
+				if ($sucArray[0] == $f_idSuc ){
+					$flagEscritura = 1;
+				}
+				# Si no matchea sigo con el proximo registro
+				if ($flagEscritura == 0){
+					next;
+				}
 			}
-			# Si no matchea sigo con el proximo registro
-                        if ($flagEscritura == 0){
-                                next;
-                        }
+			$flagEscritura=0;
+			if ( $matchCliFlag == 1 ){
+				print "valido clientes : $cliArray[0] - $f_idCli\n";
+				$cliArraySize = $#cliArray + 1;
+				if ($cliArray[0] eq "*"){
+					$flagEscritura = 1;
+				}
+				if ($cliArray[0] == $f_idCli ){
+					$flagEscritura = 1;
+				}
+				if ( $cliArraySize > 1 ){
+					 foreach (@cliArray) {
+						if ( $f_idCli == $_ ){
+							print "comparando $f_idCli CON $_\n";
+							$flagEscritura = 1;
+						}
+					}
+				}
+				# Si no matchea sigo con el proximo registro
+							if ($flagEscritura == 0){
+									next;
+							}
 
+			}
+			$flagEscritura=0;
+			if ( $matchStrFlag == 1 ){
+				if ( $descCabecera =~ $stringToMatch ){
+					#Si es un substring o incluso el string sigo adelante!
+					$prodTypeNameComp = $descCabecera;
+					$flagEscritura = 1;
+				}		
+							if ($flagEscritura == 0){
+									next;
+							}
+			}
+			
+			# Si el resultado es OK guardo en mi buffer de salida
+			addElementToBuffer();
 		}
-		$flagEscritura=0;
-		if ( $matchStrFlag == 1 ){
-			if ( $descDetalle =~ $stringToMatch ){
-				#Si es un substring o incluso el string sigo adelante!
-				$prodTypeNameComp = $descCabecera;
-				$flagEscritura = 1;
-			}		
-                        if ($flagEscritura == 0){
-                                next;
-                        }
-		}
-		
-		# Si el resultado es OK guardo en mi buffer de salida
-		addElementToBuffer();
+		# Cierro el archivo
+		close (F_INPUT);
 	}
-	# Cierro el archivo
-	close (F_INPUT);
-}
 
-# Ordeno buffer de salida por idCliente decreciente
-# sort
+	# Ordeno buffer de salida por f_idSuc creciente
+	@bufferOutput = sort(@bufferOutput);
 
 };
 
@@ -314,8 +306,13 @@ sub printData{
 # Cierro el archivo de reporte
 
 	if ($printScreen eq 1){
-		for $aref ( @bufferOutput ) {
-			print "\t [ @$aref ],\n";
+		print "CABECERA XYZ"
+		for $elem ( @bufferOutput ) {
+			#($a,$b,$c,$d,$e,$f,$g) = split(" ",$elem);
+			#print "\t $a,$b,$c,$d,$e,$f,$g\n";
+			@elems = split(" ",$elem);
+			$, = ',';
+			print "@elems\n";
 		};
 	}
 	if ($printFlag eq 1){
@@ -325,8 +322,6 @@ sub printData{
 		};
 	}
 }
-
-
 
 
 # main()
