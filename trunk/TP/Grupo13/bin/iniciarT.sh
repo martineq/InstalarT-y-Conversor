@@ -41,7 +41,7 @@
 # variables ya seteadas e ir a FIN
 ##################################################
 
-source global.sh
+#source global.sh
 
 COMANDO="iniciarT"
 
@@ -213,6 +213,43 @@ chequeaProceso(){
   bash loguearT.sh "$COMANDO" "I" "Comienzo de ejecucion de instalarT" 
   
   agregarVariablePath
+  
+  #Seteo las variables siempre y cuando no esten definidas y solo aquellas que sean necesarias.
+  if [ -z $CONFDIR ] ; then
+    CONFDIR=`pwd | sed s#/bin#/confdir#g`
+	export CONFDIR=$CONFDIR
+  fi
+  if [ -z $GRUPO ] ; then
+	export GRUPO=`grep -A 0 GRUPO $CONFDIR/instalarT.conf | sed "s/\(^.*\)\(=.*\)\(=.*\)\(=.*\)/\2/g" | sed s/=//g`
+  fi
+  if [ -z $ARRIDIR ] ; then
+	export ARRIDIR=`grep -A 0 ARRIDIR $CONFDIR/instalarT.conf | sed "s/\(^.*\)\(=.*\)\(=.*\)\(=.*\)/\2/g" | sed s/=//g`
+  fi  
+  if [ -z $RECHDIR ] ; then
+	export RECHDIR=`grep -A 0 RECHDIR $CONFDIR/instalarT.conf | sed "s/\(^.*\)\(=.*\)\(=.*\)\(=.*\)/\2/g" | sed s/=//g`
+  fi
+  if [ -z $BINDIR ] ; then
+	export BINDIR=`grep -A 0 BINDIR $CONFDIR/instalarT.conf | sed "s/\(^.*\)\(=.*\)\(=.*\)\(=.*\)/\2/g" | sed s/=//g`
+  fi
+  if [ -z $MAEDIR ] ; then
+	export MAEDIR=`grep -A 0 MAEDIR $CONFDIR/instalarT.conf | sed "s/\(^.*\)\(=.*\)\(=.*\)\(=.*\)/\2/g" | sed s/=//g`
+  fi
+  if [ -z $REPODIR ] ; then
+	export REPODIR=`grep -A 0 REPODIR $CONFDIR/instalarT.conf | sed "s/\(^.*\)\(=.*\)\(=.*\)\(=.*\)/\2/g" | sed s/=//g`
+  fi
+  if [ -z $LOGEXT ] ; then
+	export LOGEXT=`grep -A 0 LOGEXT $CONFDIR/instalarT.conf | sed "s/\(^.*\)\(=.*\)\(=.*\)\(=.*\)/\2/g" | sed s/=//g`
+  fi
+  if [ -z $LOGSIZE ] ; then
+	export LOGSIZE=`grep -A 0 LOGSIZE $CONFDIR/instalarT.conf | sed "s/\(^.*\)\(=.*\)\(=.*\)\(=.*\)/\2/g" | sed s/=//g`
+  fi
+  if [ -z $DATASIZE ] ; then
+	export DATASIZE=`grep -A 0 DATASIZE $CONFDIR/instalarT.conf | sed "s/\(^.*\)\(=.*\)\(=.*\)\(=.*\)/\2/g" | sed s/=//g`
+  fi
+  if [ -z $LOGDIR ] ; then
+	export LOGDIR=`grep -A 0 LOGDIR $CONFDIR/instalarT.conf | sed "s/\(^.*\)\(=.*\)\(=.*\)\(=.*\)/\2/g" | sed s/=//g`
+  fi
+  
   bash loguearT.sh "$COMANDO" "I" "NUeva variable de entorno PATH seteada a: $PATH" 
 
   
