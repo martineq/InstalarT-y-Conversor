@@ -1,10 +1,13 @@
 #!/usr/bin/perl 
 use Getopt::Long;
 
-
-################################################################################
-#defino aca las constantes que estan en instalarT.conf (hago asi por cuestiones de desarrollo rapido)...
-
+#########################################
+#										#
+#	Sistemas Operativos 75.08			#
+#	Grupo: 	13							#
+#	Nombre:	listarT.pl					#
+#										#
+#########################################
 
 @bufferOutput =();
 @sucArray =();
@@ -25,6 +28,7 @@ $fileout = '';
 @clientes =();
 $string = '';
 
+# Flags de filtros
 $matchSucFlag=0;
 $matchCliFlag=0;
 $matchStrFlag=0;
@@ -37,17 +41,31 @@ sub printHelp{
 # Imprime informacion de uso de la herramienta
 # Usage:	listarT.pl -<c|e|h|s|k|p|t>
 #	
-	print "\n listarT.pl\n
-			USAGE: listarT.pl -<c|e|h|s|k|p|t> \n
-			-c setea el flag de impresion solo por pantalla\n
-			-e setea el flag de impresion en archivo\n
-			-t determina un arreglo con los archivos a mirar\n
-			-s guarda un array de id sucursales\n
-			-k guarda un array de id clientes a matchear\n
-			-p guarda el string a matchear\n";
-
+	print "\n Programa: listarT.pl  -- Autor: Grupo13  -  GNU GPLv3
+	Descripcion: Genera un reporte de parques instalados en base a queries
+				 definidas por el usuario.
+				 
+	USAGE: listarT.pl -<c|e|h|s|k|p|t> 
+	-----------------------------------------------------------------------\n
+	-h : Imprime esta ayuda
+	-c : Imprime la salida del programa por STDOUT
+	-e : Se genera la salida del reporte en el directorio REPODIR
+	-t : Filtro de tipos de producto <INTERNETCABLEMODEM|..|*>
+	-s : Sucursal a validar <ID SUC> or rango de ellas <SUCinf> <SUCsup>
+	-k : Cliente a consultar < ID CLI >
+	-p : String o sub-string para filtrar con el cod. cabecera.\n
+	-----------------------------------------------------------------------\n
+	Ejemplo:
+		listarT.pl -c -e -t INTERNETCABLEMODEM -s 100 -k 160 -p Cable
+		listarT.pl -e -t \"*\" -s 100 145 -p \"Plan Comercial Cablemodem \(Hoteles y Empresas\)\"
+		listarT.pl -c -t \"*\" -s \"*\" -k 169 124 177\"
+	\n";
+	exit 0;
+	
 }
 
+
+# Seteo las variables en base a la informacion que brinda el entorno
 sub parseConfig{
 	$maeDir = $ENV{"MAEDIR"};
 	$grupo = $ENV{"GRUPO"};
@@ -59,6 +77,7 @@ sub parseConfig{
 	$parqueInstalado="$grupo/parque_instalado";
 }
 
+# Cargo los hashes de clientes, productos y sucursales
 sub loadHashes{
 	# Abre los archivos de productos, sucursales y clientes
 	open F_CLIENTES, "<", "$cliMae" or die "No se pudo abrir el archivo de $cliMae";
@@ -90,22 +109,23 @@ sub loadHashes{
 		# Realiza split dejando los campos que interesan para el hash, clave y valor
 		($prodTypeId, $prodTypeName, $a, $s, $d, $f, $g, $h, $itemName)=split(",");
 		# Carga el hash de productos, valor clave: prodTypeName, valor asoc.: itemName
-	print "prodTypeId: $prodTypeId, prodTypeName: $prodTypeName, itemName: $itemName  ";
+	#print "prodTypeId: $prodTypeId, prodTypeName: $prodTypeName, itemName: $itemName  \n";
 		$prodHash{$itemName}=$prodTypeName;
 	}
 
 	# Cierro archivos
-
 	close (F_CLIENTES);
 	close (F_SUCURSALES);
 	close (F_PRODUCTOS);
 
 };
 
+
+# Realizo el parsing de los argumentos ingresados por el cliente
 sub parseArgs{
 
 	@myArgs = @ARGV;
-	GetOptions('help|h' => \$help, 
+	GetOptions('help|h' => \ sub { printHelp() }, 
 				'stdout|c' => sub { $printScreen=1 },
 				'fileout|e'=>  sub { $printFlag=1 },
 				"files|t=s{,}" => \@files,
@@ -119,26 +139,10 @@ sub parseArgs{
 		printHelp();
 		exit 1;
     }
-
-	# if ( $stdout ) {
-		# Si encuentra -c setea el flag de impresion solo por pantalla
-		# $printScreen=1;
-	# }
-
-	# if ( $fileout ) {
-		# Si encuentra -e setea el flag de impresion en archivo
-		# $printFlag=1;	
-	# }
 	
 	if ( $#files >= 0 ) {
 		# Si encuentra -t determina un arreglo con los archivos a mirar (nombre). Tambien valida que sean validos y
 		# que si es * exista un archivo en el directorio
-		
-		# while ( (($ARGV[$i] ne '-e') &&($ARGV[$i] ne '-c') &&($ARGV[$i] ne '-h') &&($ARGV[$i] ne '-s') &&($ARGV[$i] ne '-k') &&($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
-			# print "$i ,  $ARGV[$i]";
-			# @filesToProcess=$ARGV[$i];
-			# $i++;
-		# }
 		for ( my $i=0; $i <= $#files; $i++ ){
 			#next if ( $files[$i] eq "." || $files[$i] eq ".." );
 			$filesToProcess[$i]=$files[$i];
@@ -149,18 +153,6 @@ sub parseArgs{
 	if ( $#sucursales >= 0 ) {
 	# Si encuentra -s guarda un array de id sucursales a matchear, si es * lo guarda y es interpretado luego como any
 	# Tambien realiza la validacion de los elementos, si alguno no es numerico (a excepcion de *) devuelve error.
-		# $i++;
-		# $j=0;
-		# while ( (($ARGV[$i] ne '-e') &&($ARGV[$i] ne '-c') &&($ARGV[$i] ne '-h') &&($ARGV[$i] ne '-s') &&($ARGV[$i] ne '-k') &&($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
-			# @sucArray=$ARGV[$i];
-			# $matchSucFlag=1;
-			# $i++;
-			# $j++;
-			# if ($j > 1){
-				# print "El rango no pueden ser mas de dos elementos!";
-				# exit 1;
-			# }
-		# }
 		if ( $#sucursales >= 2 ){
 			print "El rango no pueden ser mas de dos elementos!";
 			exit 1;
@@ -173,12 +165,6 @@ sub parseArgs{
 	if ( $#clientes >= 0 ) {
 	# Si encuentra -k guarda un array de id clientes a matchear, si es * lo guarda y es interpretado luego como any
 	# Tambien realiza la validacion de los elementos, si alguno no es numerico (a excepcion de *) devuelve error.
-		# $i++;
-		# while ( (($ARGV[$i] ne '-e') &&($ARGV[$i] ne '-c') &&($ARGV[$i] ne '-h') &&($ARGV[$i] ne '-s') &&($ARGV[$i] ne '-k') &&($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
-			# @cliArray=$ARGV[$i];
-			# $matchCliFlag=1;
-			# $i++;
-		# }
 		for ( my $i=0; $i <= $#clientes; $i++ ){
 			$cliArray[$i]=$clientes[$i];
 		}
@@ -187,27 +173,24 @@ sub parseArgs{
 	
 	if ( $string ) {
 		# Si encuentra -p guarda el string a matchear con el campo itemName.
-		# $i++;
-		# while ( (($ARGV[$i] ne '-e') &&($ARGV[$i] ne '-c') &&($ARGV[$i] ne '-h') &&($ARGV[$i] ne '-s') &&($ARGV[$i] ne '-k') &&($ARGV[$i] ne '-p')) && ($i < $cantParams) ){
-			# $stringToMatch=$ARGV[$i];
-			# $matchStrFlag=1;
-		# }
 		$stringToMatch=$string;
 		$matchStrFlag=1;
 	}
 }
 
+#Agrega un elemento al buffer de salida, se modularizo para dar claridad al codigo
 sub addElementToBuffer(){
 	push(@bufferOutput,[$f_idSuc,$sucHash{$f_idSuc},$f_idCli,$cliHash{$f_idCli},$prodHash{$prodTypeNameComp},$descCabecera,$descDetalle]);
 }
 
+# Genera la informacion que se almacena en el buffer de salida en base a los filtros que 
+# se definieron mediante los argumentos de entrada del programa
 sub generateOutputData{
 	# Por cada archivo en el array lo abro y recorro secuencialmente
 	# Si file to process es * debo leer todos los archivos del directorio
 	if ( $filesToProcess[0] eq "*" ){
 		$i=0;
 		opendir(DIR, $parqueInstalado) or die $!;
-		print "abri $parqueInstalado\n";
 		while ( my $file = readdir(DIR)) {
 			# Evito todo lo que comienze con "."
 			if ($file =~ m/^\./){
@@ -269,9 +252,9 @@ sub generateOutputData{
 					}
 				}
 				# Si no matchea sigo con el proximo registro
-							if ($flagEscritura == 0){
-									next;
-							}
+				if ($flagEscritura == 0){
+						next;
+				}
 
 			}
 			$flagEscritura=0;
@@ -281,11 +264,10 @@ sub generateOutputData{
 					$prodTypeNameComp = $descCabecera;
 					$flagEscritura = 1;
 				}		
-							if ($flagEscritura == 0){
-									next;
-							}
+				if ($flagEscritura == 0){
+						next;
+				}
 			}
-			
 			# Si el resultado es OK guardo en mi buffer de salida
 			addElementToBuffer();
 		}
@@ -294,25 +276,21 @@ sub generateOutputData{
 	}
 
 	# Ordeno buffer de salida por f_idSuc creciente
-	
-	@bufferOutput = sort { $a->[0] cmp $b->[0] } @bufferOutput;
+	@bufferOutput = sort { $a->[0] <==> $b->[0] } @bufferOutput;
 
 };
 
-
+# Imprime la info en la salida especificada
 sub printData{
-
-# Imprimo mi buffer por stdout
-# Si el flag es -e guardo en archivo
-# Creo archivo en repositorio default con nombre lpi.<aaaammddhhmmss>
-# Hago un vuelco de la info en el archivo
-# Cierro el archivo de reporte
-
+	# Imprimo mi buffer por stdout
+	# Si el flag es -e guardo en archivo
+	# Creo archivo en repositorio default con nombre lpi.<aaaammddhhmmss>
+	# Hago un vuelco de la info en el archivo
+	# Cierro el archivo de reporte
 	($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
 	$mon++;
 	$year+=1900;
 	$repId = "$year"."$mon"."$mday"."$hour"."$min"."$sec";
-	#print "\n REP_ID: $repId\n";
 	
 	if ($printScreen eq 1){
 		print "Reporte: lpi.$repId";
