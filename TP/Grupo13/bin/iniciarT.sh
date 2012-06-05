@@ -256,25 +256,29 @@ chequeaProceso(){
   if [ `chequeaVariables` -eq 1 ] ; then
     bash loguearT.sh "$COMANDO" "SE" "Variables no definidas durante la instalacion o no disponibles"
     echo "Error Severo: Variables no definidas durante la instalacion o no disponibles"
-    exit 1
+    return 1
+    #exit 1
   fi
 
   if [ `chequearInstalacion` -eq 1 ] ; then
     bash loguearT.sh "$COMANDO" "SE" "Variables no definidas durante la instalacion o no disponibles"
     echo "Error Severo: Variables no definidas durante la instalacion o no disponibles"
-    exit 1
+    return 1
+    #exit 1
   fi
 
   if [ `chequeaDirectorios` -eq 1 ] ; then
     bash loguearT.sh "$COMANDO" "SE" "Directorios necesarios no creados en la instalacion o no disponibles" 
     echo "Error Severo: Directorios necesarios no creados en la instalacion o no disponibles"
-    exit 1
+    return 1
+    #exit 1
   fi
 
   if [ `chequeaArchivosMaestros` -eq 1 ] ; then
     bash loguearT.sh "$COMANDO" "SE" "Archivos maestros no accesibles/disponibles"
     echo "Error Severo: Archivos maestros no accesibles/disponibles"
-    exit 1
+    return 1
+    #exit 1
   fi
   
   bash loguearT.sh "$COMANDO" "I" "Validacion del entorno de ejecucion finalizada" 
@@ -306,12 +310,13 @@ chequeaProceso(){
   else
     bash loguearT.sh "$COMANDO" "E" "Demonio detectarT ya ejecutado bajo PID: <`chequeaProceso detectarT.sh $$`>" 
     echo "Error: Demonio detectarT ya ejecutado bajo PID: <`chequeaProceso detectarT.sh $$`>"
-    exit 1
+    #exit 1
+    return 1
   fi
   
   
   bash loguearT.sh "$COMANDO" "I" "Fin de ejecucion de instalarT" 
-  
-  exit 0
+  return 0 
+  #exit 0
 
 

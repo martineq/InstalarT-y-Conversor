@@ -149,7 +149,7 @@ do
           bash loguearT.sh "$COMANDO" "E" "Demonio grabarParqueT ya ejecutado bajo PID: <`chequeaProceso grabarParqueT.sh $$`>" 
 #         echo "Error: grabarParqueT ya ejecutado bajo PID: <`chequeaProceso grabarParqueT.sh $$`>"
           echo "ERROR"
-         exit 1
+         #exit 1
       fi
    fi
 
