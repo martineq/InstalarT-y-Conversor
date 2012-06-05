@@ -113,14 +113,17 @@ do
 			
  		   if ( ([ $START_DATE -lt $DATE ]) || ([ $START_DATE -eq $DATE ]) ) && ( ([ $END_DATE -gt $DATE ]) || ([ $END_DATE -eq $DATE ]) ) then 
 
-			  perl moverT.pl "$ARRIDIR/$PARAM"  "$grupo/inst_recibidas/"
-		      bash loguearT.sh "$COMANDO" "I" "Archivo $PARAM enviado"  
+			 # perl moverT.pl "$ARRIDIR/$PARAM"  "$grupo/inst_recibidas/"
+		        bash moverT.sh "$ARRIDIR/$PARAM"  "$grupo/inst_recibidas/" "$COMANDO"
+			bash loguearT.sh "$COMANDO" "I" "Archivo $PARAM enviado"  
                    else
-		      perl moverT.pl "$ARRIDIR/$PARAM"  "$RECHDIR/"
+		        bash moverT.sh "$ARRIDIR/$PARAM"  "$RECHDIR/" "$COMANDO"
+			#perl moverT.pl "$ARRIDIR/$PARAM"  "$RECHDIR/"
 	 	      bash loguearT.sh "$COMANDO" "I" "Archivo $PARAM rechazado por sucursal no vigente"  
                    fi
 	       	else
-  	           perl moverT.pl "$ARRIDIR/$PARAM"  "$RECHDIR/"		
+  	           	bash moverT.sh "$ARRIDIR/$PARAM"  "$RECHDIR/" "$COMANDO"
+			#perl moverT.pl "$ARRIDIR/$PARAM"  "$RECHDIR/"		
 			   bash loguearT.sh "$COMANDO" "I" "Archivo $PARAM rechazado por nombre incorrecto"  
                 fi
             else

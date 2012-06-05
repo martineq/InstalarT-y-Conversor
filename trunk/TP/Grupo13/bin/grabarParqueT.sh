@@ -430,15 +430,16 @@ chequeaProceso(){
         break
       fi
 	FILENAMEAUX=`echo $ARCHIVO | sed 's#.*\/##'`
-	CHEQDUP=`ls -l $INSTPROC | grep $FILENAMEAUX `
+	#FILENAMEAUX=`echo $FILENAMESLASH | cut -d "." -f 1`
+        CHEQDUP=`ls -l $INSTPROC | grep $FILENAMEAUX `
 	# Chequea duplicado en carpeta de procesados
 	if [ ! -z "$CHEQDUP" ] ; then
-		perl moverT.pl "$INSTREC/$FILENAMEAUX" "$RECHDIR/" $COMANDO
-		bash loguearT.sh "$COMANDO" "A" "Archivo: $ARCHIVO dup., moviendo a $RECHDIR/"
+		#perl moverT.pl "$INSTREC/$FILENAMEAUX" "$RECHDIR/" $COMANDO
+		bash moverT.sh "$INSTREC/$FILENAMEAUX" "$RECHDIR/" $COMANDO
+		bash loguearT.sh "$COMANDO" "A" "Archivo: $FILENAMESLASH dup., moviendo a $RECHDIR/"
 		let QTYARCHRECH=$QTYARCHRECH+1
 		continue
 	fi
-	
 	let QTYLINEAS=0
 	
     # Formato registros detalle/cabecera
@@ -643,7 +644,8 @@ chequeaProceso(){
 	done
 	
 	# Muevo para evitar el reprocesamiento
-	perl moverT.pl "$INSTREC/$FILENAME" "$INSTPROC/" $COMANDO
+	#perl moverT.pl "$INSTREC/$FILENAME" "$INSTPROC/" $COMANDO
+	bash moverT.sh "$INSTREC/$FILENAME" "$INSTPROC/" $COMANDO
   done
   
   # Comienzo el procesamiento de los archivos ordenados
