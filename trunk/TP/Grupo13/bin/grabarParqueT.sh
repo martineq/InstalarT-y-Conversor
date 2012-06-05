@@ -172,6 +172,19 @@ obtenerProducto(){
     echo 1
     return 1
   fi
+  
+  #Valido que tenga registro cabecera detalle
+#   CHEQITEM=`cat $PRODUCTOS | grep "^[^,]*,[^,]*,$CPID,[^,]*,[^,]*,[^,]*,N,$ITEMID"`
+#   if [ -z "$CHEQITEM" ] ; then
+#     if [ $DEBUG -eq 1 ]; then
+#       bash loguearT.sh "DEBUG" "A" "Error no se encuentra registro cab. detalle en el archivo maestro para el el item $ITEMID"
+#     fi
+#     bash loguearT.sh "$COMANDO" "I" "El item: $ITEMID no posee un reg. cabecera detalle valido"
+#     echo 1
+#     return 1
+#   fi
+  
+  
   echo 0
 }
 
@@ -436,8 +449,8 @@ chequeaProceso(){
     # Clase de Servicio requerida - caracter - CLASS_SERVICE_IS_REQUIRED
     # Id del Ítem de Producto - numérico - ITEM_ID
     # Separador: coma
-	
-	for LINEA in `cat $ARCHIVO`
+      FILENAME=`echo $ARCHIVO | sed 's#.*\/##'`
+      for LINEA in `cat $ARCHIVO`
       do
       # Ordeno el archivo
       # CUSTOMER_ID (asc), OPERATION_DATE (de la mas antigüa a la más reciente), 
@@ -470,6 +483,10 @@ chequeaProceso(){
 		if [ -z $CUSTID ] || [ -z $OPDATE ] || [ -z $CPID ] \
 		  || [ -z $CSID ] || [ -z $CSR ] || [ -z $ITEMID ] ; then
 		  # Todos NO vacios
+# 		  bash loguearT.sh "$COMANDO" "I" "Error en validacion de estructura de campos"
+# 		  let QTYREGRECH=$QTYREGRECH+1
+# 		  #Lo agrego a los rechazados
+# 		  `echo $LINEA >> "$RECHDIR/$FILENAME"`
 		  continue
 		fi
 		
@@ -598,7 +615,7 @@ chequeaProceso(){
 		  # Antes tomo el recaudo de ver si no son el mismo, en ese caso no inserto
 		  if [ $LINEA_AUX == ${LINEA_ORD[i]} ] ; then
 			#Son iguales
-			echo "iguales 100%, no inserto"
+			#echo "iguales 100%, no inserto"
 			break
 		  fi
 		  
@@ -641,11 +658,15 @@ chequeaProceso(){
 #   cargaProductos
 #   cargaDescripciones
 
+	let DETALLE=0
+	let CABECERA=0
+	let OLDCUSTID=0
+
   for ARCHIVO in $ARCH_ORD
     do
 	FILENAME=`echo $ARCHIVO | sed 's#.*\/##'`
-	bash loguearT.sh "$COMANDO" "I" "Procesando archivo: $ARCHIVO  - fin."
-	bash loguearT.sh "$COMANDO" "I" "Procesando filename $FILENAME  - fin."
+	bash loguearT.sh "$COMANDO" "I" "Procesando archivo: $ARCHIVO"
+	bash loguearT.sh "$COMANDO" "I" "Procesando filename $FILENAME"
 	for LINEA in `cat $ARCHIVO`
 	  do
 
@@ -654,6 +675,11 @@ chequeaProceso(){
 	      # Error en la validacion de la cabecera
 	      bash loguearT.sh "$COMANDO" "A" "Rechazando el registro por error en cabecera"
 	      let QTYREGRECH=$QTYREGRECH+1
+	      #Lo agrego a los rechazados
+	      `echo $LINEA >> "$RECHDIR/$FILENAME"`
+	      let CABECERA=0
+	      let DETALLE=0
+	      let OLDCUSTID=0
 	      continue
 	  fi
 
@@ -663,10 +689,17 @@ chequeaProceso(){
 	      let QTYREGRECH=$QTYREGRECH+1
 	      #Lo agrego a los rechazados
 	      `echo $LINEA >> "$RECHDIR/$FILENAME"`
+	      let CABECERA=0
+	      let DETALLE=0
+	      let OLDCUSTID=0
 	      continue
 	  fi
 	  
+	  CUSTID=`echo $LINEA | cut -d "," -f 1`
+          CSR=`echo $LINEA | cut -d "," -f 5 | sed -e 's///g'`
+          ITEMID=`echo $LINEA | cut -d "," -f 6 | sed -e 's///g'`
 	  CPID=`echo $LINEA | cut -d "," -f 3`
+
 	  PARQDIR="$GRUPO/parque_instalado"
 
 	  # Valido el producto
@@ -675,31 +708,55 @@ chequeaProceso(){
 	    bash loguearT.sh "$COMANDO" "I" "Codigo de producto no encontrado en archivo maestro"
 	    #Lo agrego a los rechazados
 	    `echo $LINEA >> "$RECHDIR/$FILENAME"`
+	    let CABECERA=0
+	    let DETALLE=0
+	    let OLDCUSTID=0
 	    continue
 	  fi
 
-	  # Formo la linea nueva
-          CUSTID=`echo $LINEA | cut -d "," -f 1`
-          CSR=`echo $LINEA | cut -d "," -f 5 | sed -e 's///g'`
-          ITEMID=`echo $LINEA | cut -d "," -f 6 | sed -e 's///g'`
-
+	# Formo la linea nueva
 	CHEQDESC=`cat $PRODUCTOS | grep ".*,$CSR,$ITEMID,[^,]*$"`
 	if [ -z "$CHEQDESC" ] ; then
 	  let QTYREGRECH=$QTYREGRECH+1
 	  bash loguearT.sh "$COMANDO" "I" "Codigo de desc. de prod no encontrado en archivo maestro"
 	  #Lo agrego a los rechazados
 	  `echo $LINEA >> "$RECHDIR/$FILENAME"`
+	  let CABECERA=0
+	  let DETALLE=0
+	  let OLDCUSTID=0
 	  continue
 	fi
 		
 	let QTYREGOK=$QTYREGOK+1
-	DESC=`cat $PRODUCTOS | grep "^[^,]*,[^,]*,$CPID,[^,]*,[^,]*,[^,]*,Y," | head -n 1 | cut -d "," -f 9`
-	DESCDET=`cat $PRODUCTOS | grep "$CPID,[^,]*,[^,]*,[^,]*,N,$ITEMID,[^,]*$" | head -n 1 | cut -d "," -f 9`
-	PROD=`cat $PRODUCTOS | grep "^[^,]*,[^,]*,$CPID" | head -n 1 | cut -d "," -f 2`
 
-	#Del nombre del archivo obtenfo el nombre de la suc (suc id en realidad)
-	BRANCHID=`echo $FILENAME | cut -d "-" -f2`
-	LINEA_NUEVA="$BRANCHID,$CUSTID,$DESC,$DESCDET"
+	if [ ! $CUSTID -eq $OLDCUSTID -a ! $OLDCUSTID -eq 0 ] ; then
+	  bash loguearT.sh "$COMANDO" "I" "Error, bloque incompleto, se precisa un reg cab y otro detalle"
+	  let QTYREGRECH=$QTYREGRECH+1
+	  #Muevo el anterior a rechazados
+	  `echo $LINEAANT >> "$RECHDIR/$FILENAME"`
+	  let CABECERA=0
+	  let DETALLE=0
+	  let OLDCUSTID=0
+	  
+	fi
+	
+	if [ "$CSR" == "Y" -a $CUSTID -eq $OLDCUSTID ] || [ "$CSR" == "Y" -a $OLDCUSTID -eq 0 ]; then
+	  let CABECERA=1
+	  LINEAANT=$LINEA
+	fi
+	
+	if [ "$CSR" == "N" -a $CUSTID -eq $OLDCUSTID ] || [ "$CSR" == "N" -a $OLDCUSTID -eq 0 ]; then
+	  let DETALLE=1
+	  DESC=`cat $PRODUCTOS | grep "^[^,]*,[^,]*,$CPID,[^,]*,[^,]*,[^,]*,Y," | head -n 1 | cut -d "," -f 9`
+	  DESCDET=`cat $PRODUCTOS | grep "$CPID,[^,]*,[^,]*,[^,]*,N,$ITEMID,[^,]*$" | head -n 1 | cut -d "," -f 9`
+	  PROD=`cat $PRODUCTOS | grep "^[^,]*,[^,]*,$CPID" | head -n 1 | cut -d "," -f 2`
+          #Del nombre del archivo obtenfo el nombre de la suc (suc id en realidad)
+	  BRANCHIDAUX=`echo $FILENAME | cut -d "-" -f2`
+	  BRANCHID=`echo $BRANCHIDAUX | cut -d "." -f1`
+	  LINEA_NUEVA="$BRANCHID,$CUSTID,$DESC,$DESCDET"
+	  LINEAANT=$LINEA
+	
+	fi
 
 	if [ $DEBUG -eq 1 ]; then
 	  bash loguearT.sh "DEBUG" "Validacion parque_instalado"
@@ -713,12 +770,18 @@ chequeaProceso(){
 	  bash loguearT.sh "DEBUG" "A parqueInst $PROD >> $LINEA_NUEVA"
 	fi
 	  
+	if [ $CABECERA -eq 1 -a $DETALLE -eq 1 ] ; then  
+	  let CABECERA=0
+	  let DETALLE=0
+	  let OLDCUSTID=0
+	  
 	  case $PROD in
 	    "INTERNETADSL")
 	      echo $LINEA_NUEVA >> "$PARQDIR/INTERNETADSL"
 	      bash loguearT.sh "$COMANDO" "I" "Grabando entrada en archivo $PARQDIR/INTERNETADSL"
 	      ;;
 	    "INTERNETCABLEMODEM")
+	      
 	      echo $LINEA_NUEVA >> "$PARQDIR/INTERNETCABLEMODEM"
 	      bash loguearT.sh "$COMANDO" "I" "Grabando entrada en archivo $PARQDIR/INTERNETCABLEMODEM"
 	      ;;
@@ -742,6 +805,8 @@ chequeaProceso(){
 	      bash loguearT.sh "$COMANDO" "A" "Commercial Plan ID no reconocido"
 	      ;;	  
 	  esac
+	fi
+	  
 	done
   done
   bash loguearT.sh "$COMANDO" "I" "Eliminando archivos ordenados temporales"
