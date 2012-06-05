@@ -43,45 +43,45 @@ $reportes=$grupo."/reportes";
 }
 
 sub loadHashes{
-# Abre los archivos de productos, sucursales y clientes
-open F_CLIENTES, "<", "$cliMae" or die "No se pudo abrir el archivo de $cliMae";
-open F_PRODUCTOS, "<", "$prodMae" or die "No se pudo abrir el archivo de $cliMae";
-open F_SUCURSALES, "<", "$sucMae" or die "No se pudo abrir el archivo de $cliMae";
+	# Abre los archivos de productos, sucursales y clientes
+	open F_CLIENTES, "<", "$cliMae" or die "No se pudo abrir el archivo de $cliMae";
+	open F_PRODUCTOS, "<", "$prodMae" or die "No se pudo abrir el archivo de $cliMae";
+	open F_SUCURSALES, "<", "$sucMae" or die "No se pudo abrir el archivo de $cliMae";
 
-# Recorre secuencialmente el archivo
-while (<F_CLIENTES>){
-	chomp;
-	# Realiza split dejando los campos que interesan para el hash, clave y valor
-	($idCliente, $territori, $cliName,$resto)=split(";");
-	# Carga el hash de clientes, valor clave: idCliente, valor asoc.: clientName
-	$cliHash{$idCliente}=$cliName;
-}
+	# Recorre secuencialmente el archivo
+	while (<F_CLIENTES>){
+		chomp;
+		# Realiza split dejando los campos que interesan para el hash, clave y valor
+		($idCliente, $territori, $cliName,$resto)=split(";");
+		# Carga el hash de clientes, valor clave: idCliente, valor asoc.: clientName
+		$cliHash{$idCliente}=$cliName;
+	}
 
-# Recorre secuencialmente el archivo
-while (<F_SUCURSALES>){
-	chomp;
-	# Realiza split dejando los campos que interesan para el hash, clave y valor
-	($idRegion, $regionName, $idSuc,$sucName,$resto)=split(",");
-	# Carga el hash de sucursales, valor clave: idSuc, valor asoc.: sucName
-	$sucHash{$idSuc}=$sucName;
-}
+	# Recorre secuencialmente el archivo
+	while (<F_SUCURSALES>){
+		chomp;
+		# Realiza split dejando los campos que interesan para el hash, clave y valor
+		($idRegion, $regionName, $idSuc,$sucName,$resto)=split(",");
+		# Carga el hash de sucursales, valor clave: idSuc, valor asoc.: sucName
+		$sucHash{$idSuc}=$sucName;
+	}
 
 
-# Recorre secuencialmente el archivo
-while (<F_PRODUCTOS>){
-	chomp;
-	# Realiza split dejando los campos que interesan para el hash, clave y valor
-	($prodTypeId, $prodTypeName, $a, $s, $d, $f, $g, $h, $itemName)=split(",");
-	# Carga el hash de productos, valor clave: prodTypeName, valor asoc.: itemName
-print "prodTypeId: $prodTypeId, prodTypeName: $prodTypeName, itemName: $itemName  ";
-	$sucHash{$prodTypeName}=$itemName;
-}
+	# Recorre secuencialmente el archivo
+	while (<F_PRODUCTOS>){
+		chomp;
+		# Realiza split dejando los campos que interesan para el hash, clave y valor
+		($prodTypeId, $prodTypeName, $a, $s, $d, $f, $g, $h, $itemName)=split(",");
+		# Carga el hash de productos, valor clave: prodTypeName, valor asoc.: itemName
+	print "prodTypeId: $prodTypeId, prodTypeName: $prodTypeName, itemName: $itemName  ";
+		$sucHash{$itemName}=$prodTypeName;
+	}
 
-# Cierro archivos
+	# Cierro archivos
 
-close (F_CLIENTES);
-close (F_SUCURSALES);
-close (F_PRODUCTOS);
+	close (F_CLIENTES);
+	close (F_SUCURSALES);
+	close (F_PRODUCTOS);
 
 };
 
@@ -183,7 +183,7 @@ print "\n files: $files[0] $files[1], cantidad: $#files  \n";
 }
 
 sub addElementToBuffer(){
-	push(@bufferOutput,[$f_idSuc,$sucHash{$f_idSuc},$f_idCli,$cliHash{$f_idCli},$prodTypeNameComp,$prodHash{$prodTypeNameComp}]);
+	push(@bufferOutput,[$f_idSuc,$sucHash{$f_idSuc},$f_idCli,$cliHash{$f_idCli},$prodHash{$prodTypeNameComp},$descCabecera,$descDetalle]);
 }
 
 sub generateOutputData{
@@ -214,9 +214,9 @@ foreach (@filesToProcess ){
 	print "procesando $parqueInstalado/$_";
 	while (<F_INPUT>){
 		chomp;
-		($f_idSuc, $f_idCli, $desc)=split(",");
+		($f_idSuc, $f_idCli, $descCabecera, $descDetalle)=split(",");
 		$flagEscritura = 0;
-		$prodTypeNameComp = $desc;
+		$prodTypeNameComp = $descCabecera;
 		# Aplico los filtros de producto, cliente y sucursal
 		
 		# Primero chequeo si debeo ver la sucursal, si tiene mas de un elemento es busqueda por rango
@@ -266,9 +266,9 @@ foreach (@filesToProcess ){
 		}
 		$flagEscritura=0;
 		if ( $matchStrFlag == 1 ){
-			if ( $desc =~ $stringToMatch ){
+			if ( $descDetalle =~ $stringToMatch ){
 				#Si es un substring o incluso el string sigo adelante!
-				$prodTypeNameComp = $desc;
+				$prodTypeNameComp = $descCabecera;
 				$flagEscritura = 1;
 			}		
                         if ($flagEscritura == 0){
