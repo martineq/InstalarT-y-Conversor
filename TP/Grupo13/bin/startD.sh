@@ -9,7 +9,7 @@
 #########################################
 
 
-source global.sh
+#source global.sh
 
 COMANDO="startD"
 

@@ -24,9 +24,9 @@
 #               Para escribir en el archivo de log, salvo el caso del comando "instalar" que va en un directorio fijo.
 # ------------------------------------------------------------------------------------------------
 
-if [ "$1" != "instalar" ] ; then
-  source global.sh      
-fi
+#if [ "$1" != "instalar" ] ; then
+#  source global.sh      
+#fi
 
 
 COMANDO="mirarT"

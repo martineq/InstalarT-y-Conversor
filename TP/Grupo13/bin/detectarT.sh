@@ -22,7 +22,7 @@
 ##################################################
 
 
-source global.sh
+#source global.sh
 COMANDO="detectarT"
 
 chequeaProceso(){
@@ -73,7 +73,7 @@ if ([ ! -d "$grupo/inst_recibidas" ]) then
    exit 1
 fi
 
-while [ $CANT_LOOP -lt 1 ]
+while [ "$LOOP" == "true"  ]
 do
    if ([ -d $ARRIDIR ]) then
         ARCHIVOS=`ls -p $ARRIDIR | grep -v '/$'`
@@ -148,7 +148,7 @@ do
       else
           bash loguearT.sh "$COMANDO" "E" "Demonio grabarParqueT ya ejecutado bajo PID: <`chequeaProceso grabarParqueT.sh $$`>" 
 #         echo "Error: grabarParqueT ya ejecutado bajo PID: <`chequeaProceso grabarParqueT.sh $$`>"
-          echo "ERROR"
+#         echo "ERROR"
          #exit 1
       fi
    fi
@@ -160,5 +160,5 @@ done
 
 LOOP=0
    	
-exit 0
+#exit 0
 

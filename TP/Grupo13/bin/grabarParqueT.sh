@@ -37,7 +37,7 @@
 
 # Usage: see below
 
-source global.sh
+#source global.sh
 COMANDO="grabarParque"
 
 INSTREC="$GRUPO/inst_recibidas"
