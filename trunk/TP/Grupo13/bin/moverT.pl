@@ -129,13 +129,20 @@ sub main{
                                 #actualizo el numero de secuencia...
                                 $nroSecuencia_archMover = $nroSecuencia_ultimo + 1;
                                 $nombre_nuevo = $arch_origen.".".$nroSecuencia_archMover;
+                                
+                                #para desentralizar numero de secuencia en cada directorio
+                                @arch_origen_split = split("[.]", $arch_origen);
+                                $long_arch_origen = @arch_origen_split;
+                                if ($long_arch_origen >= 2){
+                                	$nombre_nuevo = @arch_origen_split[0];
+                            	}
+                            	
                                 $name_old = $origen;
                                 $name_new = $dir_origen.$nombre_nuevo;          
                                 #print "name_old: $origen\n";
                                 #print "name_new: $name_new\n";
 
-                                #para no borrar en directorio origen un archivo con numero de secuencia ya creado
-                                $name_new_2 = $name_new;        
+                                #para no borrar en directorio origen un archivo con numero de secuencia ya creado  
                                 $extension_fantasma = ".movertmp";
                                 $name_new = $name_new.$extension_fantasma;
                                 rename($name_old, $name_new) or die "ERROR(moverT): imposible renombrar $name_old a $name_new/n";
@@ -179,20 +186,4 @@ sub main{
         exit 0;
         
 #fin
-
-##########################################################################		
-				if ($long_nombresArch_split >= 1){
-					if (@nombresArch_patron_split[0] eq @nombresArch_split[0]){
-							if ($long_nombresArch_split >= 2){
-								if (@nombresArch_split[1] > $nroMax_secuencia){
-									$nroMax_secuencia = @nombresArch_split[1];
-
-								}
-							}
-					}
-				}
-			} #fin foreach
-		}
-	return ($nroMax_secuencia);
-}
 
