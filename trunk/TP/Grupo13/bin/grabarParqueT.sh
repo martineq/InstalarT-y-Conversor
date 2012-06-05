@@ -661,7 +661,7 @@ chequeaProceso(){
 	let DETALLE=0
 	let CABECERA=0
 	let OLDCUSTID=0
-
+  if [ $QTY_ARCH -gt 0 ]; then
   for ARCHIVO in $ARCH_ORD
     do
 	FILENAME=`echo $ARCHIVO | sed 's#.*\/##'`
@@ -809,6 +809,7 @@ chequeaProceso(){
 	  
 	done
   done
+  fi
   bash loguearT.sh "$COMANDO" "I" "Eliminando archivos ordenados temporales"
   `rm $INSTORD/* &> /dev/null`
   bash loguearT.sh "$COMANDO" "I" "Se leyeron $QTYREGOK registros correctamente"
