@@ -295,7 +295,7 @@ sub generateOutputData{
 
 	# Ordeno buffer de salida por f_idSuc creciente
 	
-	@bufferOutput = sort { $a <=> $b } @bufferOutput;
+	@bufferOutput = sort { $a->[0] cmp $b->[0] } @bufferOutput;
 
 };
 
