@@ -10,6 +10,7 @@ use Getopt::Long;
 @sucArray =();
 @cliArray =();
 @filesToProcess =();
+@myArgs =();
 %prodHash;
 %cliHash;
 %sucuHash;
@@ -29,6 +30,7 @@ $matchCliFlag=0;
 $matchStrFlag=0;
 $printFlag=0;
 $printScreen=0;
+
 
 sub printHelp{
 
@@ -102,7 +104,7 @@ sub loadHashes{
 
 sub parseArgs{
 
-
+	@myArgs = @ARGV;
 	GetOptions('help|h' => \$help, 
 				'stdout|c' => sub { $printScreen=1 },
 				'fileout|e'=>  sub { $printFlag=1 },
@@ -306,13 +308,13 @@ sub printData{
 # Cierro el archivo de reporte
 
 	if ($printScreen eq 1){
-		print "CABECERA XYZ"
+		print "CABECERA XYZ ";
+		foreach (@myArgs) {
+        		print "$_ \n";
+		}
+		print "\n";
 		for $elem ( @bufferOutput ) {
-			#($a,$b,$c,$d,$e,$f,$g) = split(" ",$elem);
-			#print "\t $a,$b,$c,$d,$e,$f,$g\n";
-			@elems = split(" ",$elem);
-			$, = ',';
-			print "@elems\n";
+			print join( ',', @$elem )."\n";
 		};
 	}
 	if ($printFlag eq 1){
@@ -330,15 +332,6 @@ parseConfig();
 loadHashes();
 generateOutputData();
 printData();
-
-#		for $aref ( @bufferOutput ) {
-#			print "\t [ @$aref ],\n";
-#		};
-
-
-
-
-
 
 
 
