@@ -62,8 +62,8 @@ sub parseConfig{
 sub loadHashes{
 	# Abre los archivos de productos, sucursales y clientes
 	open F_CLIENTES, "<", "$cliMae" or die "No se pudo abrir el archivo de $cliMae";
-	open F_PRODUCTOS, "<", "$prodMae" or die "No se pudo abrir el archivo de $cliMae";
-	open F_SUCURSALES, "<", "$sucMae" or die "No se pudo abrir el archivo de $cliMae";
+	open F_PRODUCTOS, "<", "$prodMae" or die "No se pudo abrir el archivo de $prodMae";
+	open F_SUCURSALES, "<", "$sucMae" or die "No se pudo abrir el archivo de $sucMae";
 
 	# Recorre secuencialmente el archivo
 	while (<F_CLIENTES>){
@@ -294,7 +294,8 @@ sub generateOutputData{
 	}
 
 	# Ordeno buffer de salida por f_idSuc creciente
-	@bufferOutput = sort(@bufferOutput);
+	
+	@bufferOutput = sort { $a <=> $b } @bufferOutput;
 
 };
 
@@ -310,16 +311,16 @@ sub printData{
 	($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
 	$mon++;
 	$year+=1900;
-	$repId = "$year"."$mon"."mday"."$hour"."$min"."$sec";
-	print "\n REP_ID: $repId\n";
+	$repId = "$year"."$mon"."$mday"."$hour"."$min"."$sec";
+	#print "\n REP_ID: $repId\n";
 	
 	if ($printScreen eq 1){
 		print "Reporte: lpi.$repId";
-		print "  Invocado con: ";
+		print " -- Invocado con: ";
 		foreach (@myArgs) {
         		print "$_ ";
 		}
-		print "\n\nID SUC | BRANCH NAME | ID CLIENTE | CUST 1ST NAME | TIPO PROD | PLAN COM | ITEM";
+		print "\n\nID SUC | BRANCH NAME | ID CLIENTE | CUST 1ST NAME | TIPO PROD | PLAN COM | ITEM\n";
 		for $elem ( @bufferOutput ) {
 			print join( ',', @$elem )."\n";
 		};
@@ -327,18 +328,16 @@ sub printData{
 	if ($printFlag eq 1){
 		open F_REPORTE, ">", "$reportes/lpi.$repId" or die "No se pudo abrir el archivo de $reportes/lpi.$repId";
 		print F_REPORTE "Reporte: lpi.$repId";
-		print F_REPORTE "  Invocado con: ";
+		print F_REPORTE " -- Invocado con: ";
 		foreach (@myArgs) {
         		print F_REPORTE "$_ ";
 		}
-		print F_REPORTE "\n\nID SUC | BRANCH NAME | ID CLIENTE | CUST 1ST NAME | TIPO PROD | PLAN COM | ITEM";
+		print F_REPORTE "\n\nID SUC | BRANCH NAME | ID CLIENTE | CUST 1ST NAME | TIPO PROD | PLAN COM | ITEM\n";
 		for $elem ( @bufferOutput ) {
 			print F_REPORTE join( ',', @$elem )."\n";
 		};
 	}
 }
-
-$f_idSuc,$sucHash{$f_idSuc},$f_idCli,$cliHash{$f_idCli},$prodHash{$prodTypeNameComp},$descCabecera,$descDetalle]);
 
 # main()
 parseArgs();
