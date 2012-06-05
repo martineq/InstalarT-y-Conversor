@@ -29,7 +29,23 @@ $matchCliFlag=0;
 $matchStrFlag=0;
 $printFlag=0;
 $printScreen=0;
-	
+
+sub printHelp{
+
+# Imprime informacion de uso de la herramienta
+# Usage:	listarT.pl -<c|e|h|s|k|p|t>
+#	
+	print "\n listarT.pl\n
+			USAGE: listarT.pl -<c|e|h|s|k|p|t> \n
+			-c setea el flag de impresion solo por pantalla\n
+			-e setea el flag de impresion en archivo\n
+			-t determina un arreglo con los archivos a mirar\n
+			-s guarda un array de id sucursales\n
+			-k guarda un array de id clientes a matchear\n
+			-p guarda el string a matchear\n";
+
+}
+
 sub parseConfig{
 
 $grupo = "/var/tmp/TP/Grupo13";
@@ -74,7 +90,7 @@ sub loadHashes{
 		($prodTypeId, $prodTypeName, $a, $s, $d, $f, $g, $h, $itemName)=split(",");
 		# Carga el hash de productos, valor clave: prodTypeName, valor asoc.: itemName
 	print "prodTypeId: $prodTypeId, prodTypeName: $prodTypeName, itemName: $itemName  ";
-		$sucHash{$itemName}=$prodTypeName;
+		$prodHash{$itemName}=$prodTypeName;
 	}
 
 	# Cierro archivos
@@ -310,14 +326,7 @@ sub printData{
 	}
 }
 
-sub printHelp{
 
-# Imprime informacion de uso de la herramienta
-# Usage:	listarT.pl -<c|e|h|s|k|p|t>
-#	
-	print "USAGE: listarT.pl -<c|e|h|s|k|p|t> ";
-
-}
 
 
 # main()
