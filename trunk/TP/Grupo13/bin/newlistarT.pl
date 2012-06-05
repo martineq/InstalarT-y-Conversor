@@ -307,24 +307,38 @@ sub printData{
 # Hago un vuelco de la info en el archivo
 # Cierro el archivo de reporte
 
+	($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+	$mon++;
+	$year+=1900;
+	$repId = "$year"."$mon"."mday"."$hour"."$min"."$sec";
+	print "\n REP_ID: $repId\n";
+	
 	if ($printScreen eq 1){
-		print "CABECERA XYZ ";
+		print "Reporte: lpi.$repId";
+		print "  Invocado con: ";
 		foreach (@myArgs) {
-        		print "$_ \n";
+        		print "$_ ";
 		}
-		print "\n";
+		print "\n\nID SUC | BRANCH NAME | ID CLIENTE | CUST 1ST NAME | TIPO PROD | PLAN COM | ITEM";
 		for $elem ( @bufferOutput ) {
 			print join( ',', @$elem )."\n";
 		};
 	}
 	if ($printFlag eq 1){
-		open F_REPORTE, ">", "$reportes/reporte.rep" or die "No se pudo abrir el archivo de $cliMae";
-		for $aref ( @bufferOutput ) {
-			print F_REPORTE "\t [ @$aref ],\n"; 
+		open F_REPORTE, ">", "$reportes/lpi.$repId" or die "No se pudo abrir el archivo de $reportes/lpi.$repId";
+		print F_REPORTE "Reporte: lpi.$repId";
+		print F_REPORTE "  Invocado con: ";
+		foreach (@myArgs) {
+        		print F_REPORTE "$_ ";
+		}
+		print F_REPORTE "\n\nID SUC | BRANCH NAME | ID CLIENTE | CUST 1ST NAME | TIPO PROD | PLAN COM | ITEM";
+		for $elem ( @bufferOutput ) {
+			print F_REPORTE join( ',', @$elem )."\n";
 		};
 	}
 }
 
+$f_idSuc,$sucHash{$f_idSuc},$f_idCli,$cliHash{$f_idCli},$prodHash{$prodTypeNameComp},$descCabecera,$descDetalle]);
 
 # main()
 parseArgs();
